@@ -161,7 +161,7 @@ a.btn{font-size:13px;text-decoration:none;border:1px solid var(--line);backgroun
 a.btn:hover{border-color:var(--accent)}
 .app{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:14px}
 @media (min-width:1080px){.app{grid-template-columns:360px minmax(0,1fr)} .side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:2px}}
-@media (max-width:1079px){.app>.side,.app>.mainc{display:contents} #p1{order:1} #mapCard{order:2} #calCard{order:3} #p3{order:4} #p4{order:5} #top3Card{order:6} #resCard{order:7} #costCard{order:8} #kpiCard{order:9} #pdcaCard{order:10} #p6{order:11} #p5{order:12} #more{order:13}}
+@media (max-width:1079px){.app>.side,.app>.mainc{display:contents} #p1{order:1} #mapCard{order:2} #calCard{order:3} #p3{order:4} #p4{order:5} #top3Card{order:6} #resCard{order:7} #costCard{order:8} #kpiCard{order:9} #stockCard{order:10} #pdcaCard{order:11} #p6{order:12} #p5{order:13} #more{order:14}}
 .side,.mainc{display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 .panel h2{display:flex;gap:8px;align-items:center;font-size:16px}
@@ -254,6 +254,18 @@ ol.houses li select,ol.houses li input[type=date]{font-size:11.5px;padding:2px 3
 ol.houses li{flex-wrap:wrap;row-gap:4px} ol.houses li .t{flex:1 1 calc(100% - 70px)} ol.houses li select{margin-left:2.2em}
 ol.houses li.on .i{color:var(--accent);font-weight:600}
 ol.houses{max-height:260px}
+.dchips{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-left:2.2em;flex-basis:100%}
+.dchip{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 3px 1px 8px}
+.dchip button{border:0;background:transparent;padding:0 4px;font-size:12px;color:inherit}
+.dchips select,.dchips input{font-size:11.5px;padding:2px 3px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--ink)}
+.dchips input{width:44px}
+.dchips .add{padding:1px 7px;font-size:12px}
+.chartbox{position:relative;margin-top:12px}
+.chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.chartbox .tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.12);white-space:nowrap}
+.chartbox .lg{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-bottom:4px;flex-wrap:wrap}
+.chartbox .lg i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:5px}
+tr.selrow td{background:var(--accent-soft)}
 .formula{font-family:var(--f-mono);font-size:12.5px;background:var(--surface2);border:1px solid var(--line2);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap;margin-top:10px}
 </style>
 
@@ -299,7 +311,7 @@ ol.houses{max-height:260px}
         <p class="hint">Картадан қосылған мекенжайдың бірінші бару күні — күнтізбеде таңдалған күн. «Кестені теңестіру» бекітілмеген күндерді жүктеме мен жақындық бойынша қайта бөледі.</p>
         <div class="row"><button type="button" id="btnRand" class="ghost">Тест: 20 кездейсоқ мекенжай</button><button type="button" id="btnClear" class="ghost">Барлығын алу</button></div>
         <details class="help"><summary class="small" style="cursor:pointer;color:var(--accent)">Тізіммен қосу және мекенжай тізілімі</summary>
-          <p class="hint" style="margin:6px 0">Әр жолға бір мекенжай: «көше нөмір», «ендік, бойлық» немесе тізілімге қосу үшін «мекенжай; ендік; бойлық». Мекенжайлар тек осы браузерде сақталады, сыртқы серверге жіберілмейді.</p>
+          <p class="hint" style="margin:6px 0">Әр жолға бір мекенжай: «көше нөмір», «ендік, бойлық» немесе толық түрі «мекенжай; ендік; бойлық; кезең (күн); атау:саны, атау:саны». Мысалы: «Майлықожа 12; 41.4661; 69.1502; 30; Метформин:2, Эналаприл:1». Мекенжайлар тек осы браузерде сақталады, сыртқы серверге жіберілмейді.</p>
           <textarea id="batch" class="batch" aria-label="Мекенжайлар тізімі"></textarea>
           <div class="row" style="margin-top:6px"><button type="button" id="btnBatch">Тізімді қосу</button><span class="small muted" id="regInfo"></span></div>
         </details>
@@ -425,11 +437,29 @@ ol.houses{max-height:260px}
         <p class="hint" style="margin-top:8px" id="kpiWhy"></p>
       </article>
 
+      <article class="card" id="stockCard">
+        <div class="card-h"><h2><span id="lblGoods">Дәрі</span> қоры: күнтізбеден қажеттілік</h2><span class="small muted">жеткізу кестесі → қажеттілік → тапсырыс</span></div>
+        <p class="hint" style="margin-top:6px">Әр мекенжайға не жеткізілетінін белгілесеңіз, күнтізбе әр атаудың күнделікті қажеттілігін алдын ала береді. Тапсырыс жеткізушінің келу күніне синхрондалады: келесі келуге дейінгі нақты қажеттілік + сақтық қор − қолдағы және жолдағы қор. Салыстыру үшін орташа тұтыну бойынша тапсырыс та есептеледі.</p>
+        <div class="fields three" style="margin-top:10px">
+          <div class="fld"><label for="supDow">Жеткізуші келетін күн</label><select id="supDow"><option value="0">Дүйсенбі</option><option value="1">Сейсенбі</option><option value="2">Сәрсенбі</option><option value="3">Бейсенбі</option><option value="4">Жұма</option></select></div>
+          <div class="fld"><label for="lead">Тапсырыс мерзімі <span class="u">күн</span></label><input id="lead" type="number" min="0" max="30" step="1"></div>
+          <div class="fld"><label for="ssd">Сақтық қор <span class="u">күн</span></label><input id="ssd" type="number" min="0" max="30" step="0.5"></div>
+          <div class="fld"><label for="dev">Жоспардан тыс ауытқу <span class="u">%</span></label><input id="dev" type="number" min="0" max="100" step="1"></div>
+        </div>
+        <div class="tbl"><table id="drugTbl"></table></div>
+        <div class="row" style="margin-top:8px"><button type="button" id="btnAddDrug">+ Атау қосу</button><button type="button" id="btnRandDrug" class="ghost">Тест: мекенжайларға кездейсоқ тағайындау</button><span class="status" id="stStock"></span></div>
+        <div class="tbl"><table id="needTbl"></table></div>
+        <div class="chartbox" id="stockChart"></div>
+        <div id="stockCmp"></div>
+        <h3 style="margin-top:14px">Жинау парағы: <span id="pickDate"></span></h3>
+        <div class="tbl"><table id="pickTbl"></table></div>
+      </article>
+
       <article class="card" id="pdcaCard">
         <div class="card-h"><h2>Үздіксіз жетілдіру (PDCA)</h2><span class="small muted">жоспар → орындау → тексеру → түзету</span></div>
         <p class="hint" style="margin-top:6px">Бағыт орындалған соң әр топтың нақты уақытын жазыңыз. Жүйе жоспар мен нақтыны салыстырады, жылдамдық пен мекенжайдағы уақытты қайта бағалайды. Бағаны қолдансаңыз, келесі жоспарлар дәлірек болады.</p>
         <div class="tbl"><table id="factTbl"></table></div>
-        <div class="row" style="margin-top:8px"><button type="button" id="btnFact" class="primary">Нақтыны сақтау</button><button type="button" id="btnLong">ЖИ: ұзағырақ іздеу (30 с)</button><span class="status" id="stFact"></span></div>
+        <div class="row" style="margin-top:8px"><button type="button" id="btnFact" class="primary">Нақтыны сақтау</button><button type="button" id="btnLong">Ұзағырақ оңтайландыру (30 с)</button><span class="status" id="stFact"></span></div>
         <div class="kpis k4" id="pdcaKpi"></div>
         <div class="tbl"><table id="cbTbl"></table></div>
         <div class="row" style="margin-top:8px"><button type="button" id="btnApplyCal">Калибрлеуді қолдану</button><button type="button" id="btnFactCsv" class="ghost">Жазбаларды көшіру (CSV)</button><button type="button" id="btnFactClr" class="ghost">Жазбаларды өшіру</button></div>
@@ -1166,6 +1196,58 @@ return {DAY, dayNum, isoOf, dow, nextWork, visits, schedule, balance, calibrate,
 
 </script>
 <script>
+/* ======================================================================
+   STOCK — жеткізу күнтізбесінен дәрі қажеттілігін алдын ала шығару және
+   жеткізушіден (СК-Фармация) толықтыруды күнтізбеге синхрондау (Н6).
+     D_k(t) = Σ_i q_ik · 1[t ∈ V_i]                         — k-дәрінің t күнгі қажеттілігі
+     Q_kj   = max(0, D_k[t_j^o, a_{j+1}) + SS_k − IP_k(t_j^o)) — тапсырыс (күнтізбе саясаты)
+     Q̄_kj   = max(0, d̄_k·(a_{j+1} − t_j^o) + SS_k − IP_k(t_j^o)) — салыстыру базасы (орташа бойынша)
+   мұнда a_j — жеткізу (келу) күні, t_j^o = a_j − L — тапсырыс күні, IP — қолдағы + жолдағы қор.
+   ====================================================================== */
+const STOCK = (() => {
+"use strict";
+
+/* houses: [{drugs:[{id, q}], ...}], visitsFn(h) → бару күндері (күн нөмірі) */
+function demand(houses, drugIds, from, len, visitsFn){
+  const D = new Map(drugIds.map(id => [id, new Float64Array(len)]));
+  for(const h of houses){ if(!h.drugs || !h.drugs.length) continue;
+    for(const d of visitsFn(h)){ const t = d - from; if(t < 0 || t >= len) continue;
+      for(const x of h.drugs){ const a = D.get(x.id); if(a) a[t] += +x.q || 0; } } }
+  return D;
+}
+/* келу күндері: апта күні бойынша (0 = дүйсенбі) */
+function arrivals(from, len, dowList, dowFn){ const out = []; for(let t = 0; t < len; t++) if(dowList.includes(dowFn(from + t))) out.push(t); return out; }
+
+/* симуляция: actual — нақты тұтыну, plan — жоспар (күнтізбе) не орташа бойынша болжам */
+function simulate(actual, plan, I0, arr, L, o){
+  o = Object.assign({policy:"calendar", ssDays:3, avgDaily:0}, o || {});
+  const n = actual.length, stock = new Float64Array(n + 1), incoming = new Float64Array(n + L + 60), orders = [];
+  const avg = o.avgDaily, ss = o.ssDays * avg; let I = I0, short = 0, shortDays = 0, sumI = 0;
+  // тапсырыс күндері: t_o = a − L (горизонт басынан бұрын түссе, 0-ге)
+  const orderAt = new Map(); arr.forEach((a, j) => { const to = Math.max(0, a - L); const next = j + 1 < arr.length ? arr[j + 1] : a + (arr.length > 1 ? arr[1] - arr[0] : 7); orderAt.set(to, (orderAt.get(to) || []).concat([{a, next}])); });
+  for(let t = 0; t < n; t++){
+    I += incoming[t];
+    for(const {a, next} of orderAt.get(t) || []){
+      let pipe = 0; for(let u = t + 1; u < incoming.length; u++) pipe += incoming[u];
+      const need = o.policy === "calendar" ? plan.slice(t, Math.min(n, next)).reduce((s, v) => s + v, 0) + Math.max(0, next - n) * avg : avg * (next - t);
+      const q = Math.max(0, Math.ceil(need + ss - (I + pipe)));
+      if(q > 0){ const at = Math.max(a, t); if(at === t) I += q; else incoming[at] += q; orders.push({order:t, arrive:at, q}); } }
+    const use = actual[t]; if(I >= use) I -= use; else { short += use - I; shortDays++; I = 0; }
+    stock[t + 1] = I; sumI += I; }
+  stock[0] = I0;
+  const tot = actual.reduce((s, v) => s + v, 0);
+  return {stock, orders, short, shortDays, avgStock:sumI / n, fill:tot ? (1 - short / tot) * 100 : 100, ordered:orders.reduce((s, x) => s + x.q, 0)};
+}
+/* жоспардан тыс ауытқу: әр бару ±e үлесімен (жаңа рецепт, доза өзгерісі, үйде болмау) — қайталанатын кездейсоқ */
+function perturb(plan, e, seed){ let a = seed | 0; const rnd = () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  return Float64Array.from(plan, v => v > 0 ? Math.max(0, Math.round(v * (1 + (rnd() * 2 - 1) * e))) : (rnd() < e / 4 ? 1 : 0)); }
+
+return {demand, arrivals, simulate, perturb};
+})();
+
+
+</script>
+<script>
 (function(){
 "use strict";
 const $ = id => document.getElementById(id);
@@ -1179,7 +1261,7 @@ const lsJSON = (k, d) => { try{ return JSON.parse(lsGet(k)) || d; }catch(e){ ret
 const DEF = {lat:AYAN[0], lon:AYAN[1], R:1500, K:1, mode:"auto", ret:true, shift:240, vw:4.5, vb:12, vc:20, s0:8, pB:0.5, pC:1.5,
   sub:false, far:1500, eps:450, minPts:3, layers:{bg:false, cross:true, inter:false}, vis:{walk:true, bike:true, drive:true},
   salN:300000, salD:250000, hrs:168, crew:1, drv:true, fuelP:232, fuelL:10, cars:1, bikes:2, days:22,
-  sector:"med", period:30, sat:false, load:1, capW:20, capB:40, capC:500};
+  sector:"med", period:30, sat:false, load:1, capW:20, capB:40, capC:500, supDow:0, lead:5, ssd:2, dev:10};
 /* салалық баптаулар: логика бірдей, тек бастапқы мәндер мен атаулар өзгереді */
 const SECTORS = {
   med:{name:"Медицина: дәріні үйге жеткізу", worker:"Мейірбике", depot:"Емхана", s0:8, period:30, load:1, capW:20, capB:40, capC:500, unit:"қаптама"},
@@ -1450,15 +1532,15 @@ function clickHouse(wp){
   if(pendingAddr){ label = pendingAddr; regAdd(pendingAddr, PR.inv(p[0], p[1])); pendingAddr = null; HL = null; status("st3", `«${label}» тізілімге сақталды.`, "ok"); }
   if(addHouse(p[0], p[1], label, b ? b.id : null)) afterHouses(); }
 function afterHouses(){ saveHouses(); renderHouses(); TOP3 = null; renderTop3(); MONTH = null; renderCal(); plan(); }
-function saveHouses(){ lsSet(H_KEY, JSON.stringify(HOUSES.map(hh => ({lat:hh.lat, lon:hh.lon, label:hh.label, bid:hh.bid, period:hh.period, date:hh.date, fixed:hh.fixed})))); }
+function saveHouses(){ lsSet(H_KEY, JSON.stringify(HOUSES.map(hh => ({lat:hh.lat, lon:hh.lon, label:hh.label, bid:hh.bid, period:hh.period, date:hh.date, fixed:hh.fixed, drugs:hh.drugs || []})))); }
 function restoreHouses(){ HOUSES = []; let out = 0;
-  for(const q of lsJSON(H_KEY, [])){ const p = PR.fwd(q.lat, q.lon); if(Math.hypot(p[0], p[1]) > U.R){ out++; continue; } addHouse(p[0], p[1], q.label, q.bid, {period:q.period != null ? q.period : U.period, date:q.date || U.date, fixed:!!q.fixed}); }
+  for(const q of lsJSON(H_KEY, [])){ const p = PR.fwd(q.lat, q.lon); if(Math.hypot(p[0], p[1]) > U.R){ out++; continue; } addHouse(p[0], p[1], q.label, q.bid, {period:q.period != null ? q.period : U.period, date:q.date || U.date, fixed:!!q.fixed, drugs:q.drugs || []}); }
   renderHouses(); if(out) status("st3", `${out} мекенжай жаңа шеңберден тыс қалды және алынды.`, "warn"); saveHouses(); }
 function renderHouses(){ $("hCount").textContent = HOUSES.length ? `· ${HOUSES.length}` : "";
   const today = new Set(dayHouses().map(h => h.id));
   $("hList").innerHTML = HOUSES.length ? HOUSES.map((hh, i) => `<li class="${today.has(hh.id) ? "on" : ""}"><span class="i">${i + 1}</span><span class="t" title="${esc(hh.label)}">${esc(hh.label || `${hh.lat.toFixed(5)}, ${hh.lon.toFixed(5)}`)}</span>
       <select data-per="${hh.id}" aria-label="Кезең">${PERIODS.map(([v, t]) => `<option value="${v}"${v === hh.period ? " selected" : ""}>${t}</option>`).join("")}</select>
-      <input type="date" data-date="${hh.id}" value="${hh.date || ""}" aria-label="${hh.period ? "Бірінші бару күні" : "Бару күні"}"><button type="button" class="x" data-rm="${hh.id}" aria-label="Алып тастау">×</button></li>`).join("")
+      <input type="date" data-date="${hh.id}" value="${hh.date || ""}" aria-label="${hh.period ? "Бірінші бару күні" : "Бару күні"}"><button type="button" class="x" data-rm="${hh.id}" aria-label="Алып тастау">×</button>${drugChips(hh)}</li>`).join("")
     : `<li class="empty">Әзірге мекенжай жоқ. Картадағы мекенжайды басыңыз.</li>`; }
 $("hList").addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if(!b) return; HOUSES = HOUSES.filter(hh => hh.id !== b.dataset.rm); afterHouses(); });
 $("hList").addEventListener("change", e => { const t = e.target, id = t.dataset.per || t.dataset.date, hh = HOUSES.find(q => q.id === id); if(!hh) return;
@@ -1489,7 +1571,11 @@ function regInfo(){ $("regInfo").textContent = REG.length ? `Тізілімде 
 function findAddr(text){
   text = String(text || "").trim(); if(!text) return {kind:"none"};
   const parts = text.split(/[;\t]/).map(q => q.trim());
-  if(parts.length >= 3){ const c = parseCoord(parts[1] + "," + parts[2]); if(c){ regAdd(parts[0], c); return {kind:"point", p:PR.fwd(c[0], c[1]), label:parts[0]}; } }
+  if(parts.length >= 3){ const c = parseCoord(parts[1] + "," + parts[2]); if(c){ regAdd(parts[0], c); const meta = {};
+      if(parts[3] && /^\d+$/.test(parts[3])) meta.period = +parts[3];
+      if(parts[4]) meta.drugs = parts[4].split(",").map(z => z.trim()).filter(Boolean).map(z => { const [nm, q] = z.split(/[:×x*]/).map(v => v.trim()); let d = DRUGS.find(v => norm(v.name).startsWith(norm(nm)));
+        if(!d){ d = {id:"d" + Date.now().toString(36) + Math.floor(Math.random() * 1e4), name:nm, stock:0}; DRUGS.push(d); saveDrugs(); } return {id:d.id, q:Math.max(1, +q || 1)}; });
+      return {kind:"point", p:PR.fwd(c[0], c[1]), label:parts[0], meta}; } }
   if(isCoordLine(text)){ const c = parseCoord(text); if(c) return {kind:"point", p:PR.fwd(c[0], c[1]), label:""}; }
   const a = norm(text), r = REG.find(e => e.a === a); if(r) return {kind:"point", p:PR.fwd(r.lat, r.lon), label:r.t};
   const {street, hn} = splitAddr(text); if(!street) return {kind:"none"};
@@ -1499,7 +1585,7 @@ function findAddr(text){
   return {kind:"none"}; }
 function addByText(text, quiet){
   const f = findAddr(text);
-  if(f.kind === "point"){ const hh = addHouse(f.p[0], f.p[1], f.label || text, f.bid); if(hh && !hh.bid) attachBuilding(hh); return hh ? "ok" : "fail"; }
+  if(f.kind === "point"){ const hh = addHouse(f.p[0], f.p[1], f.label || text, f.bid, f.meta); if(hh && !hh.bid) attachBuilding(hh); return hh ? "ok" : "fail"; }
   if(f.kind === "street"){ if(!quiet){ HL = new Path2D(); f.roads.forEach(q => line(HL, q.xy)); pendingAddr = f.label;
       const xs = f.roads.flatMap(q => q.xy.filter((_, i) => i % 2 === 0)), ys = f.roads.flatMap(q => q.xy.filter((_, i) => i % 2 === 1)), [w, h] = size();
       V.x = (Math.min(...xs) + Math.max(...xs)) / 2; V.y = (Math.min(...ys) + Math.max(...ys)) / 2; V.s = Math.min(3, 0.8 * Math.min(w / (Math.max(...xs) - Math.min(...xs) + 100), h / (Math.max(...ys) - Math.min(...ys) + 100)));
@@ -1616,8 +1702,8 @@ function startILS(tok, ms){ ms = ms || 4000; const cur = PLAN.cur, rnd = ROUTE.r
     if(imp){ cur.parts.forEach(modeInfo); evaluateCand(cur); }
     $("optBar").style.width = "100%"; renderAll(); requestDraw();
     const gain = before < Infinity && cur.ev.ok ? before - cur.ev.Z : 0;
-    status("stOpt", `Дайын: ${fmtDate(U.date)}, ${cur.houses} мекенжай, ${cur.teams.length} топ. ЖИ ізденісі: ${F(it)} итерация${gain > 0.5 ? `, шығын ${F(gain)} ₸-ға азайды` : ""}.`, "ok"); }
-  status("stOpt", "ЖИ бағыттарды жақсартып жатыр…"); raf = requestAnimationFrame(step); }
+    status("stOpt", `Дайын: ${fmtDate(U.date)}, ${cur.houses} мекенжай, ${cur.teams.length} топ. Оңтайландыру: ${F(it)} итерация${gain > 0.5 ? `, шығын ${F(gain)} ₸-ға азайды` : ""}.`, "ok"); }
+  status("stOpt", "Алгоритм бағыттарды жақсартып жатыр…"); raf = requestAnimationFrame(step); }
 
 /* Топ-3: K = 1…8 × {кіші аудансыз, кіші аудандармен}, әрқайсысында жүріс түрі DP арқылы таңдалады */
 $("btnTop3").addEventListener("click", async () => {
@@ -1658,7 +1744,7 @@ function modePath(part, j, m){ const inf = part.info[j] && part.info[j][m]; if(!
 function chosenMode(c, part, j){ const o = c.ev && c.ev.ok ? c.ev.picks[j] : null; if(!o) return null; return part.kind === "sub" ? o.subMode : o.clinicMode; }
 
 /* ---------- нәтиже бөлімдері ---------- */
-function renderAll(){ renderResults(); renderCost(); renderKPI(); renderPDCA(); }
+function renderAll(){ renderResults(); renderCost(); renderKPI(); renderPDCA(); renderStock(); }
 function renderResults(){
   const cur = PLAN && PLAN.cur; if(!cur){ ["kpi", "dirTbl", "cmp", "resWarn"].forEach(id => $(id).innerHTML = ""); $("resSub").textContent = "Мекенжай белгіленбеген"; return; }
   const e = cur.ev; $("resSub").textContent = `${fmtDate(U.date)} · ${cur.houses} мекенжай · ${cur.K} топ · ${cur.sub ? "кіші аудандармен" : "емханадан тікелей"}${U.ret ? "" : " · емханаға қайтпайды"}`;
@@ -1728,7 +1814,7 @@ const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `$
 let MONTH = null;
 
 /* ---------- сала ---------- */
-function applySectorLabels(){ const S = SECTORS[U.sector] || SECTORS.med; $("lblWorker").textContent = S.worker; $("lblDepot").textContent = S.depot; $("lblUnit").textContent = S.unit;
+function applySectorLabels(){ const S = SECTORS[U.sector] || SECTORS.med; if(typeof renderStock === "function" && DATA) setTimeout(renderStock, 0); $("lblWorker").textContent = S.worker; $("lblDepot").textContent = S.depot; $("lblUnit").textContent = S.unit;
   document.querySelectorAll(".unitLbl").forEach(e => e.textContent = S.unit); }
 $("sector").value = U.sector; applySectorLabels();
 $("sector").addEventListener("change", e => { U.sector = e.target.value; const S = SECTORS[U.sector];
@@ -1805,6 +1891,112 @@ $("btnFactCsv").addEventListener("click", async () => { const csv = "date,team,m
 $("btnFactClr").addEventListener("click", () => { const b = $("btnFactClr"); if(b.dataset.c !== "1"){ b.dataset.c = "1"; b.textContent = "Иә, өшіру"; setTimeout(() => { b.dataset.c = ""; b.textContent = "Жазбаларды өшіру"; }, 4000); return; }
   b.dataset.c = ""; b.textContent = "Жазбаларды өшіру"; FACTS = []; lsSet(F_KEY, "[]"); renderPDCA(); });
 $("btnLong").addEventListener("click", () => { if(!PLAN || !PLAN.cur) return; const tok = ++planTok; cancelAnimationFrame(raf); startILS(tok, 30000); });
+
+/* ================================================================ 6. қор: күнтізбеден қажеттілік (Н6) */
+const DR_KEY = "dariModel.drugs.v1", HORIZON = 56;
+const DEMO_DRUGS = [{id:"d1", name:"Метформин 850 мг (мысал)", stock:40}, {id:"d2", name:"Эналаприл 10 мг (мысал)", stock:30},
+  {id:"d3", name:"Бисопролол 5 мг (мысал)", stock:25}, {id:"d4", name:"Аторвастатин 20 мг (мысал)", stock:20}];
+let DRUGS = lsJSON(DR_KEY, null) || DEMO_DRUGS.map(d => Object.assign({}, d)), STOCK_SEL = null;
+const saveDrugs = () => lsSet(DR_KEY, JSON.stringify(DRUGS));
+const goodsWord = () => U.sector === "med" ? "Дәрі" : "Тауар";
+function bindNumS(id, key, lo, hi){ const e = $(id); e.value = U[key]; e.addEventListener("change", () => { let v = +e.value; if(!Number.isFinite(v)) v = DEF[key]; v = Math.max(lo, Math.min(hi, v)); e.value = v; U[key] = v; saveU(); renderStock(); }); }
+bindNumS("lead", "lead", 0, 30); bindNumS("ssd", "ssd", 0, 30); bindNumS("dev", "dev", 0, 100);
+$("supDow").value = U.supDow; $("supDow").addEventListener("change", e => { U.supDow = +e.target.value; saveU(); renderStock(); });
+
+/* мекенжай жолындағы дәрі чиптері */
+function drugChips(hh){ const opts = DRUGS.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join("");
+  return `<span class="dchips">${(hh.drugs || []).map(x => { const d = DRUGS.find(q => q.id === x.id); return d ? `<span class="dchip">${esc(d.name.replace(/ \(мысал\)$/, ""))} ×${x.q}<button type="button" data-drm="${hh.id}|${x.id}" aria-label="Алып тастау">×</button></span>` : ""; }).join("")}
+    ${DRUGS.length ? `<select data-dsel="${hh.id}" aria-label="${goodsWord()}">${opts}</select><input type="number" min="1" step="1" value="1" data-dq="${hh.id}" aria-label="Саны"><button type="button" class="add" data-dadd="${hh.id}" aria-label="Қосу">＋</button>` : ""}</span>`; }
+$("hList").addEventListener("click", e => {
+  const a = e.target.closest("[data-dadd]"), r = e.target.closest("[data-drm]");
+  if(a){ const hh = HOUSES.find(q => q.id === a.dataset.dadd); if(!hh) return; const id = document.querySelector(`[data-dsel="${hh.id}"]`).value, q = Math.max(1, +document.querySelector(`[data-dq="${hh.id}"]`).value || 1);
+    hh.drugs = (hh.drugs || []).filter(x => x.id !== id).concat([{id, q}]); saveHouses(); renderHouses(); renderStock(); }
+  if(r){ const [hid, did] = r.dataset.drm.split("|"), hh = HOUSES.find(q => q.id === hid); if(!hh) return; hh.drugs = (hh.drugs || []).filter(x => x.id !== did); saveHouses(); renderHouses(); renderStock(); } });
+
+/* атаулар кестесі */
+function renderDrugTbl(){ $("lblGoods").textContent = goodsWord();
+  $("drugTbl").innerHTML = `<thead><tr><th>${goodsWord()}</th><th class="n">Қолдағы қор</th><th class="n">Мекенжай саны</th><th></th></tr></thead><tbody>` +
+    DRUGS.map(d => `<tr><td><input type="text" data-dname="${d.id}" value="${esc(d.name)}" aria-label="Атауы" style="width:100%;min-width:140px;font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--ink)"></td>
+      <td class="n"><input type="number" min="0" step="1" data-dstock="${d.id}" value="${d.stock}" aria-label="Қолдағы қор" style="width:84px;text-align:right;font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--ink)"></td>
+      <td class="n">${HOUSES.filter(h => (h.drugs || []).some(x => x.id === d.id)).length}</td><td><button type="button" class="x" data-ddel="${d.id}">Өшіру</button></td></tr>`).join("") + "</tbody>"; }
+$("drugTbl").addEventListener("change", e => { const t = e.target, d = DRUGS.find(q => q.id === (t.dataset.dname || t.dataset.dstock)); if(!d) return;
+  if(t.dataset.dname) d.name = t.value.trim() || d.name; else d.stock = Math.max(0, +t.value || 0); saveDrugs(); renderHouses(); renderStock(); });
+$("drugTbl").addEventListener("click", e => { const b = e.target.closest("[data-ddel]"); if(!b) return; DRUGS = DRUGS.filter(d => d.id !== b.dataset.ddel);
+  HOUSES.forEach(h => h.drugs = (h.drugs || []).filter(x => x.id !== b.dataset.ddel)); saveDrugs(); saveHouses(); renderHouses(); renderStock(); });
+$("btnAddDrug").addEventListener("click", () => { const id = "d" + Date.now().toString(36); DRUGS.push({id, name:`${goodsWord()} ${DRUGS.length + 1}`, stock:0}); saveDrugs(); renderHouses(); renderStock(); });
+$("btnRandDrug").addEventListener("click", () => { if(!DRUGS.length || !HOUSES.length){ status("stStock", "Алдымен мекенжай мен атау қосыңыз.", "err"); return; } const rnd = ROUTE.rng(Date.now() & 0xffff);
+  HOUSES.forEach(h => { const k = 1 + Math.floor(rnd() * Math.min(3, DRUGS.length)), pick = DRUGS.slice().sort(() => rnd() - .5).slice(0, k); h.drugs = pick.map(d => ({id:d.id, q:1 + Math.floor(rnd() * 2)})); });
+  saveHouses(); renderHouses(); renderStock(); status("stStock", "Тест: әр мекенжайға 1–3 атау тағайындалды (нақты рецепт емес).", "ok"); });
+
+/* негізгі есеп */
+let STOCK_RES = null;
+function computeStock(){
+  const from = PLANC.dayNum(U.date), wd = WD(), vis = h => PLANC.visits(h, from, from + HORIZON - 1, wd);
+  const D = STOCK.demand(HOUSES, DRUGS.map(d => d.id), from, HORIZON, vis), arr = STOCK.arrivals(from, HORIZON, [U.supDow], PLANC.dow);
+  const rows = DRUGS.map((d, i) => { const plan = D.get(d.id), tot = plan.reduce((s, v) => s + v, 0), avg = tot / HORIZON, act = STOCK.perturb(plan, U.dev / 100, 11 + i);
+    const o = {ssDays:U.ssd, avgDaily:avg}, cal = STOCK.simulate(act, plan, d.stock, arr, U.lead, Object.assign({policy:"calendar"}, o)), ave = STOCK.simulate(act, plan, d.stock, arr, U.lead, Object.assign({policy:"average"}, o));
+    let cum = 0, runOut = null; for(let t = 0; t < HORIZON; t++){ cum += plan[t]; if(cum > d.stock){ runOut = t; break; } }
+    const next = cal.orders.find(x => x.q > 0);
+    return {d, plan, act, tot, need30:plan.slice(0, 30).reduce((s, v) => s + v, 0), runOut, next, cal, ave}; });
+  return {from, arr, rows}; }
+function renderStock(){
+  renderDrugTbl(); $("pickDate").textContent = fmtDate(U.date);
+  if(!DRUGS.length){ ["needTbl", "stockChart", "stockCmp", "pickTbl"].forEach(id => $(id).innerHTML = ""); return; }
+  const R = STOCK_RES = computeStock(), any = R.rows.some(r => r.tot > 0);
+  if(!any){ $("needTbl").innerHTML = `<tbody><tr><td class="muted">Мекенжайларға ${goodsWord().toLowerCase()} тағайындалмаған. Мекенжай тізіміндегі «＋» арқылы не тест батырмасымен тағайындаңыз.</td></tr></tbody>`;
+    ["stockChart", "stockCmp", "pickTbl"].forEach(id => $(id).innerHTML = ""); return; }
+  if(!STOCK_SEL || !R.rows.find(r => r.d.id === STOCK_SEL)) STOCK_SEL = (R.rows.find(r => r.tot > 0) || R.rows[0]).d.id;
+  const iso = t => fmtDate(PLANC.isoOf(R.from + t));
+  $("needTbl").innerHTML = `<thead><tr><th>${goodsWord()}</th><th class="n">Қор</th><th class="n">30 күнге қажет</th><th class="n">Жетеді</th><th>Келесі тапсырыс</th><th class="n">Тапшы күн: күнтізбе / орташа</th><th class="n">Орташа қор: күнтізбе / орташа</th></tr></thead><tbody>` +
+    R.rows.map(r => `<tr data-srow="${r.d.id}" class="${r.d.id === STOCK_SEL ? "selrow" : ""}" style="cursor:pointer"><td>${esc(r.d.name)}</td><td class="n">${F(r.d.stock)}</td><td class="n">${F(r.need30)}</td>
+      <td class="n">${r.tot === 0 ? "—" : r.runOut == null ? `${HORIZON}+ күн` : `${iso(r.runOut)} дейін`}</td>
+      <td>${r.next ? `${iso(r.next.order)} тапсыру · ${F(r.next.q)} · келеді ${iso(r.next.arrive)}` : "қажет емес"}</td>
+      <td class="n">${r.cal.shortDays} / ${r.ave.shortDays}</td><td class="n">${F(r.cal.avgStock, 1)} / ${F(r.ave.avgStock, 1)}</td></tr>`).join("") + "</tbody>";
+  const A = R.rows.filter(r => r.tot > 0), sum = (k, f) => A.reduce((s, r) => s + f(r[k]), 0), tot = A.reduce((s, r) => s + r.act.reduce((a, v) => a + v, 0), 0);
+  const fillC = tot ? 100 * (1 - sum("cal", x => x.short) / tot) : 100, fillA = tot ? 100 * (1 - sum("ave", x => x.short) / tot) : 100;
+  $("stockCmp").innerHTML = `<div class="cmp"><div class="kpi"><b>Күнтізбе бойынша тапсырыс</b><div><span>Қамту деңгейі</span><span>${F(fillC, 1)} %</span></div><div><span>Тапшы күн (барлығы)</span><span>${sum("cal", x => x.shortDays)}</span></div><div><span>Орташа қор</span><span>${F(sum("cal", x => x.avgStock), 1)}</span></div></div>
+    <div class="kpi"><b>Орташа тұтыну бойынша</b><div><span>Қамту деңгейі</span><span>${F(fillA, 1)} %</span></div><div><span>Тапшы күн (барлығы)</span><span>${sum("ave", x => x.shortDays)}</span></div><div><span>Орташа қор</span><span>${F(sum("ave", x => x.avgStock), 1)}</span></div></div></div>
+    <p class="hint" style="margin-top:6px">Симуляция: ${HORIZON} күн, ${fmtDate(PLANC.isoOf(R.from))} бастап; нақты тұтыну жоспардан ±${U.dev} % ауытқиды (жаңа рецепт, доза өзгерісі, мекенжайда болмау). Екі саясатта да сақтық қор, тапсырыс мерзімі және келу күні бірдей — айырма тек қажеттілікті қайдан алатынында.</p>`;
+  renderStockChart(R); renderPick(); }
+$("needTbl").addEventListener("click", e => { const tr = e.target.closest("[data-srow]"); if(!tr) return; STOCK_SEL = tr.dataset.srow; renderStock(); });
+
+/* қор болжамының сызбасы: екі саясат, бір ось */
+function renderStockChart(R){
+  const r = R.rows.find(q => q.d.id === STOCK_SEL); if(!r || !r.tot){ $("stockChart").innerHTML = ""; return; }
+  const W = 680, H = 210, pl = 40, pr = 12, pt = 10, pb = 26, n = HORIZON, a = r.cal.stock, b = r.ave.stock;
+  const ymax = Math.max(1, ...a, ...b) * 1.08, X = t => pl + (W - pl - pr) * t / n, Y = v => pt + (H - pt - pb) * (1 - v / ymax);
+  const path = s => Array.from(s, (v, t) => `${t ? "L" : "M"}${X(t).toFixed(1)} ${Y(v).toFixed(1)}`).join("");
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map(f => Math.round(ymax / 1.08 * f));
+  let g = ticks.map(v => `<line x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line2)" stroke-width="1"/><text x="${pl - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`).join("");
+  for(let t = 0; t <= n; t += 7) g += `<text x="${X(t)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${fmtDate(PLANC.isoOf(R.from + t)).replace(/ .*/, m => " " + m.trim().slice(0, 3))}</text>`;
+  g += R.arr.map(t => `<line x1="${X(t)}" x2="${X(t)}" y1="${H - pb}" y2="${H - pb + 5}" stroke="var(--muted)" stroke-width="1.5"/>`).join("");
+  $("stockChart").innerHTML = `<div class="lg"><span><i style="background:var(--c1)"></i>Күнтізбе бойынша</span><span><i style="background:var(--c2)"></i>Орташа тұтыну бойынша</span><span>${esc(r.d.name)} · қор болжамы · сызықша — жеткізуші келетін күн</span></div>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(r.d.name)}: ${HORIZON} күндік қор болжамы, екі саясат">${g}
+      <line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--ink2)" stroke-width="1"/>
+      <path d="${path(b)}" fill="none" stroke="var(--c2)" stroke-width="2" stroke-linejoin="round"/><path d="${path(a)}" fill="none" stroke="var(--c1)" stroke-width="2" stroke-linejoin="round"/>
+      <line id="scx" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>
+      <circle id="sca" r="4" fill="var(--c1)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/><circle id="scb" r="4" fill="var(--c2)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>
+      <rect x="${pl}" y="${pt}" width="${W - pl - pr}" height="${H - pt - pb}" fill="transparent" id="scHit"/></svg><div class="tip" id="scTip" hidden></div>`;
+  const svg = $("stockChart").querySelector("svg"), tip = $("scTip");
+  const show = ev => { const bb = svg.getBoundingClientRect(), x = (ev.clientX - bb.left) * W / bb.width, t = Math.max(0, Math.min(n, Math.round((x - pl) / (W - pl - pr) * n)));
+    ["scx"].forEach(id => { const e = svg.querySelector("#" + id); e.setAttribute("x1", X(t)); e.setAttribute("x2", X(t)); e.setAttribute("visibility", "visible"); });
+    [["sca", a], ["scb", b]].forEach(([id, s]) => { const e = svg.querySelector("#" + id); e.setAttribute("cx", X(t)); e.setAttribute("cy", Y(s[t])); e.setAttribute("visibility", "visible"); });
+    tip.hidden = false; tip.innerHTML = `<b>${fmtDate(PLANC.isoOf(R.from + t))}</b><br>Күнтізбе бойынша: ${F(a[t])}<br>Орташа бойынша: ${F(b[t])}<br>Жоспарлы қажеттілік: ${F(r.plan[Math.min(t, n - 1)])}`;
+    const px = X(t) / W * bb.width; tip.style.left = Math.min(bb.width - 170, px + 12) + "px"; tip.style.top = "24px"; };
+  const hide = () => { tip.hidden = true; ["scx", "sca", "scb"].forEach(id => svg.querySelector("#" + id).setAttribute("visibility", "hidden")); };
+  svg.querySelector("#scHit").addEventListener("pointermove", show); svg.querySelector("#scHit").addEventListener("pointerleave", hide); }
+
+/* жинау парағы: таңдалған күннің әр тобына не алу керек */
+function renderPick(){
+  const cur = PLAN && PLAN.cur, byTeam = [];
+  if(cur && cur.ev && cur.ev.ok){ cur.parts.forEach(part => part.sol.routes.forEach((r, j) => { byTeam[j] = byTeam[j] || new Map();
+      r.seq.forEach(k => { const hh = HOUSES.find(h => h.id === part.sol.pts[k].id); (hh && hh.drugs || []).forEach(x => byTeam[j].set(x.id, (byTeam[j].get(x.id) || 0) + x.q)); }); })); }
+  else { const m = new Map(); dayHouses().forEach(hh => (hh.drugs || []).forEach(x => m.set(x.id, (m.get(x.id) || 0) + x.q))); if(m.size) byTeam[0] = m; }
+  const used = DRUGS.filter(d => byTeam.some(m => m && m.get(d.id)));
+  if(!used.length){ $("pickTbl").innerHTML = `<tbody><tr><td class="muted">Бұл күні жеткізілетін ${goodsWord().toLowerCase()} жоқ.</td></tr></tbody>`; return; }
+  $("pickTbl").innerHTML = `<thead><tr><th>${goodsWord()}</th>${byTeam.map((_, j) => `<th class="n">${j + 1}-топ</th>`).join("")}<th class="n">Барлығы</th><th class="n">Қор</th></tr></thead><tbody>` +
+    used.map(d => { const v = byTeam.map(m => (m && m.get(d.id)) || 0), s = v.reduce((a, b) => a + b, 0);
+      return `<tr><td>${esc(d.name)}</td>${v.map(x => `<td class="n">${x || "—"}</td>`).join("")}<td class="n"><b>${s}</b></td><td class="n">${s > d.stock ? `<span class="chip no">${F(d.stock)} — жетпейді</span>` : F(d.stock)}</td></tr>`; }).join("") + "</tbody>"; }
 
 /* ================================================================ айнымалылар және модельге жіберу */
 function ensureRES(){ if(RES || !DATA) return RES; RES = NET.analyze(DATA, U.R, {depot}); renderVars(); return RES; }

@@ -146,7 +146,7 @@ footer{margin-top:22px;color:var(--muted);font-size:12.5px;display:flex;flex-dir
     <div>
       <div class="eyebrow">МСАК · д-есептегі пациенттер · үйге жеткізу</div>
       <h1>Дәрі тарату моделі</h1>
-      <p>Кез келген айнымалыны өзгертіңіз: есеп бірден жаңарады. ЖИ үздік тарату әдісін таңдайды және картада маршрутты үздіксіз жақсартады.</p>
+      <p>Кез келген айнымалыны өзгертіңіз: есеп бірден жаңарады. Алгоритм үздік тарату әдісін таңдайды және картада маршрутты үздіксіз жақсартады.</p>
     </div>
     <div class="tools">
       <a href="index.html" style="font-size:13px;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:8px">← Көше картасы</a>
@@ -157,7 +157,7 @@ footer{margin-top:22px;color:var(--muted);font-size:12.5px;display:flex;flex-dir
   </header>
 
   <nav class="jump" aria-label="Бөлімдер">
-    <a href="#inputs">Енгізу</a><a href="#ai">ЖИ ұсынысы</a><a href="#map">Карта</a><a href="#methods">Әдістер</a><a href="#areasCard">Аймақтар</a><a href="#drugsCard">Дәрі</a>
+    <a href="#inputs">Енгізу</a><a href="#ai">Ұсыныс</a><a href="#map">Карта</a><a href="#methods">Әдістер</a><a href="#areasCard">Аймақтар</a><a href="#drugsCard">Дәрі</a>
   </nav>
 
   <main class="grid">
@@ -185,7 +185,7 @@ footer{margin-top:22px;color:var(--muted);font-size:12.5px;display:flex;flex-dir
         <p id="optStatus" class="small muted" style="margin:6px 0 0"></p>
         <div class="map-stat" id="mapStat"></div>
         <div class="legend" id="mapLegend"></div>
-        <p class="hint" style="margin-top:8px">Мекенжай жоқ кезде үйлер аймақ ішінде кездейсоқ қойылады (Б2 болжамы). Қашықтық көше торы бойынша (|Δx|+|Δy|) есептеледі. ЖИ: аймақтарды k-means арқылы бөледі, маршрутты 2-opt, Or-opt, топтар арасында ауыстыру және қайта бастау (ILS) арқылы қысқартады.</p>
+        <p class="hint" style="margin-top:8px">Мекенжай жоқ кезде үйлер аймақ ішінде кездейсоқ қойылады (Б2 болжамы). Қашықтық көше торы бойынша (|Δx|+|Δy|) есептеледі. Алгоритм: аймақтарды k-means арқылы бөледі, маршрутты 2-opt, Or-opt, топтар арасында ауыстыру және қайта бастау (ILS) арқылы қысқартады.</p>
       </article>
 
       <article id="methods" class="card"></article>
@@ -436,9 +436,9 @@ function renderInputs(){
     ${fld("М5: пункттің жұмыс уақыты","мин/күн","params.pick_min",p.pick_min,{min:0,step:10})}${fld("М5: бір беру","мин","params.pick_s1",p.pick_s1,{min:0,step:0.5})}</div>
   </div></details>
 
-  <details class="blk" open><summary><span><span class="h">6. ЖИ не маңызды деп есептейді</span><br><span class="s">салмақтар: 0 = маңызсыз, 5 = өте маңызды</span></span></summary><div class="blk-body">
+  <details class="blk" open><summary><span><span class="h">6. Бағалау салмақтары</span><br><span class="s">салмақтар: 0 = маңызсыз, 5 = өте маңызды</span></span></summary><div class="blk-body">
     <div class="fields">${rangeFld("Шығын","weights.cost",W.cost)}${rangeFld("Қызметкер уақыты","weights.staff",W.staff)}${rangeFld("CO₂","weights.co2",W.co2)}${rangeFld("Пациенттің күтуі","weights.delay",W.delay)}${rangeFld("Мейірбике–пациент байланысы","weights.cont",W.cont)}</div>
-    <p class="hint">ЖИ барлық әдісті (М0–М6) және аптасына 1–5 жеткізу күнін, М3 үшін сақина радиусын тексереді. Кешігу нормасы мен уақыт шегі бұзылмайтын нұсқалардың ішінен салмақталған ең жақсысын таңдайды.</p>
+    <p class="hint">Алгоритм барлық әдісті (М0–М6) және аптасына 1–5 жеткізу күнін, М3 үшін сақина радиусын тексереді. Кешігу нормасы мен уақыт шегі бұзылмайтын нұсқалардың ішінен салмақталған ең жақсысын таңдайды.</p>
   </div></details>`;
   $("inputs").innerHTML = h;
 }
@@ -476,7 +476,7 @@ function renderAI(){
   if(R1) why.push(`R1 ережесі (Лемма 3): ${R1.prefer==="M1"?"бекітілген аймақтар (М1)":"радиалды жапырақтар (М2)"} қысқа. Артық жол ${F1(R1.lhs)} км, үнем ${F1(R1.rhs)} км${R1.valid?"":". Ереже шарттары толық орындалмайды (тығыздық біркелкі емес немесе жапырақ шектелген)"}.`);
   if(!ok){ const need = st.map(s=>{ for(let k=s.S;k<=s.S+40;k++){ const Tp=walkT(peak(s.att,p.z)/k,s.A/k,s.r,p); if(Tp<=s.B) return k-s.S; } return null; });
     const add=need.reduce((s,v)=>s+(v||0),0); if(add>0) why.push(`М1 бойынша нормаға жету үшін шамамен ${add} жеткізуші топ қосу керек (Ф14) немесе топқа бөлінген уақытты арттыру керек.`); }
-  $("ai").innerHTML = `<div class="ai-head"><div><div class="eyebrow">ЖИ ұсынысы · ${ok?"норма сақталады":"ресурс жетпейді"}</div>
+  $("ai").innerHTML = `<div class="ai-head"><div><div class="eyebrow">Ұсыныс · ${ok?"норма сақталады":"ресурс жетпейді"}</div>
       <div class="ai-title">${b.code} · ${esc(NAMES[b.code])}</div><div class="ai-conf">${esc(DESC[b.code])}; ${esc(confText(b))}</div></div>
       <span class="chip ${ok?"ok":"no"}">${ok?"Орындалады":"Орындалмайды"}</span></div>
     <div class="kpis">
@@ -504,7 +504,7 @@ function renderMethods(){
     <td>${ok?'<span class="chip ok">сай</span>':(res.feasible?'<span class="chip mid">күту ұзақ</span>':'<span class="chip no">уақыт жетпейді</span>')}</td>
     <td class="n">${F0(res.team_peak)}</td><td class="n">${F0(res.staff)}</td><td class="n">${F0(res.cost/1000)}</td><td class="n">${F0(res.co2)}</td><td class="n">${F1(res.delay)}</td>
     <td>${res.cont?"сақталады":"жоқ"}</td><td><button type="button" class="x" data-pick="${c}">Картада</button></td></tr>`; }).join("")}
-  </tbody></table></div><p class="hint" style="margin-top:8px">Жасыл жол — ЖИ таңдаған әдіс (ол аптадағы күн санын да өзі іздейді, сондықтан ЖИ картасындағы сандар осы кестеден өзгеше болуы мүмкін).</p>`;
+  </tbody></table></div><p class="hint" style="margin-top:8px">Жасыл жол — алгоритм таңдаған әдіс (ол аптадағы күн санын да өзі іздейді, сондықтан автоматты картадағы сандар осы кестеден өзгеше болуы мүмкін).</p>`;
 }
 function renderAreas(){
   const p=P(), st=states(null);
@@ -649,16 +649,16 @@ function drawMap(){ if(!OPT) return; const inst=OPT.inst, t=S.territory, p=P(); 
     <div class="kpi"><div class="v">${F0(worst)}</div><div class="l">ең ұзақ жаяу маршрут, мин${over?` · <b style="color:var(--bad)">${over} маршрут шектен асады</b>`:""}</div></div>
     <div class="kpi"><div class="v">${F1(fr.walk_km+fr.veh_km)}</div><div class="l">формула бағасы, км / күн</div></div>`;
   $("optBar").style.width = (OPT.done?100:Math.min(98, OPT.stale/350*100))+"%";
-  $("optStatus").textContent = OPT.done ? `ЖИ маршрутты тұрақтандырды: ${F0(OPT.iter)} қадам, жалпы жол ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%). Айнымалыны өзгертсеңіз, іздеу қайта басталады.`
-      : `ЖИ маршрутты жақсартып жатыр: ${F0(OPT.iter)} қадам, қазір ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%)…`;
-  const sel=mapSelection(); $("mapTitle").textContent = `${inst.code} · ${NAMES[inst.code]}${sel.auto?" (ЖИ таңдауы)":""}, ${inst.f||"кесте бойынша"}${inst.f?" күн/апта":""}`;
+  $("optStatus").textContent = OPT.done ? `Алгоритм маршрутты тұрақтандырды: ${F0(OPT.iter)} қадам, жалпы жол ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%). Айнымалыны өзгертсеңіз, іздеу қайта басталады.`
+      : `Алгоритм маршрутты жақсартып жатыр: ${F0(OPT.iter)} қадам, қазір ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%)…`;
+  const sel=mapSelection(); $("mapTitle").textContent = `${inst.code} · ${NAMES[inst.code]}${sel.auto?" (автоматты таңдау)":""}, ${inst.f||"кесте бойынша"}${inst.f?" күн/апта":""}`;
   const used=[...new Set(inst.routes.filter(r=>r.mode==="walk").map(r=>r.col))].slice(0,8);
   $("mapLegend").innerHTML = `<span><i class="sw" style="background:var(--accent)"></i>Емхана</span>`+
     (inst.code==="M2" ? `<span>Түс = жапырақ (топ)</span>` : used.map(c=>`<span><i class="sw" style="background:${COLV(c)}"></i>${esc((S.areas[c]||{}).name||"")}</span>`).join(""))+
     (inst.routes.some(r=>r.mode==="veh")?`<span><i class="sw" style="background:var(--ink2)"></i>Көлік (үзік сызық)</span>`:"")+
     (inst.marks.some(m=>m.type==="sat")?`<span>▲ спутник нүкте</span>`:"")+(inst.marks.some(m=>m.type==="pickup")?`<span>◆ беру пункті</span>`:"")+(inst.marks.some(m=>m.type==="ring")?`<span>- - сақина шекарасы</span>`:"");
 }
-function fillMapSelect(){ const s=$("mapMethod"); s.innerHTML=`<option value="AUTO">ЖИ таңдауы (авто)</option>`+Object.keys(NAMES).map(c=>`<option value="${c}">${c} · ${NAMES[c]}</option>`).join(""); s.value=S.mapMethod||"AUTO"; }
+function fillMapSelect(){ const s=$("mapMethod"); s.innerHTML=`<option value="AUTO">Автоматты таңдау</option>`+Object.keys(NAMES).map(c=>`<option value="${c}">${c} · ${NAMES[c]}</option>`).join(""); s.value=S.mapMethod||"AUTO"; }
 $("mapMethod").addEventListener("change", e=>{ S.mapMethod=e.target.value; save(); lastMapKey=""; refreshMap(); renderMethods(); });
 $("btnReseed").addEventListener("click", ()=>{ S.seed=(S.seed*1103515245+12345)%2147483647; save(); lastMapKey=""; refreshMap(); });
 
