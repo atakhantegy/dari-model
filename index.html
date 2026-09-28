@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Белгіленген үйлерге дәрі жеткізудің көше бойынша ең тиімді бағыттары: топ саны, жаяу/велосипед/көлік салыстыру, кіші аудандар.">
+<meta name="description" content="Кез келген салаға арналған жеткізу маршрутын жоспарлау: кезеңдік күнтізбе, көше бойынша бағыттар, шығын, KPI, Топ-3 және нақтыдан үйрену.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231C6B55'/%3E%3Cpath d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z' fill='white'/%3E%3C/svg%3E">
 <style>html,body{margin:0}</style>
 </head>
 <body>
-<title>Дәрі жеткізу маршруты</title>
+<title>Жеткізу маршруты</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -161,7 +161,7 @@ a.btn{font-size:13px;text-decoration:none;border:1px solid var(--line);backgroun
 a.btn:hover{border-color:var(--accent)}
 .app{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:14px}
 @media (min-width:1080px){.app{grid-template-columns:360px minmax(0,1fr)} .side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:2px}}
-@media (max-width:1079px){.app>.side,.app>.mainc{display:contents} #p1{order:1} #mapCard{order:2} #p3{order:3} #p4{order:4} #top3Card{order:5} #resCard{order:6} #costCard{order:7} #kpiCard{order:8} #p6{order:9} #p5{order:10} #more{order:11}}
+@media (max-width:1079px){.app>.side,.app>.mainc{display:contents} #p1{order:1} #mapCard{order:2} #calCard{order:3} #p3{order:4} #p4{order:5} #top3Card{order:6} #resCard{order:7} #costCard{order:8} #kpiCard{order:9} #pdcaCard{order:10} #p6{order:11} #p5{order:12} #more{order:13}}
 .side,.mainc{display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 .panel h2{display:flex;gap:8px;align-items:center;font-size:16px}
@@ -241,15 +241,28 @@ body{background:var(--bg)}
 .t3 .modes{display:flex;flex-wrap:wrap;gap:4px}
 .kpit td.goal{font-size:12px;color:var(--muted)}
 td.win{background:var(--accent-soft);font-weight:600}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px}
+.cal .h{font-size:11.5px;color:var(--muted);text-align:center;padding:2px 0}
+.cal button{min-height:58px;padding:5px 6px;text-align:left;display:flex;flex-direction:column;gap:1px;align-items:flex-start;border-radius:8px;font-family:var(--f-mono);font-size:12px;background:var(--surface);min-width:0;overflow:hidden}
+.cal button .d{font-weight:600;color:var(--ink)} .cal button .c{font-size:11px;color:var(--ink2);white-space:nowrap} .cal button .z{font-size:10.5px;color:var(--ink2);white-space:nowrap}
+.cal button.off{background:var(--surface2);opacity:.6}
+.cal button.sel{outline:2px solid var(--accent);outline-offset:1px}
+.cal button.today .d{color:var(--accent);text-decoration:underline}
+.cal button.over{box-shadow:inset 0 -3px 0 var(--bad)}
+@media (max-width:520px){.cal button{min-height:48px;padding:3px}.cal button .z{display:none}}
+ol.houses li select,ol.houses li input[type=date]{font-size:11.5px;padding:2px 3px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--ink);max-width:104px;min-width:0}
+ol.houses li{flex-wrap:wrap;row-gap:4px} ol.houses li .t{flex:1 1 calc(100% - 70px)} ol.houses li select{margin-left:2.2em}
+ol.houses li.on .i{color:var(--accent);font-weight:600}
+ol.houses{max-height:260px}
 .formula{font-family:var(--f-mono);font-size:12.5px;background:var(--surface2);border:1px solid var(--line2);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap;margin-top:10px}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">Д-есептегі пациенттерге дәріні үйге жеткізу</div>
-      <h1>Дәрі жеткізу маршруты</h1>
-      <p>Орынды белгілеңіз, радиусты бекітіңіз, жеткізетін үйлерді картадан басыңыз. Жүйе көше бойынша бағыттарды құрып, шығын мен KPI арқылы ең тиімдісін таңдайды.</p>
+      <div class="eyebrow">Маршрутты жоспарлау · дәрі, дүкен, қойма, курьер</div>
+      <h1>Жеткізу маршруты</h1>
+      <p>Саланы таңдап, бастау нүктесі мен радиусты беріңіз, мекенжайлар мен олардың кезеңін белгілеңіз. Жүйе күнтізбе бойынша әр күннің көшемен жүретін ең тиімді бағыттарын құрады, нақты орындалуынан үйреніп, жоспарды үздіксіз дәлдейді.</p>
     </div>
     <div class="tools">
       <div class="theme" role="group" aria-label="Фон"><button type="button" id="thL">Ашық фон</button><button type="button" id="thD">Қараңғы фон</button></div>
@@ -260,8 +273,9 @@ td.win{background:var(--accent-soft);font-weight:600}
   <div class="app">
     <section class="side">
       <div class="panel" id="p1">
-        <h2><span class="stepn">1</span>Орын және радиус</h2>
-        <div class="fld"><label for="coord">Емхана координатасы <span class="u">(ендік, бойлық)</span></label>
+        <h2><span class="stepn">1</span>Сала, орын және радиус</h2>
+        <div class="fld"><label for="sector">Сала</label><select id="sector"><option value="med">Медицина: дәріні үйге жеткізу</option><option value="shop">Онлайн дүкен</option><option value="wh">Қойма / дистрибуция</option><option value="courier">Курьерлік қызмет</option></select></div>
+        <div class="fld"><label for="coord"><span id="lblDepot">Емхана</span> координатасы <span class="u">(ендік, бойлық)</span></label>
           <input id="coord" class="coord" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="41.464551, 69.148520"></div>
         <div class="row"><button type="button" id="btnPickC" aria-pressed="false">Картадан таңдау</button><button type="button" id="btnAyan">Аян емханасы</button></div>
         <div class="fld"><label for="radR">Радиус <span class="u">(км, ең көбі 10)</span></label>
@@ -276,14 +290,16 @@ td.win{background:var(--accent-soft);font-weight:600}
       </div>
 
       <div class="panel off" id="p3">
-        <h2><span class="stepn">2</span>Жеткізетін үйлер <span class="small muted" id="hCount"></span></h2>
-        <p class="hint">Картадағы үйді басыңыз, қайта басса — алынады. Мекенжаймен де қосуға болады.</p>
+        <h2><span class="stepn">2</span>Жеткізетін мекенжайлар <span class="small muted" id="hCount"></span></h2>
+        <p class="hint">Картадағы мекенжайды басыңыз, қайта басса — алынады. Мекенжаймен де қосуға болады.</p>
         <div class="row"><input type="text" id="addr" placeholder="Мысалы: Майлықожа 103 немесе 41.4651, 69.1490" aria-label="Мекенжай немесе координата"><button type="button" id="btnAddr">Қосу</button></div>
         <p class="status" id="st3"></p>
         <ol class="houses" id="hList"></ol>
-        <div class="row"><button type="button" id="btnRand" class="ghost">Тест: 20 кездейсоқ үй</button><button type="button" id="btnClear" class="ghost">Барлығын алу</button></div>
+        <div class="row"><select id="bulkP" aria-label="Барлық мекенжайдың кезеңі" style="font:inherit;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--ink)"></select><button type="button" id="btnBulkP">Барлығына қолдану</button><button type="button" id="btnBal">Кестені теңестіру</button></div>
+        <p class="hint">Картадан қосылған мекенжайдың бірінші бару күні — күнтізбеде таңдалған күн. «Кестені теңестіру» бекітілмеген күндерді жүктеме мен жақындық бойынша қайта бөледі.</p>
+        <div class="row"><button type="button" id="btnRand" class="ghost">Тест: 20 кездейсоқ мекенжай</button><button type="button" id="btnClear" class="ghost">Барлығын алу</button></div>
         <details class="help"><summary class="small" style="cursor:pointer;color:var(--accent)">Тізіммен қосу және мекенжай тізілімі</summary>
-          <p class="hint" style="margin:6px 0">Әр жолға бір үй: «көше нөмір», «ендік, бойлық» немесе тізілімге қосу үшін «мекенжай; ендік; бойлық». Мекенжайлар тек осы браузерде сақталады, сыртқы серверге жіберілмейді.</p>
+          <p class="hint" style="margin:6px 0">Әр жолға бір мекенжай: «көше нөмір», «ендік, бойлық» немесе тізілімге қосу үшін «мекенжай; ендік; бойлық». Мекенжайлар тек осы браузерде сақталады, сыртқы серверге жіберілмейді.</p>
           <textarea id="batch" class="batch" aria-label="Мекенжайлар тізімі"></textarea>
           <div class="row" style="margin-top:6px"><button type="button" id="btnBatch">Тізімді қосу</button><span class="small muted" id="regInfo"></span></div>
         </details>
@@ -304,16 +320,16 @@ td.win{background:var(--accent-soft);font-weight:600}
             <div class="fld"><label for="vw">Жаяу <span class="u">км/сағ</span></label><input id="vw" type="number" min="1" max="8" step="0.1"></div>
             <div class="fld"><label for="vb">Велосипед <span class="u">км/сағ</span></label><input id="vb" type="number" min="3" max="30" step="0.5"></div>
             <div class="fld"><label for="vc">Көлік <span class="u">км/сағ</span></label><input id="vc" type="number" min="5" max="80" step="1"></div>
-            <div class="fld"><label for="s0">Үйде <span class="u">мин</span></label><input id="s0" type="number" min="0" max="60" step="0.5"></div>
+            <div class="fld"><label for="s0">Мекенжайда <span class="u">мин</span></label><input id="s0" type="number" min="0" max="60" step="0.5"></div>
             <div class="fld"><label for="pB">Велосипед тоқтату <span class="u">мин</span></label><input id="pB" type="number" min="0" max="10" step="0.5"></div>
             <div class="fld"><label for="pC">Көлік тоқтату <span class="u">мин</span></label><input id="pC" type="number" min="0" max="15" step="0.5"></div>
-          </div></details>
+          </div><label class="chk" style="margin-top:8px"><input type="checkbox" id="sat"> Сенбі — жұмыс күні</label></details>
       </div>
 
       <div class="panel off" id="p6">
-        <h2><span class="stepn">4</span>Шығын нормалары</h2>
+        <h2><span class="stepn">4</span>Шығын және сыйымдылық</h2>
         <div class="fields">
-          <div class="fld"><label for="salN">Мейірбике айлығы <span class="u">₸/ай</span></label><input id="salN" type="number" min="0" step="5000"></div>
+          <div class="fld"><label for="salN"><span id="lblWorker">Мейірбике</span> айлығы <span class="u">₸/ай</span></label><input id="salN" type="number" min="0" step="5000"></div>
           <div class="fld"><label for="salD">Жүргізуші айлығы <span class="u">₸/ай</span></label><input id="salD" type="number" min="0" step="5000"></div>
           <div class="fld"><label for="hrs">Айлық жұмыс уақыты <span class="u">сағ</span></label><input id="hrs" type="number" min="40" max="300" step="1"></div>
           <div class="fld"><label for="crew">Топтағы адам</label><input id="crew" type="number" min="1" max="5" step="1"></div>
@@ -322,22 +338,26 @@ td.win{background:var(--accent-soft);font-weight:600}
           <div class="fld"><label for="cars">Қызметтік көлік <span class="u">дана</span></label><input id="cars" type="number" min="0" max="10" step="1"></div>
           <div class="fld"><label for="bikes">Велосипед <span class="u">дана</span></label><input id="bikes" type="number" min="0" max="20" step="1"></div>
           <div class="fld"><label for="days">Айына жеткізу күні</label><input id="days" type="number" min="1" max="31" step="1"></div>
+          <div class="fld"><label for="load">Бір мекенжай жүгі <span class="u" id="lblUnit">қаптама</span></label><input id="load" type="number" min="0" step="0.5"></div>
+          <div class="fld"><label for="capW">Жаяу сыйымдылық <span class="u unitLbl">қаптама</span></label><input id="capW" type="number" min="0" step="1"></div>
+          <div class="fld"><label for="capB">Велосипед сыйымдылығы <span class="u unitLbl">қаптама</span></label><input id="capB" type="number" min="0" step="1"></div>
+          <div class="fld"><label for="capC">Көлік сыйымдылығы <span class="u unitLbl">қаптама</span></label><input id="capC" type="number" min="0" step="10"></div>
         </div>
         <label class="chk"><input type="checkbox" id="drv"> Көлікті бөлек жүргізуші жүргізеді</label>
-        <p class="hint">Бензин бағасы: Түркістан, 14.09.2026, 232 ₸/л (nur.kz). Айлық — ел бойынша орташа деңгейге жақын бастапқы мән (2024 жылы орта медперсонал ≈ 292 800 ₸), өз мәніңізді жазыңыз.</p>
+        <p class="hint">Сыйымдылық 0 болса, ол жүріс түрі қолданылмайды. Бензин бағасы: Түркістан, 14.09.2026, 232 ₸/л (nur.kz). Айлық — ел бойынша орташа деңгейге жақын бастапқы мән (2024 жылы орта медперсонал ≈ 292 800 ₸), өз мәніңізді жазыңыз.</p>
       </div>
 
       <div class="panel off" id="p5">
         <h2><span class="stepn">5</span>Кіші аудандар</h2>
-        <p class="hint">Алыста бір-біріне жақын үйлер көп болса, жүйе кіші аудан мен оның ортасын табады. Қызметтік көлік топты ортаға апарып тастайды да, кейін қайта алып келеді.</p>
+        <p class="hint">Алыста бір-біріне жақын мекенжайлар көп болса, жүйе кіші аудан мен оның ортасын табады. Қызметтік көлік топты ортаға апарып тастайды да, кейін қайта алып келеді.</p>
         <button type="button" id="btnSub" aria-pressed="false">Кіші аудандарға бөлу</button>
         <details class="help"><summary class="small" style="cursor:pointer;color:var(--accent)">Бөлу шарттары</summary>
           <div class="fields three" style="margin-top:8px">
             <div class="fld"><label for="far">Алыс шегі <span class="u">м</span></label><input id="far" type="number" min="200" max="20000" step="100"></div>
             <div class="fld"><label for="eps">Көрші арасы <span class="u">м</span></label><input id="eps" type="number" min="50" max="3000" step="50"></div>
-            <div class="fld"><label for="minPts">Ең аз үй</label><input id="minPts" type="number" min="2" max="50" step="1"></div>
+            <div class="fld"><label for="minPts">Ең аз мекенжай</label><input id="minPts" type="number" min="2" max="50" step="1"></div>
           </div>
-          <p class="hint" style="margin-top:6px">Емханадан жаяу жолмен «алыс шегінен» қашық үйлер ғана қаралады. Кіші аудан — көше бойынша «көрші арасынан» жақын кемінде «ең аз үй» тізбегі (DBSCAN). Орта — аудан үйлеріне жаяу жолдың қосындысы ең аз, көлік жете алатын көше нүктесі.</p></details>
+          <p class="hint" style="margin-top:6px">Емханадан жаяу жолмен «алыс шегінен» қашық мекенжайлар ғана қаралады. Кіші аудан — көше бойынша «көрші арасынан» жақын кемінде «ең аз мекенжай» тізбегі (DBSCAN). Орта — аудан үйлеріне жаяу жолдың қосындысы ең аз, көлік жете алатын көше нүктесі.</p></details>
       </div>
     </section>
 
@@ -345,7 +365,7 @@ td.win{background:var(--accent-soft);font-weight:600}
       <article class="card" id="mapCard">
         <div class="maptools">
           <div class="seg" role="group" aria-label="Картаны басқанда">
-            <button type="button" id="mHouse" aria-pressed="true">Үй белгілеу</button><button type="button" id="mCenter" aria-pressed="false">Емхана орны</button>
+            <button type="button" id="mHouse" aria-pressed="true">Мекенжай белгілеу</button><button type="button" id="mCenter" aria-pressed="false">Емхана орны</button>
           </div>
           <div class="layers" id="layers">
             <label><input type="checkbox" data-l="bg">OSM фоны</label>
@@ -354,7 +374,7 @@ td.win{background:var(--accent-soft);font-weight:600}
           </div>
         </div>
         <div class="mapbox" style="margin-top:10px">
-          <canvas id="cv" aria-label="Жолдар, ғимараттар, үйлер және маршруттар картасы" role="img"></canvas>
+          <canvas id="cv" aria-label="Жолдар, ғимараттар, мекенжайлар және маршруттар картасы" role="img"></canvas>
           <div class="tl"><span class="pill" id="tagData" hidden></span><span class="pill" id="tagB" hidden></span></div>
           <div class="zoom"><button type="button" id="zIn" aria-label="Жақындату">+</button><button type="button" id="zOut" aria-label="Алыстату">−</button><button type="button" id="zFit" aria-label="Шеңберді толық көрсету">⤢</button></div>
           <div class="scale"><span id="scaleT"></span><i id="scaleB"></i></div>
@@ -364,10 +384,17 @@ td.win{background:var(--accent-soft);font-weight:600}
           <label><input type="checkbox" data-m="walk"><span class="lw" style="height:10px;background:var(--mw)"></span>Жаяу</label>
           <label><input type="checkbox" data-m="bike"><span class="lw" style="height:6px;background:var(--mb)"></span>Велосипед</label>
           <label><input type="checkbox" data-m="drive"><span class="lw" style="height:2.5px;background:var(--mc)"></span>Көлік</label>
-          <span>Қанық сызық — таңдалған түрі; үйдегі сан — топ нөмірі</span>
+          <span>Қанық сызық — таңдалған түрі; мекенжайдағы сан — топ нөмірі</span>
         </div>
         <div class="progress" aria-hidden="true"><i id="optBar"></i></div>
         <p class="status" id="stOpt"></p>
+      </article>
+
+      <article class="card" id="calCard">
+        <div class="card-h"><h2>Күнтізбе</h2>
+          <div class="row"><button type="button" id="calPrev" aria-label="Алдыңғы ай">‹</button><b id="calTitle" style="min-width:120px;text-align:center;font-family:var(--f-cond)"></b><button type="button" id="calNext" aria-label="Келесі ай">›</button><button type="button" id="btnMonth" class="primary">Айды есептеу</button></div></div>
+        <div class="cal" id="cal"></div>
+        <p class="status" id="calSum" style="margin-top:8px"></p>
       </article>
 
       <article class="card" id="top3Card" hidden>
@@ -382,7 +409,7 @@ td.win{background:var(--accent-soft);font-weight:600}
         <div class="warns" id="resWarn"></div>
         <div class="tbl"><table id="dirTbl"></table></div>
         <div id="cmp"></div>
-        <p class="hint" style="margin-top:8px">Уақыт = көше бойынша жол ÷ жылдамдық + үй саны × (үйдегі уақыт + тоқтату) + көшеден есікке дейін жаяу. Әр жүріс түрі үшін үйлердің реті бөлек оңтайландырылады.</p>
+        <p class="hint" style="margin-top:8px">Уақыт = көше бойынша жол ÷ жылдамдық + мекенжай саны × (мекенжайдағы уақыт + тоқтату) + көшеден есікке дейін жаяу. Әр жүріс түрі үшін мекенжайлардың реті бөлек оңтайландырылады.</p>
       </article>
 
       <article class="card" id="costCard">
@@ -398,6 +425,16 @@ td.win{background:var(--accent-soft);font-weight:600}
         <p class="hint" style="margin-top:8px" id="kpiWhy"></p>
       </article>
 
+      <article class="card" id="pdcaCard">
+        <div class="card-h"><h2>Үздіксіз жетілдіру (PDCA)</h2><span class="small muted">жоспар → орындау → тексеру → түзету</span></div>
+        <p class="hint" style="margin-top:6px">Бағыт орындалған соң әр топтың нақты уақытын жазыңыз. Жүйе жоспар мен нақтыны салыстырады, жылдамдық пен мекенжайдағы уақытты қайта бағалайды. Бағаны қолдансаңыз, келесі жоспарлар дәлірек болады.</p>
+        <div class="tbl"><table id="factTbl"></table></div>
+        <div class="row" style="margin-top:8px"><button type="button" id="btnFact" class="primary">Нақтыны сақтау</button><button type="button" id="btnLong">ЖИ: ұзағырақ іздеу (30 с)</button><span class="status" id="stFact"></span></div>
+        <div class="kpis k4" id="pdcaKpi"></div>
+        <div class="tbl"><table id="cbTbl"></table></div>
+        <div class="row" style="margin-top:8px"><button type="button" id="btnApplyCal">Калибрлеуді қолдану</button><button type="button" id="btnFactCsv" class="ghost">Жазбаларды көшіру (CSV)</button><button type="button" id="btnFactClr" class="ghost">Жазбаларды өшіру</button></div>
+      </article>
+
       <details class="more" id="more">
         <summary>Көше желісінің айнымалылары және модельге жіберу</summary>
         <div>
@@ -411,8 +448,8 @@ td.win{background:var(--accent-soft);font-weight:600}
   </div>
 
   <footer>
-    <div>Карта деректері: © OpenStreetMap қатысушылары, ODbL. Шағын елді мекендерде кейбір үйлер мен жолдар сызылмаған болуы мүмкін.</div>
-    <div>Әдістер: Dijkstra (көше бойынша қашықтық), бұрыштық бөлу + жақын көрші + 2-opt + Or-opt + топаралық ауыстыру + ILS (бағыттар), динамикалық бағдарлама (жүріс түрін тағайындау), DBSCAN және желідегі 1-медиана (кіші аудандар). Пациенттің аты-жөні мен ЖСН енгізілмейді; үйлер мен мекенжайлар тек осы браузерде сақталады.</div>
+    <div>Карта деректері: © OpenStreetMap қатысушылары, ODbL. Шағын елді мекендерде кейбір мекенжайлар мен жолдар сызылмаған болуы мүмкін.</div>
+    <div>Әдістер: Dijkstra (көше бойынша қашықтық), бұрыштық бөлу + жақын көрші + 2-opt + Or-opt + топаралық ауыстыру + ILS (бағыттар), динамикалық бағдарлама (жүріс түрін тағайындау), DBSCAN және желідегі 1-медиана (кіші аудандар). Пациенттің аты-жөні мен ЖСН енгізілмейді; мекенжайлар мен мекенжайлар тек осы браузерде сақталады.</div>
   </footer>
 </div>
 
@@ -1050,21 +1087,110 @@ return {MODES, CO2_PER_L, perMin, teamOptions, choose, evaluate, rank};
 
 </script>
 <script>
+/* ======================================================================
+   PLANC — кезеңдік кесте (Periodic VRP-дің күнге бөлу бөлігі) және
+   жоспар мен нақтыны салыстыру арқылы параметрлерді калибрлеу (PDCA).
+   Күндер UTC бойынша «күн нөмірімен» есептеледі (уақыт белдеуі қатесі болмауы үшін).
+   ====================================================================== */
+const PLANC = (() => {
+"use strict";
+const DAY = 86400000;
+const dayNum = s => Math.round(Date.parse(s + "T00:00:00Z") / DAY);
+const isoOf = n => new Date(n * DAY).toISOString().slice(0, 10);
+const dow = n => (new Date(n * DAY).getUTCDay() + 6) % 7;            // 0 = дүйсенбі
+function nextWork(n, wd){ for(let i = 0; i < 7; i++) if(wd.includes(dow(n + i))) return n + i; return n; }
+
+/* h = {period (күн, 0 = бір рет), date (ISO, кезеңнің тірегі не жалғыз күн)} → [from, to] ішіндегі бару күндері.
+   Демалыс күніне түссе, келесі жұмыс күніне ауысады. */
+function visits(h, from, to, wd){
+  if(!h.date) return [];
+  const base = dayNum(h.date);
+  if(!(h.period > 0)){ const d = nextWork(base, wd); return d >= from && d <= to ? [d] : []; }
+  const p = h.period, out = []; let k = Math.ceil((from - 6 - base) / p);
+  for(;; k++){ const raw = base + k * p; if(raw > to) break; const d = nextWork(raw, wd); if(d >= from && d <= to && out[out.length - 1] !== d) out.push(d); }
+  return out;
+}
+function schedule(houses, from, to, wd){ const m = new Map();
+  for(const h of houses) for(const d of visits(h, from, to, wd)){ let a = m.get(d); if(!a) m.set(d, a = []); a.push(h); }
+  return m; }
+
+/* Теңестіру: бекітілмеген кезеңдік мекенжайларға тірек күнін таңдау.
+   Мақсат: Σ_күн жүктеме² (теңгерім) + λ · (сол күнгі көршілерге орташа қашықтық, км) (бір күнгі мекенжайлар жақын болуы үшін).
+   Тәртіп: жиі баратындар бірінші, сосын депо айналасындағы бұрыш бойынша (кеңістіктік үйлесім). */
+function balance(houses, start, wd, o){
+  o = Object.assign({window:84, lambda:1.5, depot:[0, 0]}, o || {});
+  const from = start, to = start + o.window - 1, cnt = new Map(), on = new Map();
+  const put = (h, ds) => ds.forEach(d => { cnt.set(d, (cnt.get(d) || 0) + 1); let a = on.get(d); if(!a) on.set(d, a = []); a.push(h); });
+  const free = [];
+  for(const h of houses){ if(h.fixed || !(h.period > 0)) put(h, visits(h, from, to, wd)); else free.push(h); }
+  const ang = h => Math.atan2(h.y - o.depot[1], h.x - o.depot[0]);
+  free.sort((a, b) => a.period - b.period || ang(a) - ang(b));
+  for(const h of free){ let best = null, bs = Infinity;
+    for(let phi = 0; phi < h.period; phi++){ const a = start + phi; if(!wd.includes(dow(a))) continue;
+      const ds = visits({period:h.period, date:isoOf(a)}, from, to, wd); if(!ds.length) continue; let sc = 0;
+      for(const d of ds){ const c = cnt.get(d) || 0, nb = on.get(d); sc += 2 * c + 1;
+        if(nb && nb.length){ let s = 0; for(const q of nb) s += Math.hypot(q.x - h.x, q.y - h.y); sc += o.lambda * s / nb.length / 1000; } }
+      sc /= ds.length; if(sc < bs - 1e-9){ bs = sc; best = a; } }
+    if(best != null){ h.date = isoOf(best); put(h, visits(h, from, to, wd)); } }
+  return houses; }
+
+/* Калибрлеу: (нақты − есікке дейінгі жаяу) = a_m · км + s · аялдама саны + тоқтату·аялдама, a_m ≥ 0, s ≥ 0.
+   a_m — мин/км (жылдамдық = 60 / a_m км/сағ), s — бір мекенжайдағы уақыт. Кіші квадраттар, теріс коэффициент нөлге бекітіледі. */
+function solveLS(X, y){ const k = X[0].length, A = Array.from({length:k}, () => new Float64Array(k)), b = new Float64Array(k);
+  for(let i = 0; i < X.length; i++) for(let p = 0; p < k; p++){ b[p] += X[i][p] * y[i]; for(let q = 0; q < k; q++) A[p][q] += X[i][p] * X[i][q]; }
+  for(let p = 0; p < k; p++) A[p][p] += 1e-9;
+  for(let c = 0; c < k; c++){ let piv = c; for(let r = c + 1; r < k; r++) if(Math.abs(A[r][c]) > Math.abs(A[piv][c])) piv = r;
+    [A[c], A[piv]] = [A[piv], A[c]]; [b[c], b[piv]] = [b[piv], b[c]]; if(Math.abs(A[c][c]) < 1e-12) return null;
+    for(let r = 0; r < k; r++){ if(r === c) continue; const f = A[r][c] / A[c][c]; for(let q = c; q < k; q++) A[r][q] -= f * A[c][q]; b[r] -= f * b[c]; } }
+  return Array.from(b, (v, i) => v / A[i][i]); }
+function nnls(X, y){ let act = X[0].map((_, i) => i);
+  for(let it = 0; it < X[0].length; it++){ const sol = solveLS(X.map(r => act.map(i => r[i])), y); if(!sol) return null;
+    const neg = sol.findIndex(v => v < 0); if(neg < 0){ const full = new Array(X[0].length).fill(0); act.forEach((i, j) => full[i] = sol[j]); return full; }
+    act = act.filter((_, j) => j !== neg); if(!act.length) return new Array(X[0].length).fill(0); }
+  return null; }
+function calibrate(recs, park){
+  const modes = ["walk", "bike", "drive"].filter(m => recs.filter(r => r.mode === m && r.km > 0).length >= 2);
+  if(recs.length < 4 || !modes.length) return {ok:false, need:Math.max(0, 4 - recs.length)};
+  const use = recs.filter(r => modes.includes(r.mode)), X = use.map(r => modes.map(m => r.mode === m ? r.km : 0).concat([r.n]));
+  const y = use.map(r => r.fact - r.acc - r.n * (park[r.mode] || 0)), w = nnls(X, y); if(!w) return {ok:false, need:0};
+  const pred = use.map((r, i) => X[i].reduce((s, v, j) => s + v * w[j], 0) + r.acc + r.n * (park[r.mode] || 0));
+  const mape = arr => arr.reduce((s, [p, f]) => s + Math.abs(p - f) / Math.max(f, 1), 0) / arr.length * 100;
+  const speed = {}; modes.forEach((m, j) => speed[m] = w[j] > 1e-9 ? 60 / w[j] : null);
+  return {ok:true, n:use.length, modes, speed, s0:w[w.length - 1],
+    mapeBefore:mape(use.map(r => [r.plan, r.fact])), mapeAfter:mape(use.map((r, i) => [pred[i], r.fact])),
+    bias:use.reduce((s, r) => s + (r.plan - r.fact) / Math.max(r.fact, 1), 0) / use.length * 100}; }
+
+return {DAY, dayNum, isoOf, dow, nextWork, visits, schedule, balance, calibrate, nnls};
+})();
+
+
+</script>
+<script>
 (function(){
 "use strict";
 const $ = id => document.getElementById(id);
 const ST_KEY = "dariModel.app.v1", H_KEY = "dariModel.houses.v1", REG_KEY = "dariModel.addr.v1", STORE_KEY = "dariModel.state.v1";
 const AYAN = [41.464551, 69.148520], MODES = ["walk", "bike", "drive"], MNAME = {walk:"Жаяу", bike:"Велосипед", drive:"Көлік"};
 const EP = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
-const MAX_H = 150, B_AUTO_R = 1500, CELL = 1000;
+const MAX_H = 2000, MAX_DAY = 150, B_AUTO_R = 1500, CELL = 1000;
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
 const lsJSON = (k, d) => { try{ return JSON.parse(lsGet(k)) || d; }catch(e){ return d; } };
 const DEF = {lat:AYAN[0], lon:AYAN[1], R:1500, K:1, mode:"auto", ret:true, shift:240, vw:4.5, vb:12, vc:20, s0:8, pB:0.5, pC:1.5,
   sub:false, far:1500, eps:450, minPts:3, layers:{bg:false, cross:true, inter:false}, vis:{walk:true, bike:true, drive:true},
-  salN:300000, salD:250000, hrs:168, crew:1, drv:true, fuelP:232, fuelL:10, cars:1, bikes:2, days:22};
+  salN:300000, salD:250000, hrs:168, crew:1, drv:true, fuelP:232, fuelL:10, cars:1, bikes:2, days:22,
+  sector:"med", period:30, sat:false, load:1, capW:20, capB:40, capC:500};
+/* салалық баптаулар: логика бірдей, тек бастапқы мәндер мен атаулар өзгереді */
+const SECTORS = {
+  med:{name:"Медицина: дәріні үйге жеткізу", worker:"Мейірбике", depot:"Емхана", s0:8, period:30, load:1, capW:20, capB:40, capC:500, unit:"қаптама"},
+  shop:{name:"Онлайн дүкен", worker:"Курьер", depot:"Дүкен / қойма", s0:4, period:0, load:3, capW:15, capB:25, capC:400, unit:"кг"},
+  wh:{name:"Қойма / дистрибуция", worker:"Экспедитор", depot:"Қойма", s0:15, period:7, load:80, capW:0, capB:0, capC:1500, unit:"кг"},
+  courier:{name:"Курьерлік қызмет", worker:"Курьер", depot:"Хаб", s0:5, period:0, load:2, capW:10, capB:20, capC:300, unit:"кг"}};
+const PERIODS = [[0, "Бір рет"], [7, "Апта сайын"], [14, "2 апта сайын"], [21, "3 апта сайын"], [28, "4 апта сайын"], [30, "Ай сайын"]];
+const localISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 const U = (() => { const t = lsJSON(ST_KEY, {}), u = Object.assign({}, DEF, t); u.layers = Object.assign({}, DEF.layers, t.layers || {}); u.vis = Object.assign({}, DEF.vis, t.vis || {});
-  if(t.v !== 4){ u.mode = "auto"; u.v = 4; } u.sub = false; return u; })();
+  if(t.v !== 4){ u.mode = "auto"; u.v = 4; } u.sub = false; u.date = localISO(); u.calM = u.date.slice(0, 7) + "-01"; return u; })();
+const WD = () => U.sat ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4];
 const saveU = () => lsSet(ST_KEY, JSON.stringify(U));
 const NF = [0, 1, 2, 3].map(d => new Intl.NumberFormat("ru-RU", {maximumFractionDigits:d, minimumFractionDigits:d}));
 const F = (v, d) => Number.isFinite(v) ? NF[d || 0].format(v) : "—";
@@ -1125,7 +1251,7 @@ function idb(){ return new Promise((res, rej) => { try{ const r = indexedDB.open
 async function cachePut(v){ try{ const db = await idb(); db.transaction("osm", "readwrite").objectStore("osm").put(v, "last"); }catch(e){} }
 async function cacheGet(){ try{ const db = await idb(); return await new Promise(res => { const q = db.transaction("osm").objectStore("osm").get("last"); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); }catch(e){ return null; } }
 
-/* ---------- деректі дайындау: граф, емхана, үйлер ---------- */
+/* ---------- деректі дайындау: граф, емхана, мекенжайлар ---------- */
 function setupData(osm, lat, lon, R, bLoaded, fresh){
   OSM = osm; U.lat = lat; U.lon = lon; U.R = R; saveU(); PR = NET.projector(lat, lon);
   if(fresh) cachePut({lat, lon, R, bLoaded, osm});
@@ -1231,11 +1357,13 @@ function draw(){
   if(DATA && U.layers.cross){ if(!DATA.xr) DATA.xr = NET.crossings(DATA.roads, DATA.rails, U.R, "rail").points;
     ctx.fillStyle = c("--m-cross"); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 1.5;
     for(const q of DATA.xr){ const p = on(q.x, q.y); if(!p) continue; ctx.beginPath(); ctx.moveTo(p[0], p[1] - 7); ctx.lineTo(p[0] + 7, p[1]); ctx.lineTo(p[0], p[1] + 7); ctx.lineTo(p[0] - 7, p[1]); ctx.closePath(); ctx.fill(); ctx.stroke(); } }
-  // үйлер: бағыт түсімен, нөмірімен
+  // мекенжайлар: бағыт түсімен, нөмірімен
   const col = new Map(); if(PLAN && PLAN.cur) for(const part of PLAN.cur.parts) part.sol.routes.forEach((r, j) => r.seq.forEach(k => col.set(part.sol.pts[k].id, [j, chosenMode(PLAN.cur, part, j)])));
   const MCc = {walk:c("--mw"), bike:c("--mb"), drive:c("--mc")};
   ctx.font = "600 10px " + (cs.getPropertyValue("--f-mono") || "monospace"); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  HOUSES.forEach(hh => { const p = on(hh.x, hh.y); if(!p) return; const q = col.get(hh.id), rr = s > 0.5 ? 8 : 6.5;
+  const todayIds = new Set(dayHouses().map(h => h.id));
+  HOUSES.forEach(hh => { if(todayIds.has(hh.id)) return; const p = on(hh.x, hh.y); if(!p) return; ctx.fillStyle = c("--m-bg"); ctx.strokeStyle = c("--muted"); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(p[0], p[1], 4, 0, 7); ctx.fill(); ctx.stroke(); });
+  HOUSES.forEach(hh => { if(!todayIds.has(hh.id)) return; const p = on(hh.x, hh.y); if(!p) return; const q = col.get(hh.id), rr = s > 0.5 ? 8 : 6.5;
     ctx.fillStyle = q && q[1] ? MCc[q[1]] : c("--ink2"); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(p[0], p[1], rr, 0, 7); ctx.fill(); ctx.stroke();
     if(q){ ctx.fillStyle = "#fff"; ctx.fillText(String(q[0] + 1), p[0], p[1] + 0.5); } });
@@ -1302,15 +1430,15 @@ function buildingAt(x, y){ let best = null, bd = 18; const gx = Math.floor(x / 6
     for(const k of a){ const b = DATA.blds[k]; if(pointInPoly(x, y, b.xy)) return b; const d = Math.hypot(b.cx - x, b.cy - y); if(d < bd){ bd = d; best = b; } } }
   return best; }
 
-/* ================================================================ 3. үйлер */
+/* ================================================================ 3. мекенжайлар */
 let hSeq = 1;
 function addrLabel(b){ return b && b.street ? `${b.street}${b.hn ? " " + b.hn : ""}` : (b && b.hn ? `№ ${b.hn}` : ""); }
 function snapHouse(hh){ hh.snap = {}; for(const m of MODES) hh.snap[m] = NET.nearest(IX[m], hh.x, hh.y, m === "drive" ? 800 : 500); return hh.snap.walk.node >= 0; }
 function attachBuilding(hh){ const b = buildingAt(hh.x, hh.y); if(b && Math.hypot(b.cx - hh.x, b.cy - hh.y) < 25){ hh.bid = b.id; if(!hh.label) hh.label = addrLabel(b); } }
-function addHouse(x, y, label, bid){
-  if(HOUSES.length >= MAX_H){ status("st3", `Бір жоспарда ${MAX_H} үйден артық болмайды.`, "err"); return null; }
-  if(Math.hypot(x, y) > U.R * 1.02){ status("st3", "Үй жүктелген шеңберден тыс.", "err"); return null; }
-  const hh = {id:"h" + (hSeq++), x, y, label:label || "", bid:bid || null};
+function addHouse(x, y, label, bid, meta){
+  if(HOUSES.length >= MAX_H){ status("st3", `Бір жоспарда ${MAX_H} мекенжайдан артық болмайды.`, "err"); return null; }
+  if(Math.hypot(x, y) > U.R * 1.02){ status("st3", "Мекенжай жүктелген шеңберден тыс.", "err"); return null; }
+  const hh = Object.assign({id:"h" + (hSeq++), x, y, label:label || "", bid:bid || null, period:U.period, date:U.date, fixed:false}, meta || {});
   if(!snapHouse(hh)){ status("st3", "Бұл нүктенің жанынан жаяу жүретін жол табылмады.", "err"); return null; }
   const ll = PR.inv(x, y); hh.lat = ll[0]; hh.lon = ll[1]; HOUSES.push(hh); return hh; }
 function clickHouse(wp){
@@ -1321,15 +1449,25 @@ function clickHouse(wp){
   const p = b ? [b.cx, b.cy] : wp; let label = b ? addrLabel(b) : "";
   if(pendingAddr){ label = pendingAddr; regAdd(pendingAddr, PR.inv(p[0], p[1])); pendingAddr = null; HL = null; status("st3", `«${label}» тізілімге сақталды.`, "ok"); }
   if(addHouse(p[0], p[1], label, b ? b.id : null)) afterHouses(); }
-function afterHouses(){ saveHouses(); renderHouses(); TOP3 = null; renderTop3(); plan(); }
-function saveHouses(){ lsSet(H_KEY, JSON.stringify(HOUSES.map(hh => ({lat:hh.lat, lon:hh.lon, label:hh.label, bid:hh.bid})))); }
+function afterHouses(){ saveHouses(); renderHouses(); TOP3 = null; renderTop3(); MONTH = null; renderCal(); plan(); }
+function saveHouses(){ lsSet(H_KEY, JSON.stringify(HOUSES.map(hh => ({lat:hh.lat, lon:hh.lon, label:hh.label, bid:hh.bid, period:hh.period, date:hh.date, fixed:hh.fixed})))); }
 function restoreHouses(){ HOUSES = []; let out = 0;
-  for(const q of lsJSON(H_KEY, [])){ const p = PR.fwd(q.lat, q.lon); if(Math.hypot(p[0], p[1]) > U.R){ out++; continue; } addHouse(p[0], p[1], q.label, q.bid); }
-  renderHouses(); if(out) status("st3", `${out} үй жаңа шеңберден тыс қалды және алынды.`, "warn"); saveHouses(); }
+  for(const q of lsJSON(H_KEY, [])){ const p = PR.fwd(q.lat, q.lon); if(Math.hypot(p[0], p[1]) > U.R){ out++; continue; } addHouse(p[0], p[1], q.label, q.bid, {period:q.period != null ? q.period : U.period, date:q.date || U.date, fixed:!!q.fixed}); }
+  renderHouses(); if(out) status("st3", `${out} мекенжай жаңа шеңберден тыс қалды және алынды.`, "warn"); saveHouses(); }
 function renderHouses(){ $("hCount").textContent = HOUSES.length ? `· ${HOUSES.length}` : "";
-  $("hList").innerHTML = HOUSES.length ? HOUSES.map((hh, i) => `<li><span class="i">${i + 1}</span><span class="t">${esc(hh.label || `${hh.lat.toFixed(5)}, ${hh.lon.toFixed(5)}`)}</span><button type="button" class="x" data-rm="${hh.id}" aria-label="Алып тастау">×</button></li>`).join("")
-    : `<li class="empty">Әзірге үй жоқ. Картадағы үйді басыңыз.</li>`; }
+  const today = new Set(dayHouses().map(h => h.id));
+  $("hList").innerHTML = HOUSES.length ? HOUSES.map((hh, i) => `<li class="${today.has(hh.id) ? "on" : ""}"><span class="i">${i + 1}</span><span class="t" title="${esc(hh.label)}">${esc(hh.label || `${hh.lat.toFixed(5)}, ${hh.lon.toFixed(5)}`)}</span>
+      <select data-per="${hh.id}" aria-label="Кезең">${PERIODS.map(([v, t]) => `<option value="${v}"${v === hh.period ? " selected" : ""}>${t}</option>`).join("")}</select>
+      <input type="date" data-date="${hh.id}" value="${hh.date || ""}" aria-label="${hh.period ? "Бірінші бару күні" : "Бару күні"}"><button type="button" class="x" data-rm="${hh.id}" aria-label="Алып тастау">×</button></li>`).join("")
+    : `<li class="empty">Әзірге мекенжай жоқ. Картадағы мекенжайды басыңыз.</li>`; }
 $("hList").addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if(!b) return; HOUSES = HOUSES.filter(hh => hh.id !== b.dataset.rm); afterHouses(); });
+$("hList").addEventListener("change", e => { const t = e.target, id = t.dataset.per || t.dataset.date, hh = HOUSES.find(q => q.id === id); if(!hh) return;
+  if(t.dataset.per) hh.period = +t.value; else if(t.value){ hh.date = t.value; hh.fixed = true; } afterHouses(); });
+function initBulk(){ $("bulkP").innerHTML = PERIODS.map(([v, t]) => `<option value="${v}"${v === U.period ? " selected" : ""}>${t}</option>`).join(""); }
+initBulk();
+$("btnBulkP").addEventListener("click", () => { const v = +$("bulkP").value; U.period = v; saveU(); HOUSES.forEach(hh => { hh.period = v; }); afterHouses(); status("st3", `Барлық мекенжайға кезең: ${PERIODS.find(q => q[0] === v)[1].toLowerCase()}. Жаңа мекенжайлар да осылай қосылады.`, "ok"); });
+$("btnBal").addEventListener("click", () => { const start = PLANC.dayNum(U.calM); PLANC.balance(HOUSES, start, WD(), {depot}); afterHouses(); MONTH = null; renderCal();
+  status("st3", "Кесте теңестірілді: бекітілмеген мекенжайлардың бару күндері жүктеме мен жақындық бойынша қайта бөлінді.", "ok"); });
 $("btnClear").addEventListener("click", () => { const b = $("btnClear"); if(b.dataset.c !== "1"){ b.dataset.c = "1"; b.textContent = "Иә, барлығын алу"; setTimeout(() => { b.dataset.c = ""; b.textContent = "Барлығын алу"; }, 4000); return; }
   b.dataset.c = ""; b.textContent = "Барлығын алу"; HOUSES = []; afterHouses(); });
 $("btnRand").addEventListener("click", () => { if(!DATA) return; const rnd = ROUTE.rng(Date.now() & 0xffff); let pool = DATA.blds.filter(b => Math.hypot(b.cx, b.cy) <= U.R && b.type !== "other");
@@ -1337,10 +1475,10 @@ $("btnRand").addEventListener("click", () => { if(!DATA) return; const rnd = ROU
     let x, y, lab = "", bid = null;
     if(pool.length){ const b = pool[Math.floor(rnd() * pool.length)]; if(HOUSES.some(hh => hh.bid === b.id)) continue; x = b.cx; y = b.cy; bid = b.id; lab = addrLabel(b); }
     else { const G = GR.walk, i = Math.floor(rnd() * G.n); if(!IX.walk || Math.hypot(G.X[i], G.Y[i]) > U.R) continue; x = G.X[i]; y = G.Y[i]; }
-    if(addHouse(x, y, lab ? lab + " (тест)" : "Тест үйі", bid)) n++; }
-  status("st3", `${n} тест үйі қосылды (нақты пациент емес).`, "ok"); afterHouses(); });
+    if(addHouse(x, y, lab ? lab + " (тест)" : "Тест мекенжайы", bid)) n++; }
+  status("st3", `${n} тест мекенжайы қосылды (нақты пациент емес).`, "ok"); afterHouses(); });
 
-/* мекенжай: алдымен тізілім, сосын OSM-дағы үй нөмірі, сосын көше атауы (сыртқы серверге жіберілмейді) */
+/* мекенжай: алдымен тізілім, сосын OSM-дағы мекенжай нөмірі, сосын көше атауы (сыртқы серверге жіберілмейді) */
 const KZ = {"ә":"а","ғ":"г","қ":"к","ң":"н","ө":"о","ұ":"у","ү":"у","һ":"х","і":"и","ё":"е","й":"и"};
 function norm(s){ return String(s || "").toLowerCase().replace(/[әғқңөұүһіёй]/g, ch => KZ[ch]).replace(/[.,;:№#"«»()]/g, " ")
   .replace(/(^|\s)(көшесі|кошеси|кошесi|көш|кош|улица|ул|street|st|даңғылы|дангылы|проспект|пр|пр-т|мкр|шағын|шагын|аудан|ауданы|переулок|пер|тұйық|туйык)(?=\s|$)/g, " ").replace(/\s+/g, " ").trim(); }
@@ -1369,8 +1507,8 @@ function addByText(text, quiet){
   return "fail"; }
 $("btnAddr").addEventListener("click", () => { if(!DATA){ status("st3", "Алдымен картаны жүктеңіз.", "err"); return; } const t = $("addr").value; const r = addByText(t, false);
   if(r === "ok"){ $("addr").value = ""; status("st3", "Қосылды.", "ok"); afterHouses(); }
-  else if(r === "street") status("st3", "Көше табылды (сарымен белгіленді), бірақ үй нөмірі картада жоқ. Үйді картадан басыңыз: мекенжай тізілімге сақталады.", "warn");
-  else status("st3", "Табылмады. Көше атауын тексеріңіз немесе үйді картадан басыңыз.", "err"); });
+  else if(r === "street") status("st3", "Көше табылды (сарымен белгіленді), бірақ мекенжай нөмірі картада жоқ. Мекенжайды картадан басыңыз: мекенжай тізілімге сақталады.", "warn");
+  else status("st3", "Табылмады. Көше атауын тексеріңіз немесе мекенжайды картадан басыңыз.", "err"); });
 $("addr").addEventListener("keydown", e => { if(e.key === "Enter") $("btnAddr").click(); });
 $("btnBatch").addEventListener("click", () => { if(!DATA){ status("st3", "Алдымен картаны жүктеңіз.", "err"); return; }
   const lines = $("batch").value.split(/\n/).map(q => q.trim()).filter(Boolean), res = {ok:0, street:[], fail:[]};
@@ -1400,7 +1538,7 @@ const costP = () => ({salN:U.salN, salD:U.salD, hrs:U.hrs, crew:U.crew, drv:U.dr
 
 /* қашықтық кэші: DM[mode].get(a).get(b) — a-дан b-ға көше бойынша, м */
 async function ensureRows(pts, tok, label){
-  let k = 0; const todo = []; for(const m of MODES) for(const p of pts) if(!DM[m].has(p.id)) todo.push([m, p]);
+  let k = 0; const todo = []; for(const m of MODES) for(const p of pts){ const row = DM[m].get(p.id); if(!row || pts.some(q => q !== p && !row.has(q.id))) todo.push([m, p]); }
   for(const [m, p] of todo){ const G = GR[m], node = p.snap[m].node, row = new Map();
     const f = node >= 0 ? NET.dijkstra(G, node).dist : null; for(const q of pts) row.set(q.id, f && q.snap[m].node >= 0 ? f[q.snap[m].node] : Infinity);
     const b = m === "drive" && node >= 0 ? NET.dijkstra(G, node, true).dist : f;
@@ -1417,7 +1555,8 @@ function modeInfo(part){ const pts = part.sol.pts; part.mats = part.mats || {};
   part.info = part.sol.routes.map(r => { const o = {};
     for(const m of MODES){ const D = part.mats[m] || (part.mats[m] = mat(m, pts)), {Dd, Ds} = ROUTE.prepare(D, part.sol.ret);
       const seq = ROUTE.localOpt(ROUTE.nearestNeighbour(r.seq.slice(), Ds), Ds), L = ROUTE.tourLen(seq, Dd);
-      o[m] = L >= 1e7 ? null : {seq, km:L / 1000, min:ROUTE.timeFn(Dd, opts(m, pts, part.sol.ret))(seq)}; }
+      const cap = {walk:U.capW, bike:U.capB, drive:U.capC}[m], load = U.load * seq.length;
+      o[m] = L >= 1e7 || cap <= 0 || load > cap ? null : {seq, km:L / 1000, min:ROUTE.timeFn(Dd, opts(m, pts, part.sol.ret))(seq), load}; }
     return o; }); part.paths = null; }
 function evaluateCand(c){ const Kt = Math.max(0, ...c.parts.map(p => p.info.length)), teams = [];
   for(let j = 0; j < Kt; j++){ const routes = []; let tr = 0;
@@ -1456,30 +1595,33 @@ async function buildCand(K, sub, P0, hs, tok){
 
 let planTok = 0, raf = 0, planTimer = 0, TOP3 = null;
 const P0 = () => ({id:"D", x:depot[0], y:depot[1], snap:DEP});
-const liveHouses = () => HOUSES.filter(hh => hh.snap && hh.snap.walk.node >= 0);
+const liveAll = () => HOUSES.filter(hh => hh.snap && hh.snap.walk.node >= 0);
+function dayHouses(iso){ const d = PLANC.dayNum(iso || U.date); return HOUSES.filter(hh => PLANC.visits(hh, d, d, WD()).length); }
+const liveHouses = () => { const s = new Set(dayHouses().map(h => h.id)); return liveAll().filter(h => s.has(h.id)).slice(0, MAX_DAY); };
 function plan(){ clearTimeout(planTimer); planTimer = setTimeout(runPlan, 120); }
 async function runPlan(){
   const tok = ++planTok; cancelAnimationFrame(raf); if(!DATA) return; const hs = liveHouses();
-  if(!hs.length){ PLAN = null; renderAll(); requestDraw(); status("stOpt", "Картадағы үйлерді басып белгілеңіз."); $("optBar").style.width = "0"; return; }
+  if(!hs.length){ PLAN = null; renderAll(); requestDraw(); status("stOpt", HOUSES.length ? `${fmtDate(U.date)} күні бару жоқ. Күнтізбеден басқа күнді таңдаңыз немесе картадан мекенжай қосыңыз.` : "Картадағы мекенжайларды басып белгілеңіз."); $("optBar").style.width = "0"; return; }
   if(!await ensureRows([P0()].concat(hs), tok)) return;
   const base = await buildCand(U.K, false, P0(), hs, tok); let cur = base, note = "";
   if(U.sub){ const s = await buildCand(U.K, true, P0(), hs, tok); if(tok !== planTok) return;
-    if(s) cur = s; else note = U.mode === "drive" ? "«Тек көлік» режимінде кіші аудан мағынасыз: топ бәрібір көлікпен жүреді." : `Емханадан ${F(U.far)} м-ден алыс, бір-біріне ${F(U.eps)} м-ден жақын кемінде ${U.minPts} үйден тұратын топ табылмады.`; }
+    if(s) cur = s; else note = U.mode === "drive" ? "«Тек көлік» режимінде кіші аудан мағынасыз: топ бәрібір көлікпен жүреді." : `Емханадан ${F(U.far)} м-ден алыс, бір-біріне ${F(U.eps)} м-ден жақын кемінде ${U.minPts} мекенжайдан тұратын топ табылмады.`; }
   PLAN = {base, cur, note}; renderAll(); requestDraw(); startILS(tok); }
-function startILS(tok){ const cur = PLAN.cur, rnd = ROUTE.rng(7), t0 = performance.now(); let stale = 0, it = 0, imp = false;
+function startILS(tok, ms){ ms = ms || 4000; const cur = PLAN.cur, rnd = ROUTE.rng(ms > 4000 ? Date.now() & 0xffff : 7), t0 = performance.now(); let stale = 0, it = 0, imp = false; const before = cur.ev.ok ? cur.ev.Z : Infinity;
   const sols = cur.parts.filter(p => p.sol.routes.length).map(p => p.sol);
   function step(){ if(tok !== planTok || PLAN.cur !== cur) return; const end = performance.now() + 12;
     while(performance.now() < end && sols.length){ it++; const s = sols[Math.floor(rnd() * sols.length)]; if(ROUTE.ilsStep(s, rnd, it % 25 === 0)){ imp = true; stale = 0; } else stale++; }
-    const el = performance.now() - t0; $("optBar").style.width = (50 + 50 * Math.min(1, el / 4000)) + "%";
-    if(el < 4000 && stale < 500){ raf = requestAnimationFrame(step); return; }
+    const el = performance.now() - t0; $("optBar").style.width = (50 + 50 * Math.min(1, el / ms)) + "%";
+    if(el < ms && (stale < 500 || ms > 4000)){ raf = requestAnimationFrame(step); return; }
     if(imp){ cur.parts.forEach(modeInfo); evaluateCand(cur); }
     $("optBar").style.width = "100%"; renderAll(); requestDraw();
-    status("stOpt", `Дайын: ${HOUSES.length} үй, ${cur.teams.length} топ. ЖИ ізденісі: ${F(it)} итерация.`, "ok"); }
+    const gain = before < Infinity && cur.ev.ok ? before - cur.ev.Z : 0;
+    status("stOpt", `Дайын: ${fmtDate(U.date)}, ${cur.houses} мекенжай, ${cur.teams.length} топ. ЖИ ізденісі: ${F(it)} итерация${gain > 0.5 ? `, шығын ${F(gain)} ₸-ға азайды` : ""}.`, "ok"); }
   status("stOpt", "ЖИ бағыттарды жақсартып жатыр…"); raf = requestAnimationFrame(step); }
 
 /* Топ-3: K = 1…8 × {кіші аудансыз, кіші аудандармен}, әрқайсысында жүріс түрі DP арқылы таңдалады */
 $("btnTop3").addEventListener("click", async () => {
-  if(!DATA){ status("stOpt", "Алдымен картаны жүктеңіз.", "err"); return; } const hs = liveHouses(); if(!hs.length){ status("stOpt", "Алдымен үйлерді белгілеңіз.", "err"); return; }
+  if(!DATA){ status("stOpt", "Алдымен картаны жүктеңіз.", "err"); return; } const hs = liveHouses(); if(!hs.length){ status("stOpt", "Алдымен мекенжайларды белгілеңіз.", "err"); return; }
   const tok = ++planTok; cancelAnimationFrame(raf); $("btnTop3").disabled = true;
   try{ if(!await ensureRows([P0()].concat(hs), tok)) return; const Ks = [1, 2, 3, 4, 5, 6, 7, 8].filter(k => k <= hs.length), all = [];
     for(let i = 0; i < Ks.length; i++){ for(const sub of [false, true]){ const c = await buildCand(Ks[i], sub, P0(), hs, tok); if(tok !== planTok) return; if(c && c.ev.ok) all.push(c); }
@@ -1493,11 +1635,11 @@ function modeChips(c){ return c.ev.picks.map((o, j) => { const a = o.clinicMode 
 const candTitle = c => `${c.K} топ · ${c.sub ? "кіші аудандармен" : "емханадан тікелей"}`;
 function renderTop3(){
   if(!TOP3){ $("top3Card").hidden = true; return; } $("top3Card").hidden = false;
-  $("t3Sub").textContent = `${TOP3.n} нұсқа тексерілді · ${HOUSES.length} үй`;
+  $("t3Sub").textContent = `${TOP3.n} нұсқа тексерілді · ${fmtDate(U.date)} · ${TOP3.list[0] ? TOP3.list[0].houses : 0} мекенжай`;
   $("top3").innerHTML = TOP3.list.map((c, i) => { const e = c.ev;
     return `<div class="t3 ${i ? "" : "first"}"><div class="rk">№${i + 1}${e.feasible ? "" : " · ауысымға сыймайды"}</div><div class="ttl">${esc(candTitle(c))}</div>
       <div class="big">${F(e.Z)} ₸<span class="small muted"> / күн</span></div>
-      <div class="rows"><div><span>Бір үйге</span><span>${F(e.kpi.perHouse)} ₸</span></div><div><span>Айына</span><span>${F(e.month / 1e6, 2)} млн ₸</span></div>
+      <div class="rows"><div><span>Бір мекенжайға</span><span>${F(e.kpi.perHouse)} ₸</span></div><div><span>Айына</span><span>${F(e.month / 1e6, 2)} млн ₸</span></div>
       <div><span>Ең ұзақ топ</span><span>${F(e.maxT)} мин</span></div><div><span>Ауысымды пайдалану</span><span>${F(e.kpi.util)} %</span></div><div><span>CO₂</span><span>${F(e.kpi.co2, 1)} кг</span></div></div>
       <div class="modes">${modeChips(c)}</div><button type="button" data-t3="${i}">${i ? "Картада көрсету" : "Картада көрсетілген"}</button></div>`; }).join("");
   const [a, b] = TOP3.list;
@@ -1516,21 +1658,23 @@ function modePath(part, j, m){ const inf = part.info[j] && part.info[j][m]; if(!
 function chosenMode(c, part, j){ const o = c.ev && c.ev.ok ? c.ev.picks[j] : null; if(!o) return null; return part.kind === "sub" ? o.subMode : o.clinicMode; }
 
 /* ---------- нәтиже бөлімдері ---------- */
-function renderAll(){ renderResults(); renderCost(); renderKPI(); }
+function renderAll(){ renderResults(); renderCost(); renderKPI(); renderPDCA(); }
 function renderResults(){
-  const cur = PLAN && PLAN.cur; if(!cur){ ["kpi", "dirTbl", "cmp", "resWarn"].forEach(id => $(id).innerHTML = ""); $("resSub").textContent = "Үй белгіленбеген"; return; }
-  const e = cur.ev; $("resSub").textContent = `${HOUSES.length} үй · ${cur.K} топ · ${cur.sub ? "кіші аудандармен" : "емханадан тікелей"}${U.ret ? "" : " · емханаға қайтпайды"}`;
+  const cur = PLAN && PLAN.cur; if(!cur){ ["kpi", "dirTbl", "cmp", "resWarn"].forEach(id => $(id).innerHTML = ""); $("resSub").textContent = "Мекенжай белгіленбеген"; return; }
+  const e = cur.ev; $("resSub").textContent = `${fmtDate(U.date)} · ${cur.houses} мекенжай · ${cur.K} топ · ${cur.sub ? "кіші аудандармен" : "емханадан тікелей"}${U.ret ? "" : " · емханаға қайтпайды"}`;
   const w = []; if(PLAN.note) w.push(PLAN.note); if(!e.ok) w.push(e.reason);
   else if(!e.feasible) w.push(`Ең ұзақ топ ${F(e.maxT)} мин — топ уақытынан (${F(U.shift)} мин) асады. Топ санын көбейтіңіз, кіші аудандарға бөліңіз немесе «Топ 3» батырмасын басыңыз.`);
-  const un = HOUSES.length - liveHouses().length; if(un) w.push(`${un} үй жолға қосылмады.`);
+  const un = HOUSES.length - liveAll().length; if(un) w.push(`${un} мекенжай жолға қосылмады.`); if(dayHouses().length > MAX_DAY) w.push(`Бұл күні ${dayHouses().length} мекенжай: бір күнде ең көбі ${MAX_DAY} мекенжай жоспарланады. Кестені теңестіріңіз немесе кезеңді өзгертіңіз.`);
   $("resWarn").innerHTML = w.map(t => `<div>${esc(t)}</div>`).join("");
-  $("kpi").innerHTML = e.ok ? [["Үй", F(HOUSES.length)], ["Ең ұзақ топ уақыты", F(e.maxT) + " мин"], ["Күнделікті шығын", F(e.Z) + " ₸"], ["Бір үйге", F(e.kpi.perHouse) + " ₸"]]
+  $("kpi").innerHTML = e.ok ? [["Мекенжай (осы күні)", F(cur.houses)], ["Ең ұзақ топ уақыты", F(e.maxT) + " мин"], ["Күнделікті шығын", F(e.Z) + " ₸"], ["Бір мекенжайға", F(e.kpi.perHouse) + " ₸"]]
     .map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("") : "";
-  let h = `<thead><tr><th>Бағыт</th><th class="n">Үй</th>${MODES.map(m => `<th class="n">${MNAME[m]}<div class="mode-h">км · мин</div></th>`).join("")}<th>Таңдалған</th></tr></thead><tbody>`;
+  let h = `<thead><tr><th>Бағыт</th><th class="n">Мекенжай</th>${MODES.map(m => `<th class="n">${MNAME[m]}<div class="mode-h">км · мин</div></th>`).join("")}<th>Таңдалған</th></tr></thead><tbody>`;
   for(const part of cur.parts){
     if(cur.parts.length > 1 || part.kind === "sub") h += `<tr class="part"><td colspan="6">${esc(part.label)}${part.kind === "sub" ? ` · ортаға көлікпен ${F(part.dTo / 1000, 1)} км (${F(part.dTo / speed("drive"))} мин)` : ""}</td></tr>`;
     part.info.forEach((q, j) => { const ch = chosenMode(cur, part, j);
-      h += `<tr><td>${j + 1}-топ</td><td class="n">${part.sol.routes[j].seq.length}</td>` + MODES.map(m => `<td class="n${ch === m ? " best" : ""}">${q[m] ? `${F(q[m].km, 1)} · ${F(q[m].min)}` : "жол жоқ"}</td>`).join("") +
+      h += `<tr><td>${j + 1}-топ</td><td class="n">${part.sol.routes[j].seq.length}</td>` + MODES.map(m => { const cap = {walk:U.capW, bike:U.capB, drive:U.capC}[m], nr = part.sol.routes[j].seq.length;
+          const why = cap <= 0 ? "қолданылмайды" : U.load * nr > cap ? "жүк сыймайды" : "жол жоқ";
+          return `<td class="n${ch === m ? " best" : ""}">${q[m] ? `${F(q[m].km, 1)} · ${F(q[m].min)}` : `<span class="muted">${why}</span>`}</td>`; }).join("") +
         `<td>${ch ? `<span class="mchip ${ch}">${MNAME[ch]}</span>` : "—"}</td></tr>`; }); }
   $("dirTbl").innerHTML = h + "</tbody>";
   if(cur.sub && PLAN.base && PLAN.base.ev.ok && e.ok){ const a = PLAN.base.ev, b = e, better = b.Z < a.Z && b.feasible;
@@ -1542,10 +1686,10 @@ function renderCost(){
   const cur = PLAN && PLAN.cur, e = cur && cur.ev; if(!e || !e.ok){ ["costKpi", "costTbl", "costFormula"].forEach(id => $(id).innerHTML = ""); $("costSub").textContent = ""; return; }
   const cN = COST.perMin(U.salN, U.hrs) * 60, cD = COST.perMin(U.salD, U.hrs) * 60;
   $("costSub").textContent = `мейірбике ${F(cN)} ₸/сағ · жүргізуші ${F(cD)} ₸/сағ · бензин ${F(U.fuelP)} ₸/л`;
-  $("costKpi").innerHTML = [["Күніне", F(e.Z) + " ₸"], ["Айына (" + U.days + " күн)", F(e.month) + " ₸"], ["Сағаттық шығын", F(e.perHour) + " ₸/сағ"], ["Бір үйге", F(e.kpi.perHouse) + " ₸"]]
+  $("costKpi").innerHTML = [["Күніне", F(e.Z) + " ₸"], ["Айына (" + U.days + " күн)", F(e.month) + " ₸"], ["Сағаттық шығын", F(e.perHour) + " ₸/сағ"], ["Бір мекенжайға", F(e.kpi.perHouse) + " ₸"]]
     .map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
   const nH = j => cur.parts.reduce((s, p) => s + (p.sol.routes[j] ? p.sol.routes[j].seq.length : 0), 0);
-  let h = `<thead><tr><th>Топ</th><th>Жүріс түрі</th><th class="n">Уақыт, сағ</th><th class="n">Мейірбике, ₸</th><th class="n">Жүргізуші, ₸</th><th class="n">Бензин, л</th><th class="n">Бензин, ₸</th><th class="n">Барлығы, ₸</th><th class="n">₸/сағ</th><th class="n">₸/үй</th></tr></thead><tbody>`;
+  let h = `<thead><tr><th>Топ</th><th>Жүріс түрі</th><th class="n">Уақыт, сағ</th><th class="n">Мейірбике, ₸</th><th class="n">Жүргізуші, ₸</th><th class="n">Бензин, л</th><th class="n">Бензин, ₸</th><th class="n">Барлығы, ₸</th><th class="n">₸/сағ</th><th class="n">₸/мекенжай</th></tr></thead><tbody>`;
   e.picks.forEach((o, j) => { const md = [o.clinicMode, o.subMode].filter(Boolean).map(m => `<span class="mchip ${m}">${MNAME[m]}</span>`).join(" "), n = nH(j);
     h += `<tr><td>${j + 1}-топ</td><td>${md}</td><td class="n">${F(o.T / 60, 2)}</td><td class="n">${F(o.staff)}</td><td class="n">${F(o.driver)}</td><td class="n">${F(o.fuelL, 1)}</td><td class="n">${F(o.fuel)}</td>
       <td class="n"><b>${F(o.cost)}</b></td><td class="n">${F(o.cost / (o.T / 60))}</td><td class="n">${n ? F(o.cost / n) : "—"}</td></tr>`; });
@@ -1554,9 +1698,9 @@ function renderCost(){
   $("costTbl").innerHTML = h;
   $("costFormula").textContent = `Z = Σ[c_N·m·T_j + x_j·(c_D·t_j + p·q·ℓ_j/100)] + Σ[c_D·τ_s + p·q·λ_s/100] = ${F(e.staff)} + ${F(e.driver)} + ${F(e.fuel)} = ${F(e.Z)} ₸/күн;  c_N = ${F(U.salN)} ÷ ${U.hrs} = ${F(cN)} ₸/сағ, m = ${U.crew}, p = ${F(U.fuelP)} ₸/л, q = ${F(U.fuelL, 1)} л/100 км`; }
 const KPIS = [
-  {k:"perHouse", l:"Бір үйге шығын", u:"₸", d:0, g:"min", goal:"↓ аз болған жақсы"},
-  {k:"minPerHouse", l:"Бір үйге уақыт", u:"мин", d:1, g:"min", goal:"↓ еңбек өнімділігі"},
-  {k:"kmPerHouse", l:"Бір үйге жол", u:"км", d:2, g:"min", goal:"↓ маршрут тығыздығы"},
+  {k:"perHouse", l:"Бір мекенжайға шығын", u:"₸", d:0, g:"min", goal:"↓ аз болған жақсы"},
+  {k:"minPerHouse", l:"Бір мекенжайға уақыт", u:"мин", d:1, g:"min", goal:"↓ еңбек өнімділігі"},
+  {k:"kmPerHouse", l:"Бір мекенжайға жол", u:"км", d:2, g:"min", goal:"↓ маршрут тығыздығы"},
   {k:"util", l:"Ауысымды пайдалану", u:"%", d:0, g:"util", goal:"≤ 100 %, жоғары жақсы"},
   {k:"balance", l:"Топтар жүктемесінің теңгерімі", u:"%", d:0, g:"max", goal:"↑ 100 % — тең"},
   {k:"co2", l:"CO₂ шығарындысы", u:"кг/күн", d:1, g:"min", goal:"↓ жасыл логистика"}];
@@ -1574,8 +1718,93 @@ function renderKPI(){
     h += `<tr><td>${q.l}</td>${cols.map((x, i) => `<td class="n${bs.has(i) ? " win" : ""}">${F(x.c.ev.kpi[q.k], q.d)} ${q.u}</td>`).join("")}<td class="goal">${q.goal}</td></tr>`; }
   h += `<tr><td>Барлық топ ауысымға сыяды</td>${cols.map(x => `<td class="n">${x.c.ev.feasible ? '<span class="chip ok">иә</span>' : '<span class="chip no">жоқ</span>'}</td>`).join("")}<td class="goal">міндетті шарт</td></tr></tbody>`;
   $("kpiTbl").innerHTML = h;
-  $("kpiWhy").textContent = cols.length > 1 ? `Боялған ұяшық — сол көрсеткіш бойынша ең жақсы нұсқа. Ұтыс саны: ${cols.map((x, i) => `${x.t} — ${wins[i]}`).join("; ")}. Негізгі өлшем — бір үйге шығын (мақсат функциясы Z-тің бір үйге шаққандағы мәні); қалған KPI шешімнің логистикалық сапасын тексереді.`
+  $("kpiWhy").textContent = cols.length > 1 ? `Боялған ұяшық — сол көрсеткіш бойынша ең жақсы нұсқа. Ұтыс саны: ${cols.map((x, i) => `${x.t} — ${wins[i]}`).join("; ")}. Негізгі өлшем — бір мекенжайға шығын (мақсат функциясы Z-тің бір мекенжайға шаққандағы мәні); қалған KPI шешімнің логистикалық сапасын тексереді.`
     : "Нұсқаларды KPI бойынша салыстыру үшін «Топ 3 үздік маршрутты анықтау» батырмасын басыңыз."; }
+
+/* ================================================================ 5. сала, күнтізбе (кезеңділік), үздіксіз жетілдіру */
+const MONTHS = ["қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан"];
+const WDN = ["Дс", "Сс", "Ср", "Бс", "Жм", "Сн", "Жс"];
+const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${d} ${MONTHS[m - 1]}`; };
+let MONTH = null;
+
+/* ---------- сала ---------- */
+function applySectorLabels(){ const S = SECTORS[U.sector] || SECTORS.med; $("lblWorker").textContent = S.worker; $("lblDepot").textContent = S.depot; $("lblUnit").textContent = S.unit;
+  document.querySelectorAll(".unitLbl").forEach(e => e.textContent = S.unit); }
+$("sector").value = U.sector; applySectorLabels();
+$("sector").addEventListener("change", e => { U.sector = e.target.value; const S = SECTORS[U.sector];
+  Object.assign(U, {s0:S.s0, period:S.period, load:S.load, capW:S.capW, capB:S.capB, capC:S.capC}); saveU();
+  ["s0", "load", "capW", "capB", "capC"].forEach(k => $(k).value = U[k]); initBulk(); applySectorLabels(); TOP3 = null; renderTop3(); MONTH = null; renderCal(); plan();
+  status("st1", `Сала: ${S.name}. Мекенжайдағы уақыт ${S.s0} мин, әдепкі кезең — ${PERIODS.find(q => q[0] === S.period)[1].toLowerCase()}, жүк пен сыйымдылық жаңартылды.`, "ok"); });
+bindNum("load", "load", 0, 10000); bindNum("capW", "capW", 0, 100000); bindNum("capB", "capB", 0, 100000); bindNum("capC", "capC", 0, 100000);
+$("sat").checked = U.sat; $("sat").addEventListener("change", e => { U.sat = e.target.checked; saveU(); MONTH = null; renderCal(); renderHouses(); plan(); });
+
+/* ---------- күнтізбе ---------- */
+function monthRange(){ const f = PLANC.dayNum(U.calM), [y, m] = U.calM.split("-").map(Number), last = PLANC.dayNum(new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10)); return [f, last, y, m]; }
+function renderCal(){
+  const [f, last, y, m] = monthRange(), wd = WD(), sch = PLANC.schedule(HOUSES, f, last, wd), today = PLANC.dayNum(localISO()), sel = PLANC.dayNum(U.date);
+  $("calTitle").textContent = `${MONTHS[m - 1]} ${y}`;
+  const maxN = Math.max(1, ...[...sch.values()].map(a => a.length)), off = PLANC.dow(f);
+  let h = WDN.map(n => `<div class="h">${n}</div>`).join("") + `<span aria-hidden="true"></span>`.repeat(off);
+  for(let d = f; d <= last; d++){ const n = (sch.get(d) || []).length, work = wd.includes(PLANC.dow(d)), iso = PLANC.isoOf(d), r = MONTH && MONTH.days.get(d);
+    const bg = n ? `style="background:color-mix(in srgb, var(--accent) ${Math.round(12 + 48 * n / maxN)}%, var(--surface))"` : "";
+    h += `<button type="button" data-day="${iso}" class="${work ? "" : "off"}${d === sel ? " sel" : ""}${d === today ? " today" : ""}${r && !r.feasible ? " over" : ""}" ${bg} aria-label="${fmtDate(iso)}: ${n} мекенжай">
+      <span class="d">${d - f + 1}</span><span class="c">${n ? n + " мек." : work ? "" : "демалыс"}</span>${r ? `<span class="z">${F(r.Z / 1000, 1)} мың ₸</span>` : ""}</button>`; }
+  $("cal").innerHTML = h;
+  const tot = [...sch.values()].reduce((s, a) => s + a.length, 0);
+  $("calSum").textContent = MONTH ? `${MONTHS[m - 1]}: ${F(MONTH.visits)} бару, ${MONTH.nDays} жұмыс күні, шығын ${F(MONTH.Z)} ₸ (бір баруға ${F(MONTH.Z / Math.max(1, MONTH.visits))} ₸), ең ауыр күн ${F(MONTH.maxT)} мин${MONTH.over ? `, ${MONTH.over} күн ауысымға сыймайды` : ""}.`
+    : `${MONTHS[m - 1]}: ${F(tot)} бару жоспарланған. Таңдалған күн: ${fmtDate(U.date)}. Ай бойынша шығынды көру үшін «Айды есептеу» басыңыз.`; }
+$("cal").addEventListener("click", e => { const b = e.target.closest("[data-day]"); if(!b) return; U.date = b.dataset.day; TOP3 = null; renderTop3(); renderCal(); renderHouses(); requestDraw(); plan(); });
+$("calPrev").addEventListener("click", () => shiftMonth(-1)); $("calNext").addEventListener("click", () => shiftMonth(1));
+function shiftMonth(k){ const [y, m] = U.calM.split("-").map(Number), d = new Date(Date.UTC(y, m - 1 + k, 1)); U.calM = d.toISOString().slice(0, 10); MONTH = null; renderCal(); }
+$("btnMonth").addEventListener("click", async () => {
+  if(!DATA){ status("calSum", "Алдымен картаны жүктеңіз.", "err"); return; }
+  const tok = ++planTok; cancelAnimationFrame(raf); const [f, last] = monthRange(), wd = WD(), sch = PLANC.schedule(liveAll(), f, last, wd);
+  if(!sch.size){ status("calSum", "Бұл айда бару жоқ.", "warn"); return; } $("btnMonth").disabled = true;
+  try{
+    const res = {days:new Map(), Z:0, visits:0, nDays:0, maxT:0, over:0}; let i = 0;
+    for(const [d, hs] of [...sch.entries()].sort((a, b) => a[0] - b[0])){
+      if(!await ensureRows([P0()].concat(hs.slice(0, MAX_DAY)), tok, `${fmtDate(PLANC.isoOf(d))}: қашықтық`)) return;
+      const c = await buildCand(U.K, false, P0(), hs.slice(0, MAX_DAY), tok); if(tok !== planTok) return;
+      if(c && c.ev.ok){ res.days.set(d, {Z:c.ev.Z, maxT:c.ev.maxT, feasible:c.ev.feasible, n:hs.length}); res.Z += c.ev.Z; res.visits += hs.length; res.nDays++; res.maxT = Math.max(res.maxT, c.ev.maxT); if(!c.ev.feasible) res.over++; }
+      status("stOpt", `Ай есептелуде: ${++i} / ${sch.size} күн`); $("optBar").style.width = (100 * i / sch.size) + "%"; await tick(); }
+    MONTH = res; renderCal(); status("stOpt", `Ай есептелді (${U.K} топ, жүріс түрі — автоматты). Күнді басып, сол күннің маршрутын көріңіз.`, "ok"); plan(); }
+  finally{ $("btnMonth").disabled = false; } });
+
+/* ---------- үздіксіз жетілдіру: жоспар → орындау → тексеру → түзету ---------- */
+const F_KEY = "dariModel.fact.v1"; let FACTS = lsJSON(F_KEY, []);
+function teamPlanRows(){ const cur = PLAN && PLAN.cur; if(!cur || !cur.ev.ok) return [];
+  return cur.ev.picks.map((o, j) => { let km = 0, n = 0, acc = 0, mixed = false;
+    for(const part of cur.parts){ const inf = part.info[j]; if(!inf) continue; const m = part.kind === "sub" ? o.subMode : o.clinicMode; if(part.kind === "sub") mixed = true;
+      const r = inf[m]; km += r.km; n += r.seq.length; acc += r.seq.reduce((s, k) => s + 2 * (part.sol.pts[k].snap[m].d || 0), 0) / speed("walk"); }
+    const mode = mixed ? "mixed" : o.clinicMode; return {team:j + 1, mode, km, n, acc, plan:o.T}; }); }
+function renderPDCA(){
+  const rows = teamPlanRows(), done = new Set(FACTS.filter(r => r.date === U.date).map(r => r.team));
+  $("factTbl").innerHTML = rows.length ? `<thead><tr><th>Топ</th><th>Жүріс түрі</th><th class="n">Мекенжай</th><th class="n">Жоспар, мин</th><th class="n">Нақты, мин</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${r.team}-топ</td><td>${r.mode === "mixed" ? "аралас (көлік + жаяу)" : `<span class="mchip ${r.mode}">${MNAME[r.mode]}</span>`}</td><td class="n">${r.n}</td><td class="n">${F(r.plan)}</td>
+      <td class="n"><input type="number" min="1" step="1" data-fact="${r.team}" aria-label="${r.team}-топтың нақты уақыты" style="width:84px;text-align:right" placeholder="${done.has(r.team) ? "сақталған" : ""}"></td></tr>`).join("") + "</tbody>"
+    : `<tbody><tr><td class="muted">Таңдалған күнде жоспар жоқ.</td></tr></tbody>`;
+  const cal = PLANC.calibrate(FACTS.filter(r => r.mode !== "mixed"), {walk:0, bike:U.pB, drive:U.pC});
+  const all = FACTS.length ? FACTS.reduce((s, r) => s + Math.abs(r.plan - r.fact) / Math.max(r.fact, 1), 0) / FACTS.length * 100 : NaN;
+  const last = FACTS.slice(-10), mLast = last.length ? last.reduce((s, r) => s + Math.abs(r.plan - r.fact) / Math.max(r.fact, 1), 0) / last.length * 100 : NaN;
+  $("pdcaKpi").innerHTML = [["Жазба саны", F(FACTS.length)], ["Жоспар қатесі (MAPE)", Number.isFinite(all) ? F(all, 1) + " %" : "—"], ["Соңғы 10 жазба", Number.isFinite(mLast) ? F(mLast, 1) + " %" : "—"],
+    ["Калибрлеуден кейін", cal.ok ? F(cal.mapeAfter, 1) + " %" : "—"]].map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  if(!cal.ok){ $("cbTbl").innerHTML = `<tbody><tr><td class="muted">Калибрлеу үшін кемінде 4 жазба керек (әр жүріс түріне кемінде 2). ${cal.need ? `Тағы ${cal.need} жазба қажет.` : ""}</td></tr></tbody>`; $("btnApplyCal").disabled = true; return; }
+  $("btnApplyCal").disabled = false; const cur = {walk:U.vw, bike:U.vb, drive:U.vc};
+  $("cbTbl").innerHTML = `<thead><tr><th>Параметр</th><th class="n">Қазіргі</th><th class="n">Нақтыдан бағаланған</th></tr></thead><tbody>` +
+    cal.modes.map(m => `<tr><td>${MNAME[m]} жылдамдығы, км/сағ</td><td class="n">${F(cur[m], 1)}</td><td class="n">${cal.speed[m] ? F(cal.speed[m], 1) : "—"}</td></tr>`).join("") +
+    `<tr><td>Мекенжайдағы уақыт, мин</td><td class="n">${F(U.s0, 1)}</td><td class="n">${F(cal.s0, 1)}</td></tr><tr><td>Жоспардың жүйелі ауытқуы</td><td class="n" colspan="2">${F(cal.bias, 1)} % ${cal.bias > 0 ? "(жоспар ұзағырақ)" : "(жоспар қысқарақ)"}</td></tr></tbody>`;
+  $("btnApplyCal").onclick = () => { cal.modes.forEach(m => { if(cal.speed[m]){ const k = {walk:"vw", bike:"vb", drive:"vc"}[m]; U[k] = Math.round(cal.speed[m] * 10) / 10; $(k).value = U[k]; } });
+    U.s0 = Math.round(cal.s0 * 10) / 10; $("s0").value = U.s0; saveU(); TOP3 = null; renderTop3(); MONTH = null; renderCal(); plan();
+    status("stFact", "Калибрленген мәндер қолданылды: келесі жоспарлар осы мәндермен құрылады.", "ok"); }; }
+$("btnFact").addEventListener("click", () => { const rows = teamPlanRows(); let n = 0;
+  document.querySelectorAll("#factTbl [data-fact]").forEach(inp => { const v = +inp.value; if(!(v > 0)) return; const r = rows.find(q => q.team === +inp.dataset.fact); if(!r) return;
+    FACTS = FACTS.filter(q => !(q.date === U.date && q.team === r.team)); FACTS.push(Object.assign({date:U.date, fact:v, K:rows.length}, r)); n++; });
+  lsSet(F_KEY, JSON.stringify(FACTS)); status("stFact", n ? `${n} жазба сақталды (${fmtDate(U.date)}).` : "Нақты уақытты енгізіңіз.", n ? "ok" : "err"); renderPDCA(); });
+$("btnFactCsv").addEventListener("click", async () => { const csv = "date,team,mode,addresses,km,access_min,plan_min,fact_min\n" + FACTS.map(r => [r.date, r.team, r.mode, r.n, r.km.toFixed(3), r.acc.toFixed(1), r.plan.toFixed(1), r.fact].join(",")).join("\n");
+  try{ await navigator.clipboard.writeText(csv); status("stFact", "CSV көшірілді: Excel-ге қойыңыз.", "ok"); }catch(e){ status("stFact", "Көшіру мүмкін болмады.", "err"); } });
+$("btnFactClr").addEventListener("click", () => { const b = $("btnFactClr"); if(b.dataset.c !== "1"){ b.dataset.c = "1"; b.textContent = "Иә, өшіру"; setTimeout(() => { b.dataset.c = ""; b.textContent = "Жазбаларды өшіру"; }, 4000); return; }
+  b.dataset.c = ""; b.textContent = "Жазбаларды өшіру"; FACTS = []; lsSet(F_KEY, "[]"); renderPDCA(); });
+$("btnLong").addEventListener("click", () => { if(!PLAN || !PLAN.cur) return; const tok = ++planTok; cancelAnimationFrame(raf); startILS(tok, 30000); });
 
 /* ================================================================ айнымалылар және модельге жіберу */
 function ensureRES(){ if(RES || !DATA) return RES; RES = NET.analyze(DATA, U.R, {depot}); renderVars(); return RES; }
@@ -1589,7 +1818,7 @@ const DEFAULT_MODEL = {v:1, isExample:true, seed:7, territory:{L:8, W:5, cx:2, c
   drugs:[{group:"G1", name:"Дәрі 1", packs:2}], params:{walk:4.5, s0:8, p:0.08, k:0.7124, phi:1.273, beta:0, norm:3, z:1.645, veh:20, shift:360, vcount:1, C:25, cfix:1500, cn:2500, cd:1800, ckm:80, co2:0.231, safety:2,
   ring:0, tau_sat:10, pick_share:0.3, pick_q:2, pick_min:120, pick_s1:3}, weights:{cost:3, staff:2, co2:1, delay:2, cont:1}, mapMethod:"AUTO"};
 $("btnSend").addEventListener("click", () => { if(!DATA){ status("st5", "Алдымен картаны жүктеңіз.", "err"); return; }
-  if(!PLAN){ status("st5", "Алдымен үйлерді белгілеңіз: аймақтар бағыттардан құрылады.", "err"); return; } ensureRES();
+  if(!PLAN){ status("st5", "Алдымен мекенжайларды белгілеңіз: аймақтар бағыттардан құрылады.", "err"); return; } ensureRES();
   let S = lsJSON(STORE_KEY, null); if(!S || !S.params) S = JSON.parse(JSON.stringify(DEFAULT_MODEL));
   const R = U.R, km = v => Math.round(v / 10) / 100, val = k => (RES.vars.find(q => q.key === k) || {}).value, delta = val("delta") || 100;
   const g0 = S.groups[0] || {id:"G1", alpha:0.6, tau:31}, tmpl = S.areas[0] || {B:U.shift, f:5}, fD = +tmpl.f || 5;
@@ -1623,7 +1852,7 @@ function demoOSM(lat0, lon0){
   return {elements:el, _demo:true}; }
 
 /* ================================================================ іске қосу */
-renderHouses(); renderAll(); requestDraw();
+renderHouses(); renderAll(); renderCal(); requestDraw();
 cacheGet().then(c => { if(DATA) return;
   if(c && c.osm){ $("coord").value = `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`; setR(c.R / 1000); setupData(c.osm, c.lat, c.lon, c.R, c.bLoaded, false); }
   else status("st1", "Орынды енгізіңіз не картадан таңдаңыз, радиусты бекітіп, «Картаны жүктеу» басыңыз."); });
