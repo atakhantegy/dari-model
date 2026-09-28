@@ -161,7 +161,7 @@ a.btn{font-size:13px;text-decoration:none;border:1px solid var(--line);backgroun
 a.btn:hover{border-color:var(--accent)}
 .app{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:14px}
 @media (min-width:1080px){.app{grid-template-columns:360px minmax(0,1fr)} .side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:2px}}
-@media (max-width:1079px){.app>.side,.app>.mainc{display:contents} #p1{order:1} #mapCard{order:2} #p3{order:3} #p4{order:4} #p5{order:5} #resCard{order:6} #more{order:7}}
+@media (max-width:1079px){.app>.side,.app>.mainc{display:contents} #p1{order:1} #mapCard{order:2} #p3{order:3} #p4{order:4} #top3Card{order:5} #resCard{order:6} #costCard{order:7} #kpiCard{order:8} #p6{order:9} #p5{order:10} #more{order:11}}
 .side,.mainc{display:flex;flex-direction:column;gap:12px;min-width:0}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
 .panel h2{display:flex;gap:8px;align-items:center;font-size:16px}
@@ -215,6 +215,33 @@ textarea.batch{min-height:80px}
 .cmp .kpi b{font-family:var(--f-cond);font-size:13px;display:block;margin-bottom:4px}
 .cmp .kpi div{font-size:12.5px;color:var(--ink2);display:flex;justify-content:space-between;gap:8px}
 .cmp .kpi div span:last-child{font-family:var(--f-mono)}
+:root{ --mw:#2E9A56; --mb:#2A6FD6; --mc:#D9480F; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --mw:#4CC37A; --mb:#5B9BF0; --mc:#F2773D; } }
+:root[data-theme="dark"]{ --mw:#4CC37A; --mb:#5B9BF0; --mc:#F2773D; }
+body{background:var(--bg)}
+.theme{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.theme button{border:0;border-radius:0;padding:6px 11px}
+.theme button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12.5px;color:var(--ink2);align-items:center}
+.legend label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.legend input{accent-color:var(--accent)}
+.lw{display:inline-block;width:22px;border-radius:3px}
+.mchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;color:#fff}
+.mchip.walk{background:var(--mw)} .mchip.bike{background:var(--mb)} .mchip.drive{background:var(--mc)}
+.top3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+@media (max-width:900px){.top3{grid-template-columns:minmax(0,1fr)}}
+.t3{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface2)}
+.t3.first{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.t3 .rk{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.t3 .ttl{font-family:var(--f-cond);font-weight:600;font-size:16px}
+.t3 .big{font-family:var(--f-mono);font-size:20px;font-weight:500}
+.t3 .rows{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--ink2)}
+.t3 .rows div{display:flex;justify-content:space-between;gap:8px}
+.t3 .rows span:last-child{font-family:var(--f-mono)}
+.t3 .modes{display:flex;flex-wrap:wrap;gap:4px}
+.kpit td.goal{font-size:12px;color:var(--muted)}
+td.win{background:var(--accent-soft);font-weight:600}
+.formula{font-family:var(--f-mono);font-size:12.5px;background:var(--surface2);border:1px solid var(--line2);border-radius:8px;padding:10px;overflow-x:auto;white-space:nowrap;margin-top:10px}
 </style>
 
 <div class="wrap">
@@ -222,9 +249,12 @@ textarea.batch{min-height:80px}
     <div>
       <div class="eyebrow">Д-есептегі пациенттерге дәріні үйге жеткізу</div>
       <h1>Дәрі жеткізу маршруты</h1>
-      <p>Орынды белгілеңіз, радиусты бекітіңіз, жеткізетін үйлерді картадан басыңыз. Жүйе көше бойынша ең тиімді бағыттарды өзі құрады.</p>
+      <p>Орынды белгілеңіз, радиусты бекітіңіз, жеткізетін үйлерді картадан басыңыз. Жүйе көше бойынша бағыттарды құрып, шығын мен KPI арқылы ең тиімдісін таңдайды.</p>
     </div>
-    <div class="tools"><a class="btn" href="model.html">Формулалар моделі →</a></div>
+    <div class="tools">
+      <div class="theme" role="group" aria-label="Фон"><button type="button" id="thL">Ашық фон</button><button type="button" id="thD">Қараңғы фон</button></div>
+      <a class="btn" href="model.html">Формулалар моделі →</a>
+    </div>
   </header>
 
   <div class="app">
@@ -262,9 +292,10 @@ textarea.batch{min-height:80px}
       <div class="panel off" id="p4">
         <h2><span class="stepn">3</span>Жеткізуші топ саны</h2>
         <div class="seg" id="kSeg" role="group" aria-label="Жеткізуші топ саны"></div>
-        <p class="hint">Бір топ — бір бағыт. Топ саны өзгерсе, үйлер бағыттарға қайта бөлінеді.</p>
+        <p class="hint">Бір топ — бір бағыт. Әр бағыттың жүріс түрін жүйе шығын бойынша өзі таңдайды.</p>
+        <button type="button" id="btnTop3" class="primary">Топ 3 үздік маршрутты анықтау</button>
         <div class="fields">
-          <div class="fld"><label for="mode">Картадағы жүріс түрі</label><select id="mode"><option value="walk">Жаяу</option><option value="bike">Велосипед</option><option value="drive">Көлік</option></select></div>
+          <div class="fld"><label for="mode">Жүріс түрі</label><select id="mode"><option value="auto">Автоматты (ең тиімді)</option><option value="walk">Тек жаяу</option><option value="bike">Тек велосипед</option><option value="drive">Тек көлік</option></select></div>
           <div class="fld"><label for="shift">Топ уақыты <span class="u">(мин/күн)</span></label><input id="shift" type="number" min="30" max="720" step="10"></div>
         </div>
         <label class="chk"><input type="checkbox" id="ret"> Соңында емханаға қайтады</label>
@@ -279,9 +310,26 @@ textarea.batch{min-height:80px}
           </div></details>
       </div>
 
+      <div class="panel off" id="p6">
+        <h2><span class="stepn">4</span>Шығын нормалары</h2>
+        <div class="fields">
+          <div class="fld"><label for="salN">Мейірбике айлығы <span class="u">₸/ай</span></label><input id="salN" type="number" min="0" step="5000"></div>
+          <div class="fld"><label for="salD">Жүргізуші айлығы <span class="u">₸/ай</span></label><input id="salD" type="number" min="0" step="5000"></div>
+          <div class="fld"><label for="hrs">Айлық жұмыс уақыты <span class="u">сағ</span></label><input id="hrs" type="number" min="40" max="300" step="1"></div>
+          <div class="fld"><label for="crew">Топтағы адам</label><input id="crew" type="number" min="1" max="5" step="1"></div>
+          <div class="fld"><label for="fuelP">Бензин АИ-92 <span class="u">₸/л</span></label><input id="fuelP" type="number" min="0" step="1"></div>
+          <div class="fld"><label for="fuelL">Көлік шығыны <span class="u">л/100 км</span></label><input id="fuelL" type="number" min="1" max="40" step="0.5"></div>
+          <div class="fld"><label for="cars">Қызметтік көлік <span class="u">дана</span></label><input id="cars" type="number" min="0" max="10" step="1"></div>
+          <div class="fld"><label for="bikes">Велосипед <span class="u">дана</span></label><input id="bikes" type="number" min="0" max="20" step="1"></div>
+          <div class="fld"><label for="days">Айына жеткізу күні</label><input id="days" type="number" min="1" max="31" step="1"></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="drv"> Көлікті бөлек жүргізуші жүргізеді</label>
+        <p class="hint">Бензин бағасы: Түркістан, 14.09.2026, 232 ₸/л (nur.kz). Айлық — ел бойынша орташа деңгейге жақын бастапқы мән (2024 жылы орта медперсонал ≈ 292 800 ₸), өз мәніңізді жазыңыз.</p>
+      </div>
+
       <div class="panel off" id="p5">
-        <h2><span class="stepn">4</span>Кіші аудандар</h2>
-        <p class="hint">Алыста бір-біріне жақын үйлер көп болса, жүйе кіші аудан мен оның ортасын табады. Қызметтік көлік топты сол ортаға жеткізеді, топ жоғарыдағы бағыт санымен жаяу таратады.</p>
+        <h2><span class="stepn">5</span>Кіші аудандар</h2>
+        <p class="hint">Алыста бір-біріне жақын үйлер көп болса, жүйе кіші аудан мен оның ортасын табады. Қызметтік көлік топты ортаға апарып тастайды да, кейін қайта алып келеді.</p>
         <button type="button" id="btnSub" aria-pressed="false">Кіші аудандарға бөлу</button>
         <details class="help"><summary class="small" style="cursor:pointer;color:var(--accent)">Бөлу шарттары</summary>
           <div class="fields three" style="margin-top:8px">
@@ -312,8 +360,20 @@ textarea.batch{min-height:80px}
           <div class="scale"><span id="scaleT"></span><i id="scaleB"></i></div>
           <div class="attr">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></div>
         </div>
+        <div class="legend" id="modeLegend">
+          <label><input type="checkbox" data-m="walk"><span class="lw" style="height:10px;background:var(--mw)"></span>Жаяу</label>
+          <label><input type="checkbox" data-m="bike"><span class="lw" style="height:6px;background:var(--mb)"></span>Велосипед</label>
+          <label><input type="checkbox" data-m="drive"><span class="lw" style="height:2.5px;background:var(--mc)"></span>Көлік</label>
+          <span>Қанық сызық — таңдалған түрі; үйдегі сан — топ нөмірі</span>
+        </div>
         <div class="progress" aria-hidden="true"><i id="optBar"></i></div>
         <p class="status" id="stOpt"></p>
+      </article>
+
+      <article class="card" id="top3Card" hidden>
+        <div class="card-h"><h2>Топ 3 үздік маршрут</h2><span class="small muted" id="t3Sub"></span></div>
+        <div class="top3" id="top3"></div>
+        <p class="hint" style="margin-top:8px" id="t3Why"></p>
       </article>
 
       <article class="card" id="resCard">
@@ -322,7 +382,20 @@ textarea.batch{min-height:80px}
         <div class="warns" id="resWarn"></div>
         <div class="tbl"><table id="dirTbl"></table></div>
         <div id="cmp"></div>
-        <p class="hint" style="margin-top:8px">Уақыт = көше бойынша жол ÷ жылдамдық + үй саны × (үйдегі уақыт + тоқтату) + көшеден есікке дейін жаяу. Әр жүріс түрі үшін үйлердің реті бөлек оңтайландырылады. ● — сол бағыттағы ең жылдам түрі.</p>
+        <p class="hint" style="margin-top:8px">Уақыт = көше бойынша жол ÷ жылдамдық + үй саны × (үйдегі уақыт + тоқтату) + көшеден есікке дейін жаяу. Әр жүріс түрі үшін үйлердің реті бөлек оңтайландырылады.</p>
+      </article>
+
+      <article class="card" id="costCard">
+        <div class="card-h"><h2>Шығындар</h2><span class="small muted" id="costSub"></span></div>
+        <div class="kpis k4" id="costKpi"></div>
+        <div class="tbl"><table id="costTbl"></table></div>
+        <div class="formula" id="costFormula"></div>
+      </article>
+
+      <article class="card" id="kpiCard">
+        <div class="card-h"><h2>KPI жүйесі</h2><span class="small muted">логистикалық негізгі көрсеткіштер</span></div>
+        <div class="tbl"><table class="kpit" id="kpiTbl"></table></div>
+        <p class="hint" style="margin-top:8px" id="kpiWhy"></p>
       </article>
 
       <details class="more" id="more">
@@ -339,7 +412,7 @@ textarea.batch{min-height:80px}
 
   <footer>
     <div>Карта деректері: © OpenStreetMap қатысушылары, ODbL. Шағын елді мекендерде кейбір үйлер мен жолдар сызылмаған болуы мүмкін.</div>
-    <div>Әдістер: Dijkstra (көше бойынша қашықтық), бұрыштық бөлу + жақын көрші + 2-opt + Or-opt + топаралық ауыстыру + ILS (бағыттар), DBSCAN және желідегі 1-медиана (кіші аудандар). Пациенттің аты-жөні мен ЖСН енгізілмейді; үйлер мен мекенжайлар тек осы браузерде сақталады.</div>
+    <div>Әдістер: Dijkstra (көше бойынша қашықтық), бұрыштық бөлу + жақын көрші + 2-opt + Or-opt + топаралық ауыстыру + ILS (бағыттар), динамикалық бағдарлама (жүріс түрін тағайындау), DBSCAN және желідегі 1-медиана (кіші аудандар). Пациенттің аты-жөні мен ЖСН енгізілмейді; үйлер мен мекенжайлар тек осы браузерде сақталады.</div>
   </footer>
 </div>
 
@@ -894,6 +967,89 @@ return {rng, prepare, tourLen, twoOpt, orOpt, localOpt, nearestNeighbour, sweep,
 
 </script>
 <script>
+/* ======================================================================
+   COST — бағыттардың ақшалай шығыны, жүріс түрін таңдау және KPI.
+   Мақсат функциясы (күніне, ₸):
+     Z = Σ_j [ c_N·m·T_j + x_j·(c_D·t_j + p·q·ℓ_j/100) ] + Σ_s [ c_D·τ_s + p·q·λ_s/100 ]
+   Шектеулер: T_j ≤ B (топ уақыты),  Σ_j x_j ≤ N_көлік − [кіші аудан бар],  Σ_j y_j ≤ N_велосипед.
+   Мұнда c_N, c_D — мейірбике мен жүргізушінің минуттық бағасы (айлық ÷ айлық сағат ÷ 60),
+   m — топтағы адам, T_j — j-топтың жалпы уақыты, t_j, ℓ_j — көлікпен жүрген уақыт пен жол,
+   p — бензин бағасы, q — 100 км-ге шығын, τ_s, λ_s — кіші аудан ортасына жеткізу уақыты мен жолы,
+   x_j, y_j — j-топ көлікті / велосипедті пайдаланса 1.
+   ====================================================================== */
+const COST = (() => {
+"use strict";
+const MODES = ["walk", "bike", "drive"], CO2_PER_L = 2.31;   // кг CO₂ / л бензин
+const perMin = (salary, hours) => salary / Math.max(hours, 1) / 60;
+
+/* бір топтың нұсқалары: routes = [{kind:"clinic"|"sub", m:{walk:{min,km}|null, bike:..., drive:...}}] */
+function teamOptions(routes, transferMin, p, allowed){
+  const clinic = routes.filter(r => r.kind === "clinic"), sub = routes.filter(r => r.kind === "sub");
+  const cModes = clinic.length ? MODES.filter(m => allowed.includes(m) && clinic.every(r => r.m[m])) : [null];
+  // кіші аудан ішінде топ жаяу жүреді: көлік топты ортаға апарады да, қайта алып кетеді
+  const sModes = sub.length ? ["walk"].filter(m => sub.every(r => r.m[m])) : [null];
+  const cN = perMin(p.salN, p.hrs), cD = perMin(p.salD, p.hrs), out = [];
+  for(const cm of cModes) for(const sm of sModes){
+    let T = transferMin, drvMin = 0, drvKm = 0; const km = {walk:0, bike:0, drive:0};
+    for(const r of clinic){ T += r.m[cm].min; km[cm] += r.m[cm].km; if(cm === "drive"){ drvMin += r.m[cm].min; drvKm += r.m[cm].km; } }
+    for(const r of sub){ T += r.m[sm].min; km[sm] += r.m[sm].km; }
+    const staff = cN * p.crew * T, driver = p.drv ? cD * drvMin : 0, fuelL = drvKm * p.fuelL / 100, fuel = fuelL * p.fuelP;
+    out.push({clinicMode:cm, subMode:sm, T, staff, driver, fuelL, fuel, cost:staff + driver + fuel, km,
+      car:cm === "drive" ? 1 : 0, bike:(cm === "bike" || sm === "bike") ? 1 : 0});
+  }
+  return out;
+}
+/* топтарға жүріс түрін тағайындау: динамикалық бағдарлама (көлік, велосипед саны бойынша күй) — дәл оптимум */
+function choose(teams, capCar, capBike, shift){
+  let states = new Map([["0,0", {cost:0, pen:0, picks:[]}]]);
+  for(const opts of teams){ const next = new Map();
+    for(const [key, s] of states){ const [c, b] = key.split(",").map(Number);
+      for(const o of opts){ const c2 = c + o.car, b2 = b + o.bike; if(c2 > capCar || b2 > capBike) continue;
+        const pen = s.pen + Math.max(0, o.T - shift), cost = s.cost + o.cost, k = c2 + "," + b2, cur = next.get(k);
+        if(!cur || pen < cur.pen - 1e-9 || (Math.abs(pen - cur.pen) <= 1e-9 && cost < cur.cost)) next.set(k, {cost, pen, picks:s.picks.concat([o])}); } }
+    states = next; if(!states.size) return null; }
+  let best = null; for(const s of states.values()) if(!best || s.pen < best.pen - 1e-9 || (Math.abs(s.pen - best.pen) <= 1e-9 && s.cost < best.cost)) best = s;
+  return {cost:best.cost, over:best.pen, picks:best.picks, feasible:best.pen <= 1e-9};
+}
+/* толық баға және KPI */
+function evaluate(teams, transfers, p, allowed, houses){
+  const hasSub = transfers.length > 0, capCar = p.cars - (hasSub ? 1 : 0);
+  if(capCar < 0) return {ok:false, reason:"Кіші аудан үшін қызметтік көлік керек (көлік саны 0)."};
+  const opts = teams.map(t => teamOptions(t.routes, t.transferMin, p, allowed));
+  if(opts.some(o => !o.length)) return {ok:false, reason:"Кейбір бағытта таңдалған жүріс түріне жол жоқ."};
+  const ch = choose(opts, capCar, Math.max(0, p.bikes), p.shift); if(!ch) return {ok:false, reason:"Көлік/велосипед саны жеткіліксіз."};
+  const cD = perMin(p.salD, p.hrs); let trCost = 0, trFuelL = 0, trKm = 0, trDrv = 0;
+  for(const t of transfers){ trKm += t.km; trFuelL += t.km * p.fuelL / 100; trDrv += p.drv ? cD * t.min : 0; }
+  trCost = trDrv + trFuelL * p.fuelP;
+  const T = ch.picks.map(o => o.T), sum = T.reduce((a, b) => a + b, 0), maxT = Math.max(0, ...T), minT = Math.min(...T);
+  const staff = ch.picks.reduce((a, o) => a + o.staff, 0), driver = ch.picks.reduce((a, o) => a + o.driver, 0) + trDrv;
+  const fuelL = ch.picks.reduce((a, o) => a + o.fuelL, 0) + trFuelL, fuel = fuelL * p.fuelP, Z = ch.cost + trCost;
+  const km = {walk:0, bike:0, drive:trKm}; ch.picks.forEach(o => MODES.forEach(m => km[m] += o.km[m]));
+  const kmAll = km.walk + km.bike + km.drive, service = houses * (p.s0 || 0);
+  const kpi = {
+    perHouse:houses ? Z / houses : NaN,           // ₸ / үй
+    minPerHouse:houses ? sum / houses : NaN,      // топ-мин / үй
+    kmPerHouse:houses ? kmAll / houses : NaN,     // км / үй
+    util:p.shift ? maxT / p.shift * 100 : NaN,    // ауысымды пайдалану, %
+    balance:maxT ? minT / maxT * 100 : 100,       // жүктеме теңгерімі, %
+    productive:sum ? service / sum * 100 : NaN,   // үйдегі (пайдалы) уақыт үлесі, %
+    co2:fuelL * CO2_PER_L                          // кг / күн
+  };
+  return {ok:true, feasible:ch.feasible, over:ch.over, Z, staff, driver, fuel, fuelL, perHour:sum ? Z / (sum / 60) : NaN, month:Z * p.days,
+    T, maxT, sum, km, kmAll, picks:ch.picks, transfers:{km:trKm, cost:trCost}, kpi};
+}
+/* салыстыру: алдымен орындалатыны, сосын Z, сосын ең ұзақ топ */
+function rank(a, b){ if(a.ev.ok !== b.ev.ok) return a.ev.ok ? -1 : 1; if(!a.ev.ok) return 0;
+  if(a.ev.feasible !== b.ev.feasible) return a.ev.feasible ? -1 : 1;
+  if(!a.ev.feasible) return a.ev.over - b.ev.over;
+  return (a.ev.Z - b.ev.Z) || (a.ev.maxT - b.ev.maxT); }
+
+return {MODES, CO2_PER_L, perMin, teamOptions, choose, evaluate, rank};
+})();
+
+
+</script>
+<script>
 (function(){
 "use strict";
 const $ = id => document.getElementById(id);
@@ -904,9 +1060,11 @@ const MAX_H = 150, B_AUTO_R = 1500, CELL = 1000;
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
 const lsJSON = (k, d) => { try{ return JSON.parse(lsGet(k)) || d; }catch(e){ return d; } };
-const DEF = {lat:AYAN[0], lon:AYAN[1], R:1500, K:1, mode:"walk", ret:true, shift:240, vw:4.5, vb:12, vc:20, s0:8, pB:0.5, pC:1.5,
-  sub:false, far:1500, eps:450, minPts:3, layers:{bg:false, cross:true, inter:false}};
-const U = (() => { const t = lsJSON(ST_KEY, {}), u = Object.assign({}, DEF, t); u.layers = Object.assign({}, DEF.layers, t.layers || {}); u.sub = false; return u; })();
+const DEF = {lat:AYAN[0], lon:AYAN[1], R:1500, K:1, mode:"auto", ret:true, shift:240, vw:4.5, vb:12, vc:20, s0:8, pB:0.5, pC:1.5,
+  sub:false, far:1500, eps:450, minPts:3, layers:{bg:false, cross:true, inter:false}, vis:{walk:true, bike:true, drive:true},
+  salN:300000, salD:250000, hrs:168, crew:1, drv:true, fuelP:232, fuelL:10, cars:1, bikes:2, days:22};
+const U = (() => { const t = lsJSON(ST_KEY, {}), u = Object.assign({}, DEF, t); u.layers = Object.assign({}, DEF.layers, t.layers || {}); u.vis = Object.assign({}, DEF.vis, t.vis || {});
+  if(t.v !== 4){ u.mode = "auto"; u.v = 4; } u.sub = false; return u; })();
 const saveU = () => lsSet(ST_KEY, JSON.stringify(U));
 const NF = [0, 1, 2, 3].map(d => new Intl.NumberFormat("ru-RU", {maximumFractionDigits:d, minimumFractionDigits:d}));
 const F = (v, d) => Number.isFinite(v) ? NF[d || 0].format(v) : "—";
@@ -921,6 +1079,10 @@ let depot = [0, 0], HOUSES = [], PLAN = null, mapMode = "house", pendingAddr = n
 const DM = {walk:new Map(), bike:new Map(), drive:new Map()}, PATHS = new Map();
 const V = {x:0, y:0, s:0.1};
 let drawQ = 0, bTimer = 0;
+/* фон: ашық (әдепкі) не қараңғы */
+function applyTheme(t){ document.documentElement.setAttribute("data-theme", t); $("thL").setAttribute("aria-pressed", String(t === "light")); $("thD").setAttribute("aria-pressed", String(t === "dark")); lsSet("dariModel.theme", t); if(typeof requestDraw === "function") requestDraw(); }
+applyTheme(lsGet("dariModel.theme") === "dark" ? "dark" : "light");
+$("thL").addEventListener("click", () => applyTheme("light")); $("thD").addEventListener("click", () => applyTheme("dark"));
 
 /* ================================================================ 1. орын және радиус */
 function parseCoord(s){ const m = String(s || "").match(/-?\d+(?:[.,]\d+)?/g); if(!m || m.length < 2) return null;
@@ -976,7 +1138,7 @@ function setupData(osm, lat, lon, R, bLoaded, fresh){
     LAY = buildLayers(DATA); BIDX = new Map(); DATA.blds.forEach((b, i) => bIndexAdd(b, i));
     RES = null; $("varTbl").innerHTML = ""; $("warns").innerHTML = "";
     depot = [0, 0]; computeDepot();
-    ["p3", "p4", "p5"].forEach(id => $(id).classList.remove("off"));
+    ["p3", "p4", "p5", "p6"].forEach(id => $(id).classList.remove("off"));
     const tg = $("tagData"); tg.hidden = false; tg.classList.toggle("demo", !!osm._demo);
     tg.textContent = osm._demo ? "Мысал: ойдан құрылған аудан" : `OSM · R ${F(R / 1000, 1)} км`;
     fitView(); restoreHouses();
@@ -1053,11 +1215,12 @@ function draw(){
         if(hh.length >= 3){ hp.moveTo(hh[0][0], hh[0][1]); hh.slice(1).forEach(q => hp.lineTo(q[0], q[1])); hp.closePath();
           ctx.fillStyle = c("--m-sub"); ctx.fill(hp); ctx.strokeStyle = c("--m-sub-edge"); ctx.lineWidth = px(1.5); ctx.setLineDash([px(6), px(4)]); ctx.stroke(hp); ctx.setLineDash([]); }
         if(!part.vpath) part.vpath = legPath("drive", DEP.drive.node, part.center.snap.drive.node);
-        ctx.strokeStyle = c("--ink2"); ctx.lineWidth = px(3); ctx.setLineDash([px(9), px(6)]); ctx.stroke(part.vpath); ctx.setLineDash([]); }
-      for(const part of PLAN.cur.parts){ if(!part.sol) continue;
-        part.sol.routes.forEach((r, j) => { if(!r.path || r.dirty){ r.path = routePath(part, r); r.dirty = false; }
-          ctx.strokeStyle = c("--m-bg"); ctx.globalAlpha = .9; ctx.lineWidth = px(7.5); ctx.stroke(r.path);
-          ctx.strokeStyle = c(`--c${(j % 8) + 1}`); ctx.globalAlpha = .95; ctx.lineWidth = px(4); ctx.stroke(r.path); ctx.globalAlpha = 1; }); } }
+        ctx.strokeStyle = c("--mc"); ctx.lineWidth = px(3); ctx.setLineDash([px(9), px(6)]); ctx.stroke(part.vpath); ctx.setLineDash([]); }
+      const MW = {walk:10, bike:6, drive:2.5}, MC = {walk:c("--mw"), bike:c("--mb"), drive:c("--mc")};
+      for(const part of PLAN.cur.parts){ if(!part.info) continue; if(!part.paths) part.paths = part.info.map((_, j) => ({}));
+        part.info.forEach((_, j) => { const ch = chosenMode(PLAN.cur, part, j);
+          for(const m of MODES){ if(!U.vis[m]) continue; const pp = part.paths[j][m] !== undefined ? part.paths[j][m] : (part.paths[j][m] = modePath(part, j, m)); if(!pp) continue;
+            ctx.strokeStyle = MC[m]; ctx.globalAlpha = m === ch ? 1 : .6; ctx.lineWidth = px(MW[m]); ctx.stroke(pp); ctx.globalAlpha = 1; } }); } }
     const big = new Path2D(), R = U.R, W2 = Math.max(w, h) / s * 4; big.rect(V.x - W2, V.y - W2, 2 * W2, 2 * W2); big.moveTo(R, 0); big.arc(0, 0, R, 0, Math.PI * 2, true);
     ctx.fillStyle = c("--m-dim"); ctx.fill(big, "evenodd");
   }
@@ -1069,12 +1232,13 @@ function draw(){
     ctx.fillStyle = c("--m-cross"); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 1.5;
     for(const q of DATA.xr){ const p = on(q.x, q.y); if(!p) continue; ctx.beginPath(); ctx.moveTo(p[0], p[1] - 7); ctx.lineTo(p[0] + 7, p[1]); ctx.lineTo(p[0], p[1] + 7); ctx.lineTo(p[0] - 7, p[1]); ctx.closePath(); ctx.fill(); ctx.stroke(); } }
   // үйлер: бағыт түсімен, нөмірімен
-  const col = new Map(); if(PLAN && PLAN.cur) for(const part of PLAN.cur.parts) if(part.sol) part.sol.routes.forEach((r, j) => r.seq.forEach(k => col.set(part.sol.pts[k].id, j)));
+  const col = new Map(); if(PLAN && PLAN.cur) for(const part of PLAN.cur.parts) part.sol.routes.forEach((r, j) => r.seq.forEach(k => col.set(part.sol.pts[k].id, [j, chosenMode(PLAN.cur, part, j)])));
+  const MCc = {walk:c("--mw"), bike:c("--mb"), drive:c("--mc")};
   ctx.font = "600 10px " + (cs.getPropertyValue("--f-mono") || "monospace"); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  HOUSES.forEach((hh, i) => { const p = on(hh.x, hh.y); if(!p) return; const j = col.get(hh.id);
-    ctx.fillStyle = j == null ? c("--ink2") : c(`--c${(j % 8) + 1}`); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(p[0], p[1], s > 0.8 ? 8 : 5.5, 0, 7); ctx.fill(); ctx.stroke();
-    if(s > 0.8){ ctx.fillStyle = "#fff"; ctx.fillText(String(i + 1), p[0], p[1] + 0.5); } });
+  HOUSES.forEach(hh => { const p = on(hh.x, hh.y); if(!p) return; const q = col.get(hh.id), rr = s > 0.5 ? 8 : 6.5;
+    ctx.fillStyle = q && q[1] ? MCc[q[1]] : c("--ink2"); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(p[0], p[1], rr, 0, 7); ctx.fill(); ctx.stroke();
+    if(q){ ctx.fillStyle = "#fff"; ctx.fillText(String(q[0] + 1), p[0], p[1] + 0.5); } });
   if(PLAN && PLAN.cur) for(const part of PLAN.cur.parts){ if(part.kind !== "sub") continue; const p = on(part.center.x, part.center.y); if(!p) continue;
     ctx.fillStyle = c("--m-sub-edge"); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(p[0], p[1] - 11); ctx.lineTo(p[0] + 10, p[1] + 7); ctx.lineTo(p[0] - 10, p[1] + 7); ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.fillStyle = c("--ink"); ctx.font = "600 12px " + (cs.getPropertyValue("--f-body") || "sans-serif"); ctx.textAlign = "left"; ctx.fillText(part.label, p[0] + 13, p[1]); ctx.textAlign = "center"; }
@@ -1157,7 +1321,7 @@ function clickHouse(wp){
   const p = b ? [b.cx, b.cy] : wp; let label = b ? addrLabel(b) : "";
   if(pendingAddr){ label = pendingAddr; regAdd(pendingAddr, PR.inv(p[0], p[1])); pendingAddr = null; HL = null; status("st3", `«${label}» тізілімге сақталды.`, "ok"); }
   if(addHouse(p[0], p[1], label, b ? b.id : null)) afterHouses(); }
-function afterHouses(){ saveHouses(); renderHouses(); plan(); }
+function afterHouses(){ saveHouses(); renderHouses(); TOP3 = null; renderTop3(); plan(); }
 function saveHouses(){ lsSet(H_KEY, JSON.stringify(HOUSES.map(hh => ({lat:hh.lat, lon:hh.lon, label:hh.label, bid:hh.bid})))); }
 function restoreHouses(){ HOUSES = []; let out = 0;
   for(const q of lsJSON(H_KEY, [])){ const p = PR.fwd(q.lat, q.lon); if(Math.hypot(p[0], p[1]) > U.R){ out++; continue; } addHouse(p[0], p[1], q.label, q.bid); }
@@ -1216,15 +1380,23 @@ $("btnBatch").addEventListener("click", () => { if(!DATA){ status("st3", "Алд
   afterHouses(); });
 regInfo();
 
-/* ================================================================ 4. бағыттар және кіші аудандар */
+/* ================================================================ 4. бағыттар, шығын, KPI, Топ-3 */
 function segInit(){ $("kSeg").innerHTML = [1, 2, 3, 4, 5, 6, 8].map(k => `<button type="button" data-k="${k}" aria-pressed="${k === U.K}">${k}</button>`).join(""); }
 segInit(); $("kSeg").addEventListener("click", e => { const b = e.target.closest("[data-k]"); if(!b) return; U.K = +b.dataset.k; saveU(); segInit(); plan(); });
-function bindNum(id, key, lo, hi){ const e = $(id); e.value = U[key]; e.addEventListener("change", () => { let v = +e.value; if(!Number.isFinite(v)) v = DEF[key]; v = Math.max(lo, Math.min(hi, v)); e.value = v; U[key] = v; saveU(); plan(); }); }
+function bindNum(id, key, lo, hi, reTop){ const e = $(id); e.value = U[key]; e.addEventListener("change", () => { let v = +e.value; if(!Number.isFinite(v)) v = DEF[key]; v = Math.max(lo, Math.min(hi, v)); e.value = v; U[key] = v; saveU(); TOP3 = null; renderTop3(); plan(); }); }
 bindNum("vw", "vw", 1, 8); bindNum("vb", "vb", 3, 30); bindNum("vc", "vc", 5, 80); bindNum("s0", "s0", 0, 60); bindNum("pB", "pB", 0, 10); bindNum("pC", "pC", 0, 15);
 bindNum("shift", "shift", 30, 720); bindNum("far", "far", 200, 20000); bindNum("eps", "eps", 50, 3000); bindNum("minPts", "minPts", 2, 50);
-$("mode").value = U.mode; $("mode").addEventListener("change", e => { U.mode = e.target.value; saveU(); plan(); });
-$("ret").checked = U.ret; $("ret").addEventListener("change", e => { U.ret = e.target.checked; saveU(); plan(); });
-$("btnSub").addEventListener("click", () => { U.sub = !U.sub; $("btnSub").setAttribute("aria-pressed", String(U.sub)); $("btnSub").textContent = U.sub ? "Кіші аудандарды алып тастау" : "Кіші аудандарға бөлу"; plan(); });
+bindNum("salN", "salN", 0, 1e8); bindNum("salD", "salD", 0, 1e8); bindNum("hrs", "hrs", 40, 300); bindNum("crew", "crew", 1, 5); bindNum("fuelP", "fuelP", 0, 5000);
+bindNum("fuelL", "fuelL", 1, 40); bindNum("cars", "cars", 0, 10); bindNum("bikes", "bikes", 0, 20); bindNum("days", "days", 1, 31);
+$("mode").value = U.mode; $("mode").addEventListener("change", e => { U.mode = e.target.value; saveU(); TOP3 = null; renderTop3(); plan(); });
+$("ret").checked = U.ret; $("ret").addEventListener("change", e => { U.ret = e.target.checked; saveU(); TOP3 = null; renderTop3(); plan(); });
+$("drv").checked = U.drv; $("drv").addEventListener("change", e => { U.drv = e.target.checked; saveU(); TOP3 = null; renderTop3(); plan(); });
+function setSubBtn(){ $("btnSub").setAttribute("aria-pressed", String(U.sub)); $("btnSub").textContent = U.sub ? "Кіші аудандарды алып тастау" : "Кіші аудандарға бөлу"; }
+$("btnSub").addEventListener("click", () => { U.sub = !U.sub; setSubBtn(); plan(); });
+document.querySelectorAll("#modeLegend input").forEach(i => { i.checked = U.vis[i.dataset.m] !== false; i.addEventListener("change", () => { U.vis[i.dataset.m] = i.checked; saveU(); requestDraw(); }); });
+
+const partMode = () => U.mode === "auto" ? "walk" : U.mode, allowed = () => U.mode === "auto" ? MODES : [U.mode];
+const costP = () => ({salN:U.salN, salD:U.salD, hrs:U.hrs, crew:U.crew, drv:U.drv, fuelP:U.fuelP, fuelL:U.fuelL, cars:U.cars, bikes:U.bikes, shift:U.shift, days:U.days, s0:U.s0});
 
 /* қашықтық кэші: DM[mode].get(a).get(b) — a-дан b-ға көше бойынша, м */
 async function ensureRows(pts, tok, label){
@@ -1234,95 +1406,176 @@ async function ensureRows(pts, tok, label){
     const b = m === "drive" && node >= 0 ? NET.dijkstra(G, node, true).dist : f;
     for(const [qid, qrow] of DM[m]){ const q = pts.find(z => z.id === qid); if(q) qrow.set(p.id, b && q.snap[m].node >= 0 ? b[q.snap[m].node] : Infinity); }
     DM[m].set(p.id, row);
-    if(++k % 6 === 0){ status("stOpt", `${label || "Көше бойынша қашықтық"}: ${k} / ${todo.length}`); $("optBar").style.width = (60 * k / todo.length) + "%"; await tick(); if(tok !== planTok) return false; } }
+    if(++k % 6 === 0){ status("stOpt", `${label || "Көше бойынша қашықтық"}: ${k} / ${todo.length}`); $("optBar").style.width = (50 * k / todo.length) + "%"; await tick(); if(tok !== planTok) return false; } }
   return true; }
 function mat(m, pts){ return pts.map(a => { const row = DM[m].get(a.id); return Float64Array.from(pts.map(b => { const v = a === b ? 0 : row.get(b.id); return Number.isFinite(v) ? v : 1e7; })); }); }
 function opts(m, pts, ret){ return {ret, v:speed(m), stop:U.s0 + park(m), vWalk:speed("walk"), acc:pts.map((p, i) => i === 0 ? 0 : (p.snap[m].d || 0))}; }
-function solvePart(center, hs, ret, kind, label){ const pts = [center].concat(hs), xy = pts.map(p => [p.x, p.y]), D = mat(U.mode, pts);
-  const sol = ROUTE.solve(D, xy, U.K, opts(U.mode, pts, ret)); sol.pts = pts; sol.ret = ret; return {kind, center, hs, sol, label}; }
-function compare(part){ const pts = part.sol.pts;
-  return part.sol.routes.map(r => { const out = {n:r.seq.length};
-    for(const m of MODES){ const D = mat(m, pts), {Dd, Ds} = ROUTE.prepare(D, part.sol.ret), seq = ROUTE.localOpt(ROUTE.nearestNeighbour(r.seq.slice(), Ds), Ds), L = ROUTE.tourLen(seq, Dd);
-      out[m] = L >= 1e7 ? null : {km:L / 1000, min:ROUTE.timeFn(Dd, opts(m, pts, part.sol.ret))(seq)}; }
-    out.best = MODES.filter(m => out[m]).reduce((a, b) => out[a].min <= out[b].min ? a : b); return out; }); }
-function median(members){ const G = GR.walk, sum = new Float64Array(G.n), cnt = new Uint16Array(G.n);
-  for(const hh of members){ const d = NET.dijkstra(G, hh.snap.walk.node).dist; for(let i = 0; i < G.n; i++) if(d[i] < Infinity){ sum[i] += d[i]; cnt[i]++; } }
-  const cand = []; for(let i = 0; i < G.n; i++) if(cnt[i] === members.length && Math.hypot(G.X[i], G.Y[i]) <= U.R) cand.push(i);
-  cand.sort((a, b) => sum[a] - sum[b]);
-  for(const i of cand.slice(0, 400)){ const sd = NET.nearest(IX.drive, G.X[i], G.Y[i], 40); if(sd.node >= 0) return {node:i, x:G.X[i], y:G.Y[i], sum:sum[i]}; }
-  return null; }
-function teamStats(parts){ const K = Math.max(0, ...parts.map(p => p.sol ? p.sol.routes.length : 0)), T = new Array(K).fill(0); let km = 0, veh = 0;
-  for(const p of parts){ if(!p.sol) continue; p.sol.routes.forEach((r, j) => { T[j] += p.sol.tf(r.seq) + (p.kind === "sub" ? (p.dTo + p.dBack) / speed("drive") : 0); km += ROUTE.tourLen(r.seq, p.sol.Dd); });
-    if(p.kind === "sub") veh += p.dTo + p.dBack; }
-  return {T, max:Math.max(0, ...T), km:km / 1000, veh:veh / 1000}; }
-
-let planTok = 0, raf = 0, planTimer = 0;
-function plan(){ clearTimeout(planTimer); planTimer = setTimeout(runPlan, 120); }
-async function runPlan(){
-  const tok = ++planTok; cancelAnimationFrame(raf);
-  if(!DATA){ return; } const hs = HOUSES.filter(hh => hh.snap && hh.snap.walk.node >= 0);
-  if(!hs.length){ PLAN = null; renderResults(); requestDraw(); status("stOpt", "Картадағы үйлерді басып белгілеңіз."); $("optBar").style.width = "0"; return; }
-  const P0 = {id:"D", x:depot[0], y:depot[1], snap:DEP};
-  if(!await ensureRows([P0].concat(hs), tok)) return;
-  const base = {parts:[solvePart(P0, hs, U.ret, "clinic", "Емханадан")]}; base.stats = teamStats(base.parts);
-  let sub = null;
-  if(U.sub){ sub = await planSub(P0, hs, tok); if(tok !== planTok) return; }
-  PLAN = {base, sub, cur:sub || base}; if(sub && sub.none) PLAN.cur = base;
-  renderResults(); requestDraw(); startILS(tok); }
-async function planSub(P0, hs, tok){
+function solvePart(center, hs, ret, kind, label, K){ const pts = [center].concat(hs), xy = pts.map(p => [p.x, p.y]), pm = partMode(), D = mat(pm, pts);
+  const sol = ROUTE.solve(D, xy, K, opts(pm, pts, ret)); sol.pts = pts; sol.ret = ret; return {kind, center, hs, sol, label}; }
+/* әр бағыттың әр жүріс түріндегі реті, жолы, уақыты */
+function modeInfo(part){ const pts = part.sol.pts; part.mats = part.mats || {};
+  part.info = part.sol.routes.map(r => { const o = {};
+    for(const m of MODES){ const D = part.mats[m] || (part.mats[m] = mat(m, pts)), {Dd, Ds} = ROUTE.prepare(D, part.sol.ret);
+      const seq = ROUTE.localOpt(ROUTE.nearestNeighbour(r.seq.slice(), Ds), Ds), L = ROUTE.tourLen(seq, Dd);
+      o[m] = L >= 1e7 ? null : {seq, km:L / 1000, min:ROUTE.timeFn(Dd, opts(m, pts, part.sol.ret))(seq)}; }
+    return o; }); part.paths = null; }
+function evaluateCand(c){ const Kt = Math.max(0, ...c.parts.map(p => p.info.length)), teams = [];
+  for(let j = 0; j < Kt; j++){ const routes = []; let tr = 0;
+    for(const p of c.parts){ if(!p.info[j]) continue; routes.push({kind:p.kind, m:p.info[j]}); if(p.kind === "sub") tr += (p.dTo + p.dBack) / speed("drive"); }
+    teams.push({routes, transferMin:tr}); }
+  const transfers = c.parts.filter(p => p.kind === "sub").map(p => ({km:2 * (p.dTo + p.dBack) / 1000, min:2 * (p.dTo + p.dBack) / speed("drive")}));
+  c.teams = teams; c.ev = COST.evaluate(teams, transfers, costP(), allowed(), c.houses); return c; }
+/* кіші аудандар: DBSCAN + желідегі 1-медиана (K-ға тәуелсіз, сондықтан кэштеледі) */
+let CL = null;
+async function getClusters(P0, hs, tok){
+  const key = [hs.map(h => h.id).join(","), U.far, U.eps, U.minPts, depot.join(",")].join("|"); if(CL && CL.key === key) return CL;
   const dW = hh => DM.walk.get("D").get(hh.id), far = hs.filter(hh => dW(hh) > U.far), byId = new Map(hs.map(hh => [hh.id, hh]));
-  const cl = ROUTE.dbscan(far.map(hh => hh.id), (a, b) => DM.walk.get(a).get(b), U.eps, U.minPts);
-  if(!cl.length) return {none:true, parts:[], msg:`Емханадан ${F(U.far)} м-ден алыс, бір-біріне ${F(U.eps)} м-ден жақын кемінде ${U.minPts} үйден тұратын топ табылмады.`};
-  const inCl = new Set(cl.flat()), parts = [], rest = hs.filter(hh => !inCl.has(hh.id));
-  if(rest.length) parts.push(solvePart(P0, rest, U.ret, "clinic", "Емханадан"));
-  for(let k = 0; k < cl.length; k++){
-    status("stOpt", `${k + 1}-кіші аудан ортасы ізделуде…`); await tick(); if(tok !== planTok) return null;
+  const cl = ROUTE.dbscan(far.map(hh => hh.id), (a, b) => DM.walk.get(a).get(b), U.eps, U.minPts), list = [];
+  for(let k = 0; k < cl.length; k++){ status("stOpt", `${k + 1}-кіші аудан ортасы ізделуде…`); await tick(); if(tok !== planTok) return null;
     const members = cl[k].map(id => byId.get(id)), md = median(members); if(!md) continue;
     const C = {id:"C" + members.map(hh => hh.id).sort().join("_"), x:md.x, y:md.y, snap:{}};
     for(const m of MODES) C.snap[m] = m === "walk" ? {node:md.node, d:0} : NET.nearest(IX[m], md.x, md.y, 80);
     if(!await ensureRows([P0, C].concat(members), tok, `${k + 1}-кіші аудан қашықтығы`)) return null;
-    const part = solvePart(C, members, true, "sub", `${k + 1}-кіші аудан`);
-    part.dTo = DM.drive.get("D").get(C.id); part.dBack = DM.drive.get(C.id).get("D");
-    if(!Number.isFinite(part.dTo) || !Number.isFinite(part.dBack)) continue; parts.push(part); }
-  const res = {parts}; res.stats = teamStats(parts); return res; }
+    const dTo = DM.drive.get("D").get(C.id), dBack = DM.drive.get(C.id).get("D"); if(!Number.isFinite(dTo) || !Number.isFinite(dBack)) continue;
+    list.push({C, members, dTo, dBack, label:`${list.length + 1}-кіші аудан`}); }
+  const inCl = new Set(list.flatMap(q => q.members.map(h => h.id)));
+  CL = {key, list, rest:hs.filter(hh => !inCl.has(hh.id))}; return CL; }
+function median(members){ const G = GR.walk, sum = new Float64Array(G.n), cnt = new Uint16Array(G.n);
+  for(const hh of members){ const d = NET.dijkstra(G, hh.snap.walk.node).dist; for(let i = 0; i < G.n; i++) if(d[i] < Infinity){ sum[i] += d[i]; cnt[i]++; } }
+  const cand = []; for(let i = 0; i < G.n; i++) if(cnt[i] === members.length && Math.hypot(G.X[i], G.Y[i]) <= U.R) cand.push(i);
+  cand.sort((a, b) => sum[a] - sum[b]);
+  for(const i of cand.slice(0, 400)){ const sd = NET.nearest(IX.drive, G.X[i], G.Y[i], 40); if(sd.node >= 0) return {node:i, x:G.X[i], y:G.Y[i]}; }
+  return null; }
+async function buildCand(K, sub, P0, hs, tok){
+  let parts;
+  if(!sub) parts = [solvePart(P0, hs, U.ret, "clinic", "Емханадан", K)];
+  else { if(U.mode === "drive") return null; const cl = await getClusters(P0, hs, tok); if(!cl || !cl.list.length) return null; parts = [];
+    if(cl.rest.length) parts.push(solvePart(P0, cl.rest, U.ret, "clinic", "Емханадан", K));
+    for(const q of cl.list){ const p = solvePart(q.C, q.members, true, "sub", q.label, K); p.dTo = q.dTo; p.dBack = q.dBack; parts.push(p); } }
+  parts.forEach(modeInfo); return evaluateCand({K, sub, parts, houses:hs.length}); }
 
-function startILS(tok){ const cur = PLAN.cur, rnd = ROUTE.rng(7), t0 = performance.now(); let stale = 0, it = 0, last = 0;
-  const sols = cur.parts.filter(p => p.sol && p.sol.routes.length).map(p => p.sol);
-  function step(){ if(tok !== planTok || PLAN.cur !== cur) return; const end = performance.now() + 12; let imp = false;
+let planTok = 0, raf = 0, planTimer = 0, TOP3 = null;
+const P0 = () => ({id:"D", x:depot[0], y:depot[1], snap:DEP});
+const liveHouses = () => HOUSES.filter(hh => hh.snap && hh.snap.walk.node >= 0);
+function plan(){ clearTimeout(planTimer); planTimer = setTimeout(runPlan, 120); }
+async function runPlan(){
+  const tok = ++planTok; cancelAnimationFrame(raf); if(!DATA) return; const hs = liveHouses();
+  if(!hs.length){ PLAN = null; renderAll(); requestDraw(); status("stOpt", "Картадағы үйлерді басып белгілеңіз."); $("optBar").style.width = "0"; return; }
+  if(!await ensureRows([P0()].concat(hs), tok)) return;
+  const base = await buildCand(U.K, false, P0(), hs, tok); let cur = base, note = "";
+  if(U.sub){ const s = await buildCand(U.K, true, P0(), hs, tok); if(tok !== planTok) return;
+    if(s) cur = s; else note = U.mode === "drive" ? "«Тек көлік» режимінде кіші аудан мағынасыз: топ бәрібір көлікпен жүреді." : `Емханадан ${F(U.far)} м-ден алыс, бір-біріне ${F(U.eps)} м-ден жақын кемінде ${U.minPts} үйден тұратын топ табылмады.`; }
+  PLAN = {base, cur, note}; renderAll(); requestDraw(); startILS(tok); }
+function startILS(tok){ const cur = PLAN.cur, rnd = ROUTE.rng(7), t0 = performance.now(); let stale = 0, it = 0, imp = false;
+  const sols = cur.parts.filter(p => p.sol.routes.length).map(p => p.sol);
+  function step(){ if(tok !== planTok || PLAN.cur !== cur) return; const end = performance.now() + 12;
     while(performance.now() < end && sols.length){ it++; const s = sols[Math.floor(rnd() * sols.length)]; if(ROUTE.ilsStep(s, rnd, it % 25 === 0)){ imp = true; stale = 0; } else stale++; }
-    const el = performance.now() - t0; $("optBar").style.width = (60 + 40 * Math.min(1, el / 5000)) + "%";
-    if(imp || performance.now() - last > 500){ last = performance.now(); if(imp){ cur.stats = teamStats(cur.parts); renderResults(true); requestDraw(); } }
-    if(el < 5000 && stale < 500) raf = requestAnimationFrame(step);
-    else { $("optBar").style.width = "100%"; cur.stats = teamStats(cur.parts); renderResults(); requestDraw();
-      status("stOpt", `Дайын: ${HOUSES.length} үй, ${cur.stats.T.length} бағыт. ЖИ ізденісі: ${F(it)} итерация.`, "ok"); } }
+    const el = performance.now() - t0; $("optBar").style.width = (50 + 50 * Math.min(1, el / 4000)) + "%";
+    if(el < 4000 && stale < 500){ raf = requestAnimationFrame(step); return; }
+    if(imp){ cur.parts.forEach(modeInfo); evaluateCand(cur); }
+    $("optBar").style.width = "100%"; renderAll(); requestDraw();
+    status("stOpt", `Дайын: ${HOUSES.length} үй, ${cur.teams.length} топ. ЖИ ізденісі: ${F(it)} итерация.`, "ok"); }
   status("stOpt", "ЖИ бағыттарды жақсартып жатыр…"); raf = requestAnimationFrame(step); }
 
-function legPath(m, a, b){ const key = m + ":" + a + ":" + b; let p = PATHS.get(key); if(p) return p; const G = GR[m], r = NET.spath(G, a, b); p = new Path2D();
-  r.path.forEach((v, i) => i ? p.lineTo(G.X[v], G.Y[v]) : p.moveTo(G.X[v], G.Y[v])); PATHS.set(key, p); if(PATHS.size > 3000) PATHS.delete(PATHS.keys().next().value); return p; }
-function routePath(part, r){ const m = U.mode, pts = part.sol.pts, t = [0].concat(r.seq, part.sol.ret ? [0] : []), p = new Path2D();
-  for(let i = 0; i + 1 < t.length; i++) p.addPath(legPath(m, pts[t[i]].snap[m].node, pts[t[i + 1]].snap[m].node)); return p; }
+/* Топ-3: K = 1…8 × {кіші аудансыз, кіші аудандармен}, әрқайсысында жүріс түрі DP арқылы таңдалады */
+$("btnTop3").addEventListener("click", async () => {
+  if(!DATA){ status("stOpt", "Алдымен картаны жүктеңіз.", "err"); return; } const hs = liveHouses(); if(!hs.length){ status("stOpt", "Алдымен үйлерді белгілеңіз.", "err"); return; }
+  const tok = ++planTok; cancelAnimationFrame(raf); $("btnTop3").disabled = true;
+  try{ if(!await ensureRows([P0()].concat(hs), tok)) return; const Ks = [1, 2, 3, 4, 5, 6, 7, 8].filter(k => k <= hs.length), all = [];
+    for(let i = 0; i < Ks.length; i++){ for(const sub of [false, true]){ const c = await buildCand(Ks[i], sub, P0(), hs, tok); if(tok !== planTok) return; if(c && c.ev.ok) all.push(c); }
+      status("stOpt", `Нұсқалар бағалануда: ${i + 1} / ${Ks.length}`); $("optBar").style.width = (100 * (i + 1) / Ks.length) + "%"; await tick(); if(tok !== planTok) return; }
+    all.sort((a, b) => COST.rank(a, b)); TOP3 = {list:all.slice(0, 3), n:all.length}; renderTop3();
+    const b = TOP3.list[0]; if(b){ U.K = b.K; U.sub = b.sub; saveU(); segInit(); setSubBtn(); PLAN = {base:all.find(c => c.K === b.K && !c.sub) || b, cur:b, note:""}; renderAll(); requestDraw(); startILS(tok); }
+    $("top3Card").scrollIntoView({behavior:"smooth", block:"start"}); }
+  finally{ $("btnTop3").disabled = false; } });
+function modeChips(c){ return c.ev.picks.map((o, j) => { const a = o.clinicMode ? `<span class="mchip ${o.clinicMode}">${j + 1}: ${MNAME[o.clinicMode]}</span>` : "";
+  const b = o.subMode ? `<span class="mchip drive">${j + 1}: көлікпен ортаға</span><span class="mchip ${o.subMode}">→ ${MNAME[o.subMode].toLowerCase()}</span>` : ""; return a + b; }).join(""); }
+const candTitle = c => `${c.K} топ · ${c.sub ? "кіші аудандармен" : "емханадан тікелей"}`;
+function renderTop3(){
+  if(!TOP3){ $("top3Card").hidden = true; return; } $("top3Card").hidden = false;
+  $("t3Sub").textContent = `${TOP3.n} нұсқа тексерілді · ${HOUSES.length} үй`;
+  $("top3").innerHTML = TOP3.list.map((c, i) => { const e = c.ev;
+    return `<div class="t3 ${i ? "" : "first"}"><div class="rk">№${i + 1}${e.feasible ? "" : " · ауысымға сыймайды"}</div><div class="ttl">${esc(candTitle(c))}</div>
+      <div class="big">${F(e.Z)} ₸<span class="small muted"> / күн</span></div>
+      <div class="rows"><div><span>Бір үйге</span><span>${F(e.kpi.perHouse)} ₸</span></div><div><span>Айына</span><span>${F(e.month / 1e6, 2)} млн ₸</span></div>
+      <div><span>Ең ұзақ топ</span><span>${F(e.maxT)} мин</span></div><div><span>Ауысымды пайдалану</span><span>${F(e.kpi.util)} %</span></div><div><span>CO₂</span><span>${F(e.kpi.co2, 1)} кг</span></div></div>
+      <div class="modes">${modeChips(c)}</div><button type="button" data-t3="${i}">${i ? "Картада көрсету" : "Картада көрсетілген"}</button></div>`; }).join("");
+  const [a, b] = TOP3.list;
+  $("t3Why").textContent = a ? `№1 таңдалды: барлық топтың уақыты ${F(U.shift)} мин ауысымға сыяды, көлік (${U.cars}) мен велосипед (${U.bikes}) саны жетеді, осы шарттарда күнделікті шығын Z ең аз.` +
+    (b ? ` №2-ден ${F(b.ev.Z - a.ev.Z)} ₸/күн (${F((b.ev.Z - a.ev.Z) / b.ev.Z * 100, 1)} %) арзан, айына ${F((b.ev.Z - a.ev.Z) * U.days)} ₸ үнем.` : "") : "Орындалатын нұсқа табылмады."; }
+$("top3").addEventListener("click", e => { const b = e.target.closest("[data-t3]"); if(!b || !TOP3) return; const c = TOP3.list[+b.dataset.t3];
+  U.K = c.K; U.sub = c.sub; saveU(); segInit(); setSubBtn(); const tok = ++planTok; cancelAnimationFrame(raf); PLAN = {base:PLAN && PLAN.base || c, cur:c, note:""};
+  document.querySelectorAll("#top3 [data-t3]").forEach((q, i) => q.textContent = i === +b.dataset.t3 ? "Картада көрсетілген" : "Картада көрсету");
+  renderAll(); requestDraw(); $("mapCard").scrollIntoView({behavior:"smooth", block:"start"}); });
 
-function renderResults(light){
-  const cur = PLAN && PLAN.cur; if(!cur){ $("kpi").innerHTML = ""; $("dirTbl").innerHTML = ""; $("cmp").innerHTML = ""; $("resWarn").innerHTML = ""; $("resSub").textContent = "Үй белгіленбеген"; return; }
-  const st = cur.stats, sub = cur !== PLAN.base;
-  $("resSub").textContent = `${HOUSES.length} үй · ${U.K} топ · картада: ${MNAME[U.mode].toLowerCase()}${U.ret ? "" : " · емханаға қайтпайды"}`;
-  $("kpi").innerHTML = [["Үй", F(HOUSES.length)], ["Ең ұзақ топ уақыты", F(st.max) + " мин"], [MNAME[U.mode] + " жолы", F(st.km, 1) + " км"], sub ? ["Көлік (жеткізу)", F(st.veh, 1) + " км"] : ["Бағыт", F(st.T.length)]]
-    .map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
-  const w = []; if(st.max > U.shift) w.push(`Ең ұзақ бағыт ${F(st.max)} мин — топ уақытынан (${F(U.shift)} мин) асады. Топ санын көбейтіңіз немесе кіші аудандарға бөліңіз.`);
-  if(PLAN.sub && PLAN.sub.none) w.push(PLAN.sub.msg); const unreached = HOUSES.length - HOUSES.filter(hh => hh.snap && hh.snap.walk.node >= 0).length; if(unreached) w.push(`${unreached} үй жолға қосылмады.`);
+/* ---------- сызу: әр бағыт — үш сызық (жаяу, велосипед, көлік) ---------- */
+function legPath(m, a, b){ const key = m + ":" + a + ":" + b; let p = PATHS.get(key); if(p) return p; const G = GR[m], r = NET.spath(G, a, b); p = new Path2D();
+  r.path.forEach((v, i) => i ? p.lineTo(G.X[v], G.Y[v]) : p.moveTo(G.X[v], G.Y[v])); PATHS.set(key, p); if(PATHS.size > 4000) PATHS.delete(PATHS.keys().next().value); return p; }
+function modePath(part, j, m){ const inf = part.info[j] && part.info[j][m]; if(!inf) return null; const pts = part.sol.pts, t = [0].concat(inf.seq, part.sol.ret ? [0] : []), p = new Path2D();
+  for(let i = 0; i + 1 < t.length; i++){ const a = pts[t[i]].snap[m].node, b = pts[t[i + 1]].snap[m].node; if(a >= 0 && b >= 0) p.addPath(legPath(m, a, b)); } return p; }
+function chosenMode(c, part, j){ const o = c.ev && c.ev.ok ? c.ev.picks[j] : null; if(!o) return null; return part.kind === "sub" ? o.subMode : o.clinicMode; }
+
+/* ---------- нәтиже бөлімдері ---------- */
+function renderAll(){ renderResults(); renderCost(); renderKPI(); }
+function renderResults(){
+  const cur = PLAN && PLAN.cur; if(!cur){ ["kpi", "dirTbl", "cmp", "resWarn"].forEach(id => $(id).innerHTML = ""); $("resSub").textContent = "Үй белгіленбеген"; return; }
+  const e = cur.ev; $("resSub").textContent = `${HOUSES.length} үй · ${cur.K} топ · ${cur.sub ? "кіші аудандармен" : "емханадан тікелей"}${U.ret ? "" : " · емханаға қайтпайды"}`;
+  const w = []; if(PLAN.note) w.push(PLAN.note); if(!e.ok) w.push(e.reason);
+  else if(!e.feasible) w.push(`Ең ұзақ топ ${F(e.maxT)} мин — топ уақытынан (${F(U.shift)} мин) асады. Топ санын көбейтіңіз, кіші аудандарға бөліңіз немесе «Топ 3» батырмасын басыңыз.`);
+  const un = HOUSES.length - liveHouses().length; if(un) w.push(`${un} үй жолға қосылмады.`);
   $("resWarn").innerHTML = w.map(t => `<div>${esc(t)}</div>`).join("");
-  if(light) return;
-  let h = `<thead><tr><th>Бағыт</th><th class="n">Үй</th>${MODES.map(m => `<th class="n">${MNAME[m]}<div class="mode-h">км · мин</div></th>`).join("")}</tr></thead><tbody>`;
-  for(const part of cur.parts){ if(!part.sol) continue; const rows = compare(part);
-    if(cur.parts.length > 1 || part.kind === "sub") h += `<tr class="part"><td colspan="5">${esc(part.label)}${part.kind === "sub" ? ` · орта көлікпен ${F(part.dTo / 1000, 1)} км (${F(part.dTo / speed("drive"))} мин)` : ""}</td></tr>`;
-    rows.forEach((q, j) => { h += `<tr><td><span class="sw" style="background:var(--c${(j % 8) + 1})"></span> ${j + 1}-топ</td><td class="n">${q.n}</td>` +
-      MODES.map(m => `<td class="n${q.best === m ? " best" : ""}">${q[m] ? `${F(q[m].km, 1)} · ${F(q[m].min)}` : "жол жоқ"}</td>`).join("") + `</tr>`; }); }
+  $("kpi").innerHTML = e.ok ? [["Үй", F(HOUSES.length)], ["Ең ұзақ топ уақыты", F(e.maxT) + " мин"], ["Күнделікті шығын", F(e.Z) + " ₸"], ["Бір үйге", F(e.kpi.perHouse) + " ₸"]]
+    .map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("") : "";
+  let h = `<thead><tr><th>Бағыт</th><th class="n">Үй</th>${MODES.map(m => `<th class="n">${MNAME[m]}<div class="mode-h">км · мин</div></th>`).join("")}<th>Таңдалған</th></tr></thead><tbody>`;
+  for(const part of cur.parts){
+    if(cur.parts.length > 1 || part.kind === "sub") h += `<tr class="part"><td colspan="6">${esc(part.label)}${part.kind === "sub" ? ` · ортаға көлікпен ${F(part.dTo / 1000, 1)} км (${F(part.dTo / speed("drive"))} мин)` : ""}</td></tr>`;
+    part.info.forEach((q, j) => { const ch = chosenMode(cur, part, j);
+      h += `<tr><td>${j + 1}-топ</td><td class="n">${part.sol.routes[j].seq.length}</td>` + MODES.map(m => `<td class="n${ch === m ? " best" : ""}">${q[m] ? `${F(q[m].km, 1)} · ${F(q[m].min)}` : "жол жоқ"}</td>`).join("") +
+        `<td>${ch ? `<span class="mchip ${ch}">${MNAME[ch]}</span>` : "—"}</td></tr>`; }); }
   $("dirTbl").innerHTML = h + "</tbody>";
-  if(PLAN.sub && !PLAN.sub.none){ const a = PLAN.base.stats, b = PLAN.sub.stats, better = b.max < a.max;
-    $("cmp").innerHTML = `<div class="cmp"><div class="kpi"><b>Кіші аудансыз</b><div><span>Ең ұзақ топ</span><span>${F(a.max)} мин</span></div><div><span>${MNAME[U.mode]} жолы</span><span>${F(a.km, 1)} км</span></div><div><span>Көлік</span><span>0 км</span></div></div>
-      <div class="kpi"><b>Кіші аудандармен ${better ? '<span class="chip ok">тиімді</span>' : '<span class="chip mid">ұтыс жоқ</span>'}</b><div><span>Ең ұзақ топ</span><span>${F(b.max)} мин</span></div><div><span>${MNAME[U.mode]} жолы</span><span>${F(b.km, 1)} км</span></div><div><span>Көлік</span><span>${F(b.veh, 1)} км</span></div></div></div>
-      <p class="hint" style="margin-top:6px">Болжам: көлік топты ортаға жеткізіп, сонда күтеді де қайта әкеледі. Топтың уақытына көліктегі жол да кіреді.</p>`; }
+  if(cur.sub && PLAN.base && PLAN.base.ev.ok && e.ok){ const a = PLAN.base.ev, b = e, better = b.Z < a.Z && b.feasible;
+    $("cmp").innerHTML = `<div class="cmp"><div class="kpi"><b>Емханадан тікелей</b><div><span>Ең ұзақ топ</span><span>${F(a.maxT)} мин</span></div><div><span>Шығын</span><span>${F(a.Z)} ₸</span></div><div><span>Көлік жолы</span><span>${F(a.km.drive, 1)} км</span></div></div>
+      <div class="kpi"><b>Кіші аудандармен ${better ? '<span class="chip ok">тиімді</span>' : '<span class="chip mid">ұтыс жоқ</span>'}</b><div><span>Ең ұзақ топ</span><span>${F(b.maxT)} мин</span></div><div><span>Шығын</span><span>${F(b.Z)} ₸</span></div><div><span>Көлік жолы</span><span>${F(b.km.drive, 1)} км</span></div></div></div>
+      <p class="hint" style="margin-top:6px">Болжам: көлік топты ортаға апарып тастап, емханаға қайтады, кейін барып алып келеді (көлік жолы = 2 × барып-қайту).</p>`; }
   else $("cmp").innerHTML = ""; }
+function renderCost(){
+  const cur = PLAN && PLAN.cur, e = cur && cur.ev; if(!e || !e.ok){ ["costKpi", "costTbl", "costFormula"].forEach(id => $(id).innerHTML = ""); $("costSub").textContent = ""; return; }
+  const cN = COST.perMin(U.salN, U.hrs) * 60, cD = COST.perMin(U.salD, U.hrs) * 60;
+  $("costSub").textContent = `мейірбике ${F(cN)} ₸/сағ · жүргізуші ${F(cD)} ₸/сағ · бензин ${F(U.fuelP)} ₸/л`;
+  $("costKpi").innerHTML = [["Күніне", F(e.Z) + " ₸"], ["Айына (" + U.days + " күн)", F(e.month) + " ₸"], ["Сағаттық шығын", F(e.perHour) + " ₸/сағ"], ["Бір үйге", F(e.kpi.perHouse) + " ₸"]]
+    .map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  const nH = j => cur.parts.reduce((s, p) => s + (p.sol.routes[j] ? p.sol.routes[j].seq.length : 0), 0);
+  let h = `<thead><tr><th>Топ</th><th>Жүріс түрі</th><th class="n">Уақыт, сағ</th><th class="n">Мейірбике, ₸</th><th class="n">Жүргізуші, ₸</th><th class="n">Бензин, л</th><th class="n">Бензин, ₸</th><th class="n">Барлығы, ₸</th><th class="n">₸/сағ</th><th class="n">₸/үй</th></tr></thead><tbody>`;
+  e.picks.forEach((o, j) => { const md = [o.clinicMode, o.subMode].filter(Boolean).map(m => `<span class="mchip ${m}">${MNAME[m]}</span>`).join(" "), n = nH(j);
+    h += `<tr><td>${j + 1}-топ</td><td>${md}</td><td class="n">${F(o.T / 60, 2)}</td><td class="n">${F(o.staff)}</td><td class="n">${F(o.driver)}</td><td class="n">${F(o.fuelL, 1)}</td><td class="n">${F(o.fuel)}</td>
+      <td class="n"><b>${F(o.cost)}</b></td><td class="n">${F(o.cost / (o.T / 60))}</td><td class="n">${n ? F(o.cost / n) : "—"}</td></tr>`; });
+  if(e.transfers.km) h += `<tr><td colspan="2">Кіші аудан ортасына жеткізу</td><td class="n">—</td><td class="n">—</td><td class="n">${F(e.driver - e.picks.reduce((s, o) => s + o.driver, 0))}</td><td class="n">${F(e.transfers.km * U.fuelL / 100, 1)}</td><td class="n">${F(e.transfers.km * U.fuelL / 100 * U.fuelP)}</td><td class="n"><b>${F(e.transfers.cost)}</b></td><td></td><td></td></tr>`;
+  h += `<tr><td colspan="2"><b>Барлығы</b></td><td class="n">${F(e.sum / 60, 2)}</td><td class="n">${F(e.staff)}</td><td class="n">${F(e.driver)}</td><td class="n">${F(e.fuelL, 1)}</td><td class="n">${F(e.fuel)}</td><td class="n"><b>${F(e.Z)}</b></td><td class="n">${F(e.perHour)}</td><td class="n">${F(e.kpi.perHouse)}</td></tr></tbody>`;
+  $("costTbl").innerHTML = h;
+  $("costFormula").textContent = `Z = Σ[c_N·m·T_j + x_j·(c_D·t_j + p·q·ℓ_j/100)] + Σ[c_D·τ_s + p·q·λ_s/100] = ${F(e.staff)} + ${F(e.driver)} + ${F(e.fuel)} = ${F(e.Z)} ₸/күн;  c_N = ${F(U.salN)} ÷ ${U.hrs} = ${F(cN)} ₸/сағ, m = ${U.crew}, p = ${F(U.fuelP)} ₸/л, q = ${F(U.fuelL, 1)} л/100 км`; }
+const KPIS = [
+  {k:"perHouse", l:"Бір үйге шығын", u:"₸", d:0, g:"min", goal:"↓ аз болған жақсы"},
+  {k:"minPerHouse", l:"Бір үйге уақыт", u:"мин", d:1, g:"min", goal:"↓ еңбек өнімділігі"},
+  {k:"kmPerHouse", l:"Бір үйге жол", u:"км", d:2, g:"min", goal:"↓ маршрут тығыздығы"},
+  {k:"util", l:"Ауысымды пайдалану", u:"%", d:0, g:"util", goal:"≤ 100 %, жоғары жақсы"},
+  {k:"balance", l:"Топтар жүктемесінің теңгерімі", u:"%", d:0, g:"max", goal:"↑ 100 % — тең"},
+  {k:"co2", l:"CO₂ шығарындысы", u:"кг/күн", d:1, g:"min", goal:"↓ жасыл логистика"}];
+function renderKPI(){
+  const cur = PLAN && PLAN.cur; if(!cur || !cur.ev.ok){ $("kpiTbl").innerHTML = ""; $("kpiWhy").textContent = ""; return; }
+  const inTop = TOP3 ? TOP3.list.indexOf(cur) : -1;
+  const cols = (TOP3 ? TOP3.list.map((c, i) => ({t:`№${i + 1} · ${c.K} топ${c.sub ? " · кіші ауд." : ""}${c === cur ? " (картада)" : ""}`, c})) : []);
+  if(inTop < 0) cols.unshift({t:"Картадағы жоспар", c:cur});
+  const bestSet = q => { const vals = cols.map(x => x.c.ev.kpi[q.k]); let b;
+    if(q.g === "util"){ const ok = vals.filter(v => v <= 100); if(!ok.length) return new Set(); b = Math.max(...ok); }
+    else b = q.g === "min" ? Math.min(...vals) : Math.max(...vals);
+    return new Set(vals.map((v, i) => Math.abs(v - b) < 1e-9 * Math.max(1, Math.abs(b)) ? i : -1).filter(i => i >= 0)); };
+  let h = `<thead><tr><th>KPI</th>${cols.map(x => `<th class="n">${esc(x.t)}</th>`).join("")}<th>Мақсат</th></tr></thead><tbody>`; const wins = cols.map(() => 0);
+  for(const q of KPIS){ const bs = cols.length > 1 ? bestSet(q) : new Set(); bs.forEach(i => wins[i]++);
+    h += `<tr><td>${q.l}</td>${cols.map((x, i) => `<td class="n${bs.has(i) ? " win" : ""}">${F(x.c.ev.kpi[q.k], q.d)} ${q.u}</td>`).join("")}<td class="goal">${q.goal}</td></tr>`; }
+  h += `<tr><td>Барлық топ ауысымға сыяды</td>${cols.map(x => `<td class="n">${x.c.ev.feasible ? '<span class="chip ok">иә</span>' : '<span class="chip no">жоқ</span>'}</td>`).join("")}<td class="goal">міндетті шарт</td></tr></tbody>`;
+  $("kpiTbl").innerHTML = h;
+  $("kpiWhy").textContent = cols.length > 1 ? `Боялған ұяшық — сол көрсеткіш бойынша ең жақсы нұсқа. Ұтыс саны: ${cols.map((x, i) => `${x.t} — ${wins[i]}`).join("; ")}. Негізгі өлшем — бір үйге шығын (мақсат функциясы Z-тің бір үйге шаққандағы мәні); қалған KPI шешімнің логистикалық сапасын тексереді.`
+    : "Нұсқаларды KPI бойынша салыстыру үшін «Топ 3 үздік маршрутты анықтау» батырмасын басыңыз."; }
 
 /* ================================================================ айнымалылар және модельге жіберу */
 function ensureRES(){ if(RES || !DATA) return RES; RES = NET.analyze(DATA, U.R, {depot}); renderVars(); return RES; }
@@ -1370,7 +1623,7 @@ function demoOSM(lat0, lon0){
   return {elements:el, _demo:true}; }
 
 /* ================================================================ іске қосу */
-renderHouses(); renderResults(); requestDraw();
+renderHouses(); renderAll(); requestDraw();
 cacheGet().then(c => { if(DATA) return;
   if(c && c.osm){ $("coord").value = `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`; setR(c.R / 1000); setupData(c.osm, c.lat, c.lon, c.R, c.bLoaded, false); }
   else status("st1", "Орынды енгізіңіз не картадан таңдаңыз, радиусты бекітіп, «Картаны жүктеу» басыңыз."); });
