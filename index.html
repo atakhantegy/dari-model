@@ -3,13 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="МСАК ұйымдарында д-есептегі пациенттерге дәріні үйге тарату моделі: айнымалыларды енгізу, тарату әдістерін салыстыру, ЖИ ұсынысы және маршрут картасы.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231C6B55'/%3E%3Cpath d='M7 24V16h8V8h10' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='24' r='2.5' fill='white'/%3E%3Ccircle cx='25' cy='8' r='2.5' fill='white'/%3E%3C/svg%3E">
-<title>Дәрі тарату моделі</title>
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#fafaf8}img{max-width:100%}[hidden]{display:none!important}</style>
+<meta name="description" content="Нақты көше желісі бойынша дәріні үйге тарату маршрутын талдау: OpenStreetMap, граф айнымалылары, ЖИ маршрут.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231C6B55'/%3E%3Cpath d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z' fill='white'/%3E%3C/svg%3E">
+<style>html,body{margin:0}</style>
 </head>
 <body>
-
+<title>Көше желісі және маршрут</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -140,564 +139,1030 @@ footer{margin-top:22px;color:var(--muted);font-size:12.5px;display:flex;flex-dir
 .msg{font-size:12.5px;color:var(--accent)}
 .msg.err{color:var(--bad)}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+:root{
+  --m-bg:#F3F5F2; --m-bld:#D3D9D2; --m-bld-edge:#BCC4BC; --m-road:#FFFFFF; --m-case:#A3ADA7; --m-major:#F7D98F; --m-major-case:#B98E33;
+  --m-svc:#C2C9C4; --m-walk:#7E8C85; --m-rail:#46504B; --m-rail2:#FFFFFF; --m-water:#9BC4E2; --m-dim:rgba(243,245,242,.78); --m-ring:#1C6B55;
+  --m-inter:#46504B; --m-dead:#B42318; --m-cross:#D9730D; --m-depot:#B42318;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --m-bg:#101715; --m-bld:#2A3531; --m-bld-edge:#34413C; --m-road:#4A5752; --m-case:#1A2220; --m-major:#8A7334; --m-major-case:#3C3218;
+    --m-svc:#34403B; --m-walk:#7F8E87; --m-rail:#A9B4AF; --m-rail2:#101715; --m-water:#1E4A69; --m-dim:rgba(16,23,21,.74); --m-ring:#4DB592;
+    --m-inter:#C9D3CE; --m-dead:#F2766B; --m-cross:#F2A33A; --m-depot:#F2766B;
+  }
+}
+:root[data-theme="dark"]{
+  --m-bg:#101715; --m-bld:#2A3531; --m-bld-edge:#34413C; --m-road:#4A5752; --m-case:#1A2220; --m-major:#8A7334; --m-major-case:#3C3218;
+  --m-svc:#34403B; --m-walk:#7F8E87; --m-rail:#A9B4AF; --m-rail2:#101715; --m-water:#1E4A69; --m-dim:rgba(16,23,21,.74); --m-ring:#4DB592;
+  --m-inter:#C9D3CE; --m-dead:#F2766B; --m-cross:#F2A33A; --m-depot:#F2766B;
+}
+a.btn{font-size:13px;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:8px}
+a.btn:hover{border-color:var(--accent)}
+a.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:500}
+ol.steps{list-style:none;margin:0;padding:10px 0;display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;z-index:5;background:var(--bg)}
+ol.steps a{flex:none;display:inline-flex;gap:6px;align-items:center;font-size:12.5px;text-decoration:none;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--surface)}
+ol.steps a b{font-family:var(--f-mono);font-weight:500;color:var(--accent)}
+ol.steps a:hover{border-color:var(--accent);color:var(--accent)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:4px}
+@media (min-width:1080px){.grid2{grid-template-columns:380px minmax(0,1fr)} .side{position:sticky;top:52px;max-height:calc(100vh - 64px);overflow:auto}}
+@media (max-width:1079px){.grid2>.side,.grid2>.mainc{display:contents} #s1{order:1} #s2{order:2} #s4{order:3} #s4r{order:4} #s3{order:5} #s5{order:6}}
+.side,.mainc{display:flex;flex-direction:column;gap:16px;min-width:0}
+.step-n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);font-size:12px;font-weight:500;flex:none}
+.card h2{display:flex;gap:8px;align-items:center}
+.card>p.hint{margin-top:6px}
+.stack{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.fld input.coord{font-family:var(--f-mono)}
+.rad{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:10px;align-items:center}
+.status{font-size:12.5px;color:var(--ink2);min-height:1.4em;margin:0}
+.status.ok{color:var(--good)} .status.err{color:var(--bad)}
+.mapbox{position:relative;margin-top:10px;height:min(66vh,660px);min-height:340px;border:1px solid var(--line2);border-radius:8px;overflow:hidden;background:var(--m-bg)}
+.mapbox canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.mapbox canvas.pick{cursor:crosshair}
+.mapbox .zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.mapbox .zoom button{width:36px;height:36px;padding:0;font-size:18px;line-height:1;font-family:var(--f-mono);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mapbox .empty[hidden]{display:none}
+.mapbox .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted);font-size:13.5px}
+.mapbox .scale{position:absolute;left:10px;bottom:8px;font-size:11px;font-family:var(--f-mono);color:var(--ink2);display:flex;flex-direction:column;gap:2px;pointer-events:none}
+.mapbox .scale i{display:block;height:4px;border:1.5px solid var(--ink2);border-top:0}
+.mapbox .dtag{position:absolute;left:8px;top:8px;font-size:12px;font-weight:500;padding:3px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink2);max-width:calc(100% - 70px)}
+.mapbox .dtag.demo{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.mapbox .attr{position:absolute;right:6px;bottom:4px;font-size:10.5px;color:var(--muted);background:var(--m-dim);padding:1px 5px;border-radius:4px}
+.mapbox .attr a{color:inherit}
+.layers{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink2)}
+.layers label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.layers input{accent-color:var(--accent)}
+.mk{display:inline-block;width:10px;height:10px;border-radius:50%}
+.vars td.v{font-family:var(--f-mono);white-space:nowrap;text-align:right}
+.vars td.how{font-size:12px;color:var(--muted);min-width:180px}
+.vars td.mdl{font-size:12px;white-space:nowrap}
+.vars tr.g td{background:var(--surface2);font-family:var(--f-cond);font-weight:600;font-size:13px;color:var(--ink)}
+.vars tr.key td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.tag{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:500}
+.disabled{opacity:.55;pointer-events:none}
+details.help{margin-top:10px;font-size:12.5px;color:var(--ink2)}
+details.help summary{cursor:pointer;color:var(--accent)}
+details.help ol{padding-left:18px;margin:8px 0;display:flex;flex-direction:column;gap:4px}
+details.help textarea{min-height:70px}
+.kpis.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:640px){.kpis.k3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">МСАК · д-есептегі пациенттер · үйге жеткізу</div>
-      <h1>Дәрі тарату моделі</h1>
-      <p>Кез келген айнымалыны өзгертіңіз: есеп бірден жаңарады. ЖИ үздік тарату әдісін таңдайды және картада маршрутты үздіксіз жақсартады.</p>
+      <div class="eyebrow">Дәрі тарату моделі · нақты көше желісі</div>
+      <h1>Көше желісі және маршрут</h1>
+      <p>Координата мен радиусты беріңіз. Жүйе сол шеңбердегі жолдар мен ғимараттарды OpenStreetMap-тан алып, модель айнымалыларын өзі анықтайды және маршрутты нақты көшелер бойынша құрады.</p>
     </div>
     <div class="tools">
-      <span id="dataBadge" class="badge">Мысал деректер</span>
-      <button id="btnData" type="button">Деректер: сақтау / көшіру</button>
-      <button id="btnReset" type="button" class="ghost">Мысалды қайта жүктеу</button>
+      <a class="btn" href="model.html">Формулалар моделі →</a>
     </div>
   </header>
 
-  <nav class="jump" aria-label="Бөлімдер">
-    <a href="#inputs">Енгізу</a><a href="#ai">ЖИ ұсынысы</a><a href="#map">Карта</a><a href="#methods">Әдістер</a><a href="#areasCard">Аймақтар</a><a href="#drugsCard">Дәрі</a>
-  </nav>
+  <ol class="steps" aria-label="Қадамдар">
+    <li><a href="#s1"><b>1</b>Орын</a></li>
+    <li><a href="#s2"><b>2</b>Карта</a></li>
+    <li><a href="#s3"><b>3</b>Айнымалылар</a></li>
+    <li><a href="#s4"><b>4</b>Маршрут</a></li>
+    <li><a href="#s5"><b>5</b>Модельге</a></li>
+  </ol>
 
-  <main class="grid">
-    <section id="inputs" class="inputs" aria-label="Кіріс деректер"></section>
-
-    <section class="results">
-      <article id="ai" class="card" aria-live="polite"></article>
-
-      <article id="map" class="card">
-        <div class="card-h">
-          <div>
-            <div class="eyebrow">Бір жеткізу күнінің маршруттары</div>
-            <h2 id="mapTitle">Карта</h2>
+  <main class="grid2">
+    <section class="side">
+      <article class="card" id="s1">
+        <h2><span class="step-n">1</span>Орын және радиус</h2>
+        <p class="hint">Бұл нүкте — емхана (жеткізу басталатын орын). Google Maps-тен көшірілген «ендік, бойлық» түрі жарайды.</p>
+        <div class="stack">
+          <div class="fld">
+            <label for="coord">Координата <span class="u">(ендік, бойлық)</span></label>
+            <input id="coord" class="coord" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="41.464551, 69.148520">
+          </div>
+          <div class="fld">
+            <label for="radR">Радиус <span class="u">(м)</span></label>
+            <div class="rad"><input id="radR" type="range" min="300" max="3000" step="50"><input id="radN" type="number" min="300" max="3000" step="50"></div>
           </div>
           <div class="row">
-            <div class="fld" style="min-width:210px">
-              <label for="mapMethod">Картадағы әдіс</label>
-              <select id="mapMethod"></select>
-            </div>
-            <button id="btnReseed" type="button" title="Үйлердің басқа кездейсоқ орналасуы">Жаңа үйлер</button>
+            <button type="button" id="btnAyan">Аян емханасы</button>
+            <button type="button" id="btnGeo">Менің орным</button>
+            <button type="button" id="btnDemo" class="ghost">Мысал аудан</button>
           </div>
+          <button type="button" id="btnLoad" class="primary">Картаны құру</button>
+          <p class="status" id="st1" role="status" aria-live="polite"></p>
         </div>
-        <div class="map-wrap"><svg id="mapSvg" class="map" role="img" aria-label="Аумақ, аймақтар және маршруттар картасы"></svg></div>
-        <div class="progress" aria-hidden="true"><i id="optBar"></i></div>
-        <p id="optStatus" class="small muted" style="margin:6px 0 0"></p>
-        <div class="map-stat" id="mapStat"></div>
-        <div class="legend" id="mapLegend"></div>
-        <p class="hint" style="margin-top:8px">Мекенжай жоқ кезде үйлер аймақ ішінде кездейсоқ қойылады (Б2 болжамы). Қашықтық көше торы бойынша (|Δx|+|Δy|) есептеледі. ЖИ: аймақтарды k-means арқылы бөледі, маршрутты 2-opt, Or-opt, топтар арасында ауыстыру және қайта бастау (ILS) арқылы қысқартады.</p>
+        <details class="help">
+          <summary>Сервер жауап бермесе: деректі қолмен жүктеу</summary>
+          <ol>
+            <li>Төмендегі сұранысты көшіріңіз.</li>
+            <li><a href="https://overpass-turbo.eu/" target="_blank" rel="noopener">overpass-turbo.eu</a> сайтына қойып, «Run» басыңыз.</li>
+            <li>«Export → Data → raw OSM data» арқылы JSON файлын сақтаңыз.</li>
+            <li>Файлды осында таңдаңыз.</li>
+          </ol>
+          <textarea id="qText" readonly aria-label="Overpass сұранысы"></textarea>
+          <div class="row" style="margin-top:6px"><button type="button" id="qCopy">Сұранысты көшіру</button><input type="file" id="fileOsm" accept=".json,application/json"></div>
+        </details>
       </article>
 
-      <article id="methods" class="card"></article>
-      <article id="areasCard" class="card"></article>
-      <article id="drugsCard" class="card"></article>
+      <article class="card disabled" id="s4">
+        <h2><span class="step-n">4</span>Маршрут параметрлері</h2>
+        <p class="hint">Пациенттер нақты адрес емес: карта ішіндегі үйлерден кездейсоқ таңдалады (тек модельді тексеру үшін).</p>
+        <div class="fields" style="margin-top:12px">
+          <div class="fld"><label for="rN">Бір күнгі пациент <span class="u">(үй)</span></label><input id="rN" type="number" min="1" max="120" step="1"></div>
+          <div class="fld"><label for="rK">Жеткізуші саны <span class="u">(маршрут)</span></label><input id="rK" type="number" min="1" max="8" step="1"></div>
+          <div class="fld"><label for="rMode">Жүріс түрі</label><select id="rMode"><option value="walk">Жаяу</option><option value="drive">Көлік</option></select></div>
+          <div class="fld"><label for="rMethod">Картадағы әдіс</label><select id="rMethod"><option value="AI">ЖИ: еркін оңтайландыру</option><option value="M1">М1: бекітілген аймақтар</option><option value="M2">М2: радиалды жапырақтар</option></select></div>
+          <div class="fld"><label for="rVw">Жаяу жылдамдық <span class="u">(км/сағ)</span></label><input id="rVw" type="number" min="1" max="8" step="0.1"></div>
+          <div class="fld"><label for="rVc">Көлік жылдамдығы <span class="u">(км/сағ)</span></label><input id="rVc" type="number" min="5" max="60" step="1"></div>
+          <div class="fld"><label for="rS0">Бір үйдегі уақыт <span class="u">(мин)</span></label><input id="rS0" type="number" min="0" max="60" step="0.5"></div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button type="button" id="btnSeed">Басқа үйлер</button>
+          <button type="button" id="btnPick" aria-pressed="false">Емхананы картадан көрсету</button>
+        </div>
+      </article>
+
+      <article class="card disabled" id="s5">
+        <h2><span class="step-n">5</span>Модельге жіберу</h2>
+        <p class="hint">Анықталған мәндер формулалар моделіне жазылады: φ̂ (айналма коэффициент), аумақ, емхана орны және үйлер бойынша бөлінген аймақтар (аймақ саны = жеткізуші саны). Пациент саны модельдегі бұрынғы мәннен үй санына пропорционал бөлінеді.</p>
+        <div class="row" style="margin-top:12px"><button type="button" id="btnSend" class="primary">Модельге жіберу →</button></div>
+        <p class="status" id="st5"></p>
+      </article>
+    </section>
+
+    <section class="mainc">
+      <article class="card" id="s2">
+        <div class="card-h">
+          <h2><span class="step-n">2</span>Карта</h2>
+          <div class="layers" id="layers">
+            <label><input type="checkbox" data-l="inter"><span class="mk" style="background:var(--m-inter)"></span>Қиылыстар</label>
+            <label><input type="checkbox" data-l="dead"><span class="mk" style="background:var(--m-dead)"></span>Тұйықтар</label>
+            <label><input type="checkbox" data-l="cross"><span class="mk" style="background:var(--m-cross)"></span>Өткелдер</label>
+            <label><input type="checkbox" data-l="walk">Жаяу соқпақтар</label>
+            <label><input type="checkbox" data-l="routes">Маршруттар</label>
+          </div>
+        </div>
+        <div class="mapbox">
+          <canvas id="cv" aria-label="Жолдар, ғимараттар және маршруттар картасы" role="img"></canvas>
+          <div class="dtag" id="dataTag" hidden></div>
+          <div class="empty" id="mapEmpty">Координата мен радиусты беріп, «Картаны құру» батырмасын басыңыз.</div>
+          <div class="zoom"><button type="button" id="zIn" aria-label="Жақындату">+</button><button type="button" id="zOut" aria-label="Алыстату">−</button><button type="button" id="zFit" aria-label="Шеңберді толық көрсету">⤢</button></div>
+          <div class="scale" id="scale"><span id="scaleT"></span><i id="scaleB"></i></div>
+          <div class="attr">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a></div>
+        </div>
+        <div class="progress" aria-hidden="true"><i id="optBar"></i></div>
+        <p class="status" id="stOpt"></p>
+        <div class="kpis" id="routeKpi"></div>
+      </article>
+
+      <article class="card disabled" id="s4r">
+        <div class="card-h"><h2>Маршрут нәтижесі</h2><span class="small muted" id="routeSub"></span></div>
+        <div class="tbl"><table id="methTbl"></table></div>
+        <div class="tbl"><table id="routeTbl"></table></div>
+        <p class="hint" style="margin-top:8px">Ф7 бағасы = 2·r + k·φ̂·√(n·A), мұнда A — маршрут үйлерінің дөңес қабығының ауданы, r = φ̂ × емханадан аймақ центріне дейінгі түзу қашықтық, k = 0,7124. k<sub>эмп</sub> — нақты маршруттардан шыққан тұрақты: ол 0,7124-тен алшақ болса, формуланы осы аумаққа калибрлеу керек.</p>
+      </article>
+
+      <article class="card disabled" id="s3">
+        <div class="card-h"><h2><span class="step-n">3</span>ЖИ анықтаған айнымалылар</h2><span class="small muted">Граф теориясы және есептеу геометриясы · қолмен енгізусіз</span></div>
+        <div class="warns" id="warns"></div>
+        <div class="tbl"><table class="vars" id="varTbl"></table></div>
+      </article>
     </section>
   </main>
 
   <footer>
-    <div>Модель: Ф1–Ф18 формулалары, М0–М6 әдістері, Лемма 1–4 («Д-есептегі пациенттерге дәріні үйге таратудың математикалық моделі», v0.2). Негізі: Beardwood–Halton–Hammersley (1959), Daganzo (1984), Newell &amp; Daganzo (1986), Gillett &amp; Miller (1974), Perboli және т.б. (2011).</div>
-    <div>Деректер тек осы құрылғыдағы браузерде сақталады. Телефон мен компьютер арасында көшіру үшін «Деректер» терезесін пайдаланыңыз. Пациенттің аты-жөні, ЖСН, мекенжайы енгізілмейді.</div>
+    <div>Карта деректері: © OpenStreetMap қатысушылары, ODbL лицензиясы. Деректің толықтығы аймаққа байланысты: шағын қалаларда кейбір үйлер мен жолдар сызылмаған болуы мүмкін.</div>
+    <div>Әдістер: қашықтық — Dijkstra алгоритмі; айналма коэффициенті — желілік және түзу қашықтық қатынасы; бағдар реттілігі — Boeing (2019) энтропиясы; маршрут — жақын көрші, 2-opt, Or-opt, топаралық ауыстыру және ILS. Пациенттің аты-жөні, ЖСН, нақты мекенжайы енгізілмейді.</div>
   </footer>
 </div>
 
-<div id="dataPanel" class="panel-data" hidden>
-  <div class="box" role="dialog" aria-modal="true" aria-labelledby="dpTitle">
-    <div class="card-h"><h2 id="dpTitle">Деректер</h2><button type="button" id="dpClose">Жабу</button></div>
-    <div class="sub">
-      <b>Осы құрылғыда сақталған сценарийлер</b>
-      <div class="row"><input type="text" id="scName" placeholder="Сценарий атауы, мысалы: 2027 жоспар"><button type="button" class="primary" id="scSave">Сақтау</button></div>
-      <ul class="saved" id="scList"></ul>
-      <span class="msg" id="scMsg"></span>
-    </div>
-    <div class="sub">
-      <b>Басқа құрылғыға көшіру</b>
-      <p class="hint">1) Мына мәтінді көшіріңіз. 2) Екінші құрылғыда осы бетті ашып, төмендегі «Импорт» өрісіне қойыңыз.</p>
-      <textarea id="expText" readonly aria-label="Экспорт мәтіні"></textarea>
-      <div class="row"><button type="button" id="expCopy">Көшіру</button><span class="msg" id="expMsg"></span></div>
-      <label for="impText" class="small">Импорт</label>
-      <textarea id="impText" placeholder="Мұнда экспорт мәтінін қойыңыз"></textarea>
-      <div class="row"><button type="button" class="primary" id="impBtn">Импорттау</button><span class="msg" id="impMsg"></span></div>
-    </div>
-  </div>
-</div>
+<script>
+/* ======================================================================
+   NET — көше желісін автоматты талдау ядросы (OpenStreetMap → граф → айнымалылар)
+   Бір файл, тәуелділіксіз. Браузерде де, Node-та да жұмыс істейді.
+   ====================================================================== */
+const NET = (() => {
+"use strict";
 
+/* ---------- OSM классификациясы ---------- */
+const STREET = new Set(["motorway","motorway_link","trunk","trunk_link","primary","primary_link","secondary","secondary_link",
+  "tertiary","tertiary_link","unclassified","residential","living_street","road"]);
+const DRIVE_EXTRA = new Set(["service","track"]);
+const WALK_ONLY = new Set(["footway","path","pedestrian","steps","cycleway","bridleway","corridor"]);
+const MAJOR = new Set(["motorway","motorway_link","trunk","trunk_link","primary","primary_link","secondary","secondary_link"]);
+const SKIP = new Set(["proposed","construction","platform","raceway","bus_stop","elevator","abandoned","razed","rest_area",
+  "services","emergency_bay","no","disused","planned"]);
+const RES_BLD = new Set(["house","residential","detached","semidetached_house","apartments","terrace","bungalow","farm",
+  "dormitory","cabin","hut"]);
+const RAIL_RX = /^(rail|light_rail|narrow_gauge|subway|preserved)$/;
+const WATER_RX = /^(river|canal)$/;
+
+/* ---------- кездейсоқ сандар (қайталанатын) ---------- */
+function rng(seed){ let a = seed|0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ---------- жергілікті проекция: метр, x — шығыс, y — солтүстік ---------- */
+function projector(lat0, lon0){
+  const kx = 111320 * Math.cos(lat0 * Math.PI / 180), ky = 110574;
+  return { fwd:(lat, lon) => [(lon - lon0) * kx, (lat - lat0) * ky], inv:(x, y) => [lat0 + y / ky, lon0 + x / kx] };
+}
+
+/* ---------- Overpass сұранысы ---------- */
+function overpassQuery(lat, lon, R){
+  const a = `(around:${Math.round(R + 150)},${lat.toFixed(6)},${lon.toFixed(6)})`;
+  return `[out:json][timeout:120];(way["highway"]${a};way["building"]${a};way["railway"]${a};` +
+         `way["waterway"~"^(river|canal)$"]${a};way["natural"="water"]${a};);out geom qt;`;
+}
+
+/* ---------- геометрия ---------- */
+function polyAreaCentroid(xy){
+  let A = 0, cx = 0, cy = 0; const n = xy.length / 2;
+  for(let i = 0; i < n; i++){ const j = (i + 1) % n; const x0 = xy[2*i], y0 = xy[2*i+1], x1 = xy[2*j], y1 = xy[2*j+1];
+    const c = x0 * y1 - x1 * y0; A += c; cx += (x0 + x1) * c; cy += (y0 + y1) * c; }
+  A /= 2;
+  if(Math.abs(A) < 1e-6){ let sx = 0, sy = 0; for(let i = 0; i < n; i++){ sx += xy[2*i]; sy += xy[2*i+1]; } return {area:0, cx:sx/n, cy:sy/n}; }
+  return {area:Math.abs(A), cx:cx / (6 * A), cy:cy / (6 * A)};
+}
+/* кесіндінің шеңбер ішіндегі ұзындығы */
+function clipLen(ax, ay, bx, by, R){
+  const dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy); if(L === 0) return 0;
+  const a = dx*dx + dy*dy, b = 2 * (ax*dx + ay*dy), c = ax*ax + ay*ay - R*R, disc = b*b - 4*a*c;
+  if(disc <= 0) return 0;
+  const s = Math.sqrt(disc); const t0 = Math.max(0, (-b - s) / (2*a)), t1 = Math.min(1, (-b + s) / (2*a));
+  return t1 > t0 ? (t1 - t0) * L : 0;
+}
+/* екі кесіндінің қиылысуы (шеттерімен қоса) */
+function segX(ax, ay, bx, by, cx, cy, dx, dy){
+  const rx = bx - ax, ry = by - ay, sx = dx - cx, sy = dy - cy, den = rx * sy - ry * sx;
+  if(Math.abs(den) < 1e-12) return null;
+  const qx = cx - ax, qy = cy - ay, t = (qx * sy - qy * sx) / den, u = (qx * ry - qy * rx) / den;
+  const e = 1e-9; if(t < -e || t > 1 + e || u < -e || u > 1 + e) return null;
+  return [ax + t * rx, ay + t * ry];
+}
+function hull(pts){ // [[x,y]] → дөңес қабық
+  if(pts.length < 3) return pts.slice();
+  const p = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cr = (o, a, b) => (a[0]-o[0]) * (b[1]-o[1]) - (a[1]-o[1]) * (b[0]-o[0]);
+  const lo = [], up = [];
+  for(const q of p){ while(lo.length >= 2 && cr(lo[lo.length-2], lo[lo.length-1], q) <= 0) lo.pop(); lo.push(q); }
+  for(let i = p.length - 1; i >= 0; i--){ const q = p[i]; while(up.length >= 2 && cr(up[up.length-2], up[up.length-1], q) <= 0) up.pop(); up.push(q); }
+  up.pop(); lo.pop(); return lo.concat(up);
+}
+function hullArea(pts){ const h = hull(pts); if(h.length < 3) return 0; const xy = []; h.forEach(q => xy.push(q[0], q[1])); return polyAreaCentroid(xy).area; }
+
+/* ---------- 1. OSM JSON → қабаттар ---------- */
+function parse(osm, lat0, lon0){
+  const pr = projector(lat0, lon0);
+  const roads = [], blds = [], rails = [], waters = [], waterAreas = [];
+  for(const e of (osm && osm.elements) || []){
+    if(e.type !== "way" || !Array.isArray(e.geometry)) continue;
+    const t = e.tags || {}, g = e.geometry, nodes = e.nodes || [];
+    const xy = [], ids = [];
+    for(let i = 0; i < g.length; i++){ const q = g[i]; if(!q || q.lat == null) continue;
+      const p = pr.fwd(q.lat, q.lon); xy.push(p[0], p[1]); ids.push(nodes[i] != null ? String(nodes[i]) : `g${e.id}_${i}`); }
+    if(xy.length < 4) continue;
+    if(t.highway && !SKIP.has(t.highway) && t.area !== "yes"){
+      const h = t.highway, priv = t.access === "private" || t.access === "no";
+      const drive = (STREET.has(h) || DRIVE_EXTRA.has(h)) && !priv && t.motor_vehicle !== "no" && t.motorcar !== "no";
+      const walk = t.foot !== "no" && h !== "motorway" && h !== "motorway_link" && (!priv || t.foot === "yes" || t.foot === "designated");
+      if(!drive && !walk) continue;
+      let ow = 0; const o = t.oneway;
+      if(o === "yes" || o === "1" || o === "true" || t.junction === "roundabout" || t.junction === "circular" || h === "motorway") ow = 1;
+      else if(o === "-1" || o === "reverse") ow = -1;
+      const cls = MAJOR.has(h) ? "major" : STREET.has(h) ? "street" : DRIVE_EXTRA.has(h) ? "service" : "walk";
+      roads.push({id:e.id, h, cls, name:t.name || t["name:kk"] || t["name:ru"] || "", drive, walk, ow, xy, ids,
+        bridge:!!(t.bridge && t.bridge !== "no"), tunnel:!!(t.tunnel && t.tunnel !== "no")});
+    } else if(t.building && t.building !== "no"){
+      const c = polyAreaCentroid(xy), b = t.building;
+      blds.push({xy, cx:c.cx, cy:c.cy, area:c.area, type:RES_BLD.has(b) ? "res" : (b === "yes" ? "unk" : "other"), lv:+t["building:levels"] || 0});
+    } else if(t.railway && RAIL_RX.test(t.railway)){
+      rails.push({xy, bridge:!!(t.bridge && t.bridge !== "no"), tunnel:!!(t.tunnel && t.tunnel !== "no"), service:t.service || ""});
+    } else if(t.waterway && WATER_RX.test(t.waterway)){
+      waters.push({xy, name:t.name || "", kind:t.waterway});
+    } else if(t.natural === "water"){
+      waterAreas.push({xy});
+    }
+  }
+  return {roads, blds, rails, waters, waterAreas, pr};
+}
+
+/* ---------- 2. Граф (CSR), қабырғалар ≤ maxSeg м бөлшектенеді ---------- */
+function buildGraph(roads, mode, maxSeg){
+  maxSeg = maxSeg || 25;
+  const idx = new Map(), X = [], Y = [], A = [], B = [], W = [];
+  const nid = (id, x, y) => { let i = idx.get(id); if(i === undefined){ i = X.length; idx.set(id, i); X.push(x); Y.push(y); } return i; };
+  for(const r of roads){
+    if(mode === "walk" ? !r.walk : !r.drive) continue;
+    const n = r.ids.length; let prev = nid(r.ids[0], r.xy[0], r.xy[1]);
+    for(let i = 1; i < n; i++){
+      const cur = nid(r.ids[i], r.xy[2*i], r.xy[2*i+1]); if(cur === prev) continue;
+      const x0 = X[prev], y0 = Y[prev], x1 = X[cur], y1 = Y[cur], len = Math.hypot(x1 - x0, y1 - y0);
+      const k = Math.max(1, Math.ceil(len / maxSeg)), w = len / k; let a = prev;
+      for(let j = 1; j <= k; j++){
+        let b; if(j === k) b = cur; else { b = X.length; X.push(x0 + (x1 - x0) * j / k); Y.push(y0 + (y1 - y0) * j / k); }
+        if(mode === "walk" || r.ow === 0){ A.push(a, b); B.push(b, a); W.push(w, w); }
+        else if(r.ow === 1){ A.push(a); B.push(b); W.push(w); }
+        else { A.push(b); B.push(a); W.push(w); }
+        a = b;
+      }
+      prev = cur;
+    }
+  }
+  const n = X.length, csr = (from, to) => { const off = new Int32Array(n + 1);
+    for(const a of from) off[a + 1]++; for(let i = 0; i < n; i++) off[i + 1] += off[i];
+    const pos = off.slice(0, n), T = new Int32Array(from.length), Wt = new Float64Array(from.length);
+    for(let e = 0; e < from.length; e++){ const p = pos[from[e]]++; T[p] = to[e]; Wt[p] = W[e]; } return {off, to:T, w:Wt}; };
+  const fw = csr(A, B), rv = mode === "walk" ? fw : csr(B, A);
+  return {mode, n, X:Float64Array.from(X), Y:Float64Array.from(Y), off:fw.off, to:fw.to, w:fw.w, roff:rv.off, rto:rv.to, rw:rv.w, idx};
+}
+
+/* ---------- 3. Dijkstra (екілік үйме) ---------- */
+function dijkstra(G, src, reverse){
+  const off = reverse ? G.roff : G.off, to = reverse ? G.rto : G.to, w = reverse ? G.rw : G.w;
+  const n = G.n, dist = new Float64Array(n).fill(Infinity), prev = new Int32Array(n).fill(-1);
+  if(src < 0) return {dist, prev};
+  let hn = new Int32Array(1024), hd = new Float64Array(1024), size = 0;
+  const push = (v, d) => { if(size === hn.length){ const a = new Int32Array(size * 2); a.set(hn); hn = a; const b = new Float64Array(size * 2); b.set(hd); hd = b; }
+    let i = size++; while(i > 0){ const p = (i - 1) >> 1; if(hd[p] <= d) break; hn[i] = hn[p]; hd[i] = hd[p]; i = p; } hn[i] = v; hd[i] = d; };
+  const pop = () => { const v = hn[0], lastV = hn[--size], lastD = hd[size]; let i = 0;
+    while(true){ let c = 2 * i + 1; if(c >= size) break; if(c + 1 < size && hd[c + 1] < hd[c]) c++; if(hd[c] >= lastD) break; hn[i] = hn[c]; hd[i] = hd[c]; i = c; }
+    hn[i] = lastV; hd[i] = lastD; return v; };
+  dist[src] = 0; push(src, 0);
+  while(size){ const d0 = hd[0], u = pop(); if(d0 > dist[u]) continue;
+    for(let e = off[u]; e < off[u + 1]; e++){ const v = to[e], nd = d0 + w[e]; if(nd < dist[v]){ dist[v] = nd; prev[v] = u; push(v, nd); } } }
+  return {dist, prev};
+}
+function pathTo(prev, t){ const p = []; for(let v = t; v >= 0; v = prev[v]) p.push(v); return p.reverse(); }
+
+/* ---------- 4. Жақын түйін іздеу торы ---------- */
+function nodeIndex(G, mask, cell){
+  cell = cell || 60; const m = new Map();
+  for(let i = 0; i < G.n; i++){ if(mask && !mask[i]) continue; const k = Math.floor(G.X[i] / cell) + "," + Math.floor(G.Y[i] / cell);
+    let a = m.get(k); if(!a) m.set(k, a = []); a.push(i); }
+  return {m, cell, G};
+}
+function nearest(ix, x, y, maxR){
+  maxR = maxR || 800; const {m, cell, G} = ix, cx = Math.floor(x / cell), cy = Math.floor(y / cell);
+  let best = -1, bd = Infinity;
+  for(let ring = 0; ring * cell <= maxR + cell; ring++){
+    for(let i = -ring; i <= ring; i++) for(let j = -ring; j <= ring; j++){
+      if(Math.max(Math.abs(i), Math.abs(j)) !== ring) continue;
+      const a = m.get((cx + i) + "," + (cy + j)); if(!a) continue;
+      for(const v of a){ const d = Math.hypot(G.X[v] - x, G.Y[v] - y); if(d < bd){ bd = d; best = v; } }
+    }
+    if(best >= 0 && bd <= ring * cell) break;
+  }
+  return bd <= maxR ? {node:best, d:bd} : {node:-1, d:Infinity};
+}
+
+/* ---------- 5. Байланыс компоненті ---------- */
+function reachMask(G, src){ // src-тен барып, қайта орала алатын түйіндер
+  const f = dijkstra(G, src, false).dist, b = G.mode === "walk" ? f : dijkstra(G, src, true).dist;
+  const m = new Uint8Array(G.n); for(let i = 0; i < G.n; i++) m[i] = (f[i] < Infinity && b[i] < Infinity) ? 1 : 0; return m;
+}
+function largestComponent(G){
+  const lab = new Int32Array(G.n).fill(-1); let best = -1, bestSize = 0, c = 0; const st = [];
+  for(let s = 0; s < G.n; s++){ if(lab[s] >= 0) continue; let size = 0; st.push(s); lab[s] = c;
+    while(st.length){ const u = st.pop(); size++;
+      for(let e = G.off[u]; e < G.off[u + 1]; e++){ const v = G.to[e]; if(lab[v] < 0){ lab[v] = c; st.push(v); } }
+      for(let e = G.roff[u]; e < G.roff[u + 1]; e++){ const v = G.rto[e]; if(lab[v] < 0){ lab[v] = c; st.push(v); } } }
+    if(size > bestSize){ bestSize = size; best = c; } c++; }
+  const m = new Uint8Array(G.n); for(let i = 0; i < G.n; i++) m[i] = lab[i] === best ? 1 : 0;
+  return {mask:m, count:c};
+}
+
+/* ---------- 6. Топология: қиылыс, тұйық, сегмент ---------- */
+function topology(roads, R, filter){
+  const nb = new Map(), pos = new Map();
+  for(const r of roads){ if(!filter(r)) continue;
+    for(let i = 0; i < r.ids.length; i++){ const id = r.ids[i]; if(!pos.has(id)) pos.set(id, [r.xy[2*i], r.xy[2*i+1]]); if(!nb.has(id)) nb.set(id, new Set()); }
+    for(let i = 1; i < r.ids.length; i++){ const a = r.ids[i-1], b = r.ids[i]; if(a === b) continue; nb.get(a).add(b); nb.get(b).add(a); } }
+  const inter = [], dead = []; let segEnds = 0, degSum = 0, nIn = 0;
+  for(const [id, s] of nb){ const p = pos.get(id); if(p[0]*p[0] + p[1]*p[1] > R*R) continue; const d = s.size;
+    if(d !== 2){ segEnds += d; degSum += d; nIn++; }
+    if(d >= 3) inter.push(p); else if(d === 1) dead.push(p); }
+  // 12 м ішіндегі түйіндерді бір қиылысқа біріктіру
+  const merged = cluster(inter, 12);
+  return {intersections:merged, deadEnds:dead, segments:segEnds / 2, meanDegree:nIn ? degSum / nIn : 0};
+}
+function cluster(pts, tol){
+  const cell = tol, grid = new Map(), out = [];
+  for(const p of pts){ const gx = Math.floor(p[0] / cell), gy = Math.floor(p[1] / cell); let hit = null;
+    for(let i = -1; i <= 1 && !hit; i++) for(let j = -1; j <= 1 && !hit; j++){ const a = grid.get((gx+i) + "," + (gy+j)); if(!a) continue;
+      for(const c of a){ if(Math.hypot(c.x - p[0], c.y - p[1]) <= tol){ hit = c; break; } } }
+    if(hit){ hit.n++; hit.x += (p[0] - hit.x) / hit.n; hit.y += (p[1] - hit.y) / hit.n; Object.assign(hit, mergeFlags(hit, p)); }
+    else { const c = Object.assign({x:p[0], y:p[1], n:1}, p.flags || {}); out.push(c); const k = gx + "," + gy; let a = grid.get(k); if(!a) grid.set(k, a = []); a.push(c); } }
+  return out;
+}
+function mergeFlags(c, p){ const f = p.flags; if(!f) return {}; const o = {};
+  for(const k in f){ o[k] = typeof f[k] === "boolean" ? (c[k] || f[k]) : (c[k] != null ? c[k] : f[k]); } return o; }
+
+/* ---------- 7. Кедергілер және өткелдер ---------- */
+function barrierSegs(list, R){
+  const segs = [];
+  for(const b of list){ for(let i = 1; i < b.xy.length / 2; i++){ const ax = b.xy[2*i-2], ay = b.xy[2*i-1], bx = b.xy[2*i], by = b.xy[2*i+1];
+    if(Math.min(Math.hypot(ax, ay), Math.hypot(bx, by)) > R + 400) continue; segs.push([ax, ay, bx, by]); } }
+  return segs;
+}
+function segGrid(segs, cell){
+  const g = new Map();
+  segs.forEach((s, i) => { const x0 = Math.floor(Math.min(s[0], s[2]) / cell), x1 = Math.floor(Math.max(s[0], s[2]) / cell);
+    const y0 = Math.floor(Math.min(s[1], s[3]) / cell), y1 = Math.floor(Math.max(s[1], s[3]) / cell);
+    for(let x = x0; x <= x1; x++) for(let y = y0; y <= y1; y++){ const k = x + "," + y; let a = g.get(k); if(!a) g.set(k, a = []); a.push(i); } });
+  return {g, cell, segs};
+}
+function segHits(SG, ax, ay, bx, by, first){
+  const {g, cell, segs} = SG, out = [], seen = new Set();
+  const x0 = Math.floor(Math.min(ax, bx) / cell), x1 = Math.floor(Math.max(ax, bx) / cell), y0 = Math.floor(Math.min(ay, by) / cell), y1 = Math.floor(Math.max(ay, by) / cell);
+  for(let x = x0; x <= x1; x++) for(let y = y0; y <= y1; y++){ const a = g.get(x + "," + y); if(!a) continue;
+    for(const i of a){ if(seen.has(i)) continue; seen.add(i); const s = segs[i]; const p = segX(ax, ay, bx, by, s[0], s[1], s[2], s[3]);
+      if(p){ out.push(p); if(first) return out; } } }
+  return out;
+}
+function crossings(roads, barriers, R, kind){
+  const segs = barrierSegs(barriers, R); if(!segs.length) return {points:[], segs, grid:null};
+  const SG = segGrid(segs, 80), raw = [];
+  for(const r of roads){
+    for(let i = 1; i < r.xy.length / 2; i++){ const ax = r.xy[2*i-2], ay = r.xy[2*i-1], bx = r.xy[2*i], by = r.xy[2*i+1];
+      if(Math.min(Math.hypot(ax, ay), Math.hypot(bx, by)) > R + 200) continue;
+      for(const p of segHits(SG, ax, ay, bx, by, false)){
+        const q = [p[0], p[1]]; q.flags = {kind, drive:r.drive, walk:r.walk, grade:r.bridge ? "bridge" : r.tunnel ? "tunnel" : "level"}; raw.push(q); } } }
+  // бір өткелдегі бірнеше жол табаны / бірнеше рельс → бір нүкте
+  const pts = cluster(raw, 60).filter(c => Math.hypot(c.x, c.y) <= R);
+  return {points:pts, segs, grid:SG};
+}
+
+/* ---------- 8. Бағдар энтропиясы (Boeing, 2019) ---------- */
+function orientation(roads, R, filter){
+  const bins = new Float64Array(36);
+  for(const r of roads){ if(!filter(r)) continue;
+    for(let i = 1; i < r.xy.length / 2; i++){ const ax = r.xy[2*i-2], ay = r.xy[2*i-1], bx = r.xy[2*i], by = r.xy[2*i+1];
+      const L = clipLen(ax, ay, bx, by, R); if(L <= 0) continue;
+      let br = Math.atan2(bx - ax, by - ay) * 180 / Math.PI; br = (br + 360) % 360;
+      bins[Math.floor(((br + 5) % 360) / 10)] += L / 2; bins[Math.floor(((br + 185) % 360) / 10)] += L / 2; } }
+  const tot = bins.reduce((s, v) => s + v, 0); if(!tot) return {H:NaN, order:NaN, main:NaN, bins};
+  let H = 0; for(const v of bins){ if(v > 0){ const p = v / tot; H -= p * Math.log(p); } }
+  const Hmax = Math.log(36), Hg = Math.log(4), x = Math.max(0, (H - Hg) / (Hmax - Hg));
+  // басым ось: 0–180° аралығы
+  let mb = 0; for(let i = 0; i < 18; i++){ if(bins[i] + bins[i + 18] > bins[mb] + bins[mb + 18]) mb = i; }
+  return {H, order:Math.max(0, 1 - x * x), main:mb * 10, bins};
+}
+
+/* ---------- 9. Негізгі талдау ---------- */
+function analyze(data, R, opt){
+  opt = Object.assign({seed:11, sources:40, targets:200, depot:[0, 0]}, opt || {});
+  const {roads, blds, rails, waters} = data, A = Math.PI * R * R, rnd = rng(opt.seed);
+  const L = {street:0, major:0, service:0, walk:0, rail:0, water:0}, names = new Set(); let unnamed = 0;
+  for(const r of roads){ let len = 0;
+    for(let i = 1; i < r.xy.length / 2; i++) len += clipLen(r.xy[2*i-2], r.xy[2*i-1], r.xy[2*i], r.xy[2*i+1], R);
+    if(len <= 0) continue;
+    if(r.cls === "major" || r.cls === "street"){ L.street += len; if(r.cls === "major") L.major += len; if(r.name) names.add(r.name.trim().toLowerCase()); else unnamed++; }
+    else if(r.cls === "service") L.service += len; else L.walk += len; }
+  const lineLen = list => list.reduce((s, b) => { let q = 0; for(let i = 1; i < b.xy.length / 2; i++) q += clipLen(b.xy[2*i-2], b.xy[2*i-1], b.xy[2*i], b.xy[2*i+1], R); return s + q; }, 0);
+  L.rail = lineLen(rails); L.water = lineLen(waters);
+
+  const isStreet = r => r.cls === "major" || r.cls === "street";
+  const topo = topology(roads, R, isStreet);
+  const ori = orientation(roads, R, isStreet);
+
+  const Gw = buildGraph(roads, "walk"), Gd = buildGraph(roads, "drive");
+  const cr = crossings(roads, rails, R, "rail"), cw = crossings(roads, waters, R, "water");
+  const sgRail = rails.length ? segGrid(barrierSegs(rails, R), 80) : null, sgWater = waters.length ? segGrid(barrierSegs(waters, R), 80) : null;
+
+  // клиника (депо) нүктесі
+  const [dx, dy] = opt.depot;
+  const lcw = largestComponent(Gw);
+  const ixwAll = nodeIndex(Gw, lcw.mask);
+  const dW = nearest(ixwAll, dx, dy, 1500);
+  const maskW = dW.node >= 0 ? reachMask(Gw, dW.node) : lcw.mask;
+  const ixw = nodeIndex(Gw, maskW);
+  const ixdAll = nodeIndex(Gd, null);
+  const dD = nearest(ixdAll, dx, dy, 1500);
+  const maskD = dD.node >= 0 ? reachMask(Gd, dD.node) : new Uint8Array(Gd.n);
+  const ixd = nodeIndex(Gd, maskD);
+
+  // ғимараттар
+  const inB = blds.filter(b => b.cx*b.cx + b.cy*b.cy <= R*R);
+  const cnt = {res:0, unk:0, other:0}; let foot = 0, accSum = 0, accN = 0;
+  for(const b of inB){ cnt[b.type]++; foot += b.area;
+    const s = nearest(ixw, b.cx, b.cy, 400); b.wn = s.node; b.wd = s.d; if(s.node >= 0){ accSum += s.d; accN++; }
+    const t = nearest(ixd, b.cx, b.cy, 600); b.dn = t.node; b.dd = t.d; }
+  const homes = inB.filter(b => b.type !== "other");
+
+  // айналма коэффициенті (circuity) — жаяу және көлік.
+  // κ (кедергі коэффициенті) қашықтық топтары бойынша есептеледі: ұзақ сапарлардың айналмасы табиғи түрде аз,
+  // сондықтан кедергіні кесетін және кеспейтін жұптар бір қашықтық тобында салыстырылады.
+  const BINS = [150, 500, 1000, 1500, Infinity];
+  const kappaOf = bins => { let num = 0, den = 0; for(const q of bins){ if(q.kC >= 10 && q.kS >= 10){ num += q.kC * (q.nC / q.eC) / (q.nS / q.eS); den += q.kC; } } return den ? num / den : NaN; };
+  function circuity(G, key, mask){
+    const pool = homes.filter(b => b[key] >= 0); let nodesPool;
+    if(pool.length >= 20) nodesPool = pool.map(b => b[key]);
+    else { nodesPool = []; for(let i = 0; i < G.n; i++) if(mask[i] && G.X[i]*G.X[i] + G.Y[i]*G.Y[i] <= R*R) nodesPool.push(i); }
+    if(nodesPool.length < 5) return {c:NaN, kRail:NaN, kWater:NaN, pairs:0, nRail:0};
+    const pick = k => { const o = []; for(let i = 0; i < k; i++) o.push(nodesPool[Math.floor(rnd() * nodesPool.length)]); return o; };
+    const S = pick(opt.sources), T = pick(opt.targets), mk = () => BINS.slice(0, -1).map(() => ({nS:0, eS:0, kS:0, nC:0, eC:0, kC:0}));
+    const bR = mk(), bWt = mk(); let n1 = 0, e1 = 0, pairs = 0, kR = 0;
+    for(const s of S){ const d = dijkstra(G, s).dist;
+      for(const t of T){ if(t === s || !(d[t] < Infinity)) continue; const eu = Math.hypot(G.X[t] - G.X[s], G.Y[t] - G.Y[s]); if(eu < BINS[0]) continue;
+        n1 += d[t]; e1 += eu; pairs++; let bi = 0; while(eu >= BINS[bi + 1]) bi++;
+        for(const [SG, bins] of [[sgRail, bR], [sgWater, bWt]]){ const q = bins[bi];
+          if(SG && segHits(SG, G.X[s], G.Y[s], G.X[t], G.Y[t], true).length){ q.nC += d[t]; q.eC += eu; q.kC++; if(bins === bR) kR++; } else { q.nS += d[t]; q.eS += eu; q.kS++; } } } }
+    return {c:e1 ? n1 / e1 : NaN, kRail:kappaOf(bR), kWater:kappaOf(bWt), pairs, nRail:kR, binsRail:bR};
+  }
+  const cW = circuity(Gw, "wn", maskW), cD = circuity(Gd, "dn", maskD);
+
+  // емханадан қолжетімділік
+  function access(G, node, key, dkey){
+    if(node < 0) return {mean:NaN, eu:NaN, max:NaN, reach:0, n:0};
+    const d = dijkstra(G, node).dist; let s = 0, e = 0, mx = 0, k = 0;
+    for(const b of homes){ const v = b[key] >= 0 ? d[b[key]] : Infinity; if(!(v < Infinity)) continue;
+      const tot = v + b[dkey] + (G === Gw ? dW.d : dD.d); s += tot; e += Math.hypot(b.cx - dx, b.cy - dy); mx = Math.max(mx, tot); k++; }
+    return {mean:k ? s / k : NaN, eu:k ? e / k : NaN, max:mx, reach:homes.length ? k / homes.length : 0, n:k};
+  }
+  const accW = access(Gw, dW.node, "wn", "wd"), accD = access(Gd, dD.node, "dn", "dd");
+
+  const km2 = A / 1e6, inter = topo.intersections, rhoI = inter.length / km2;
+  const crossWalk = cr.points.filter(p => p.walk).length, crossDrive = cr.points.filter(p => p.drive).length;
+  const gradeSep = cr.points.filter(p => p.grade !== "level").length;
+
+  const V = [];
+  const add = (group, key, label, value, unit, how, model, fmt) => V.push({group, key, label, value, unit, how, model:model || "", fmt:fmt == null ? 0 : fmt});
+  add("Аумақ","R","Талдау радиусы",R,"м","Пайдаланушы енгізеді","Ф1");
+  add("Аумақ","A","Аумақ ауданы, A = πR²",km2,"км²","Шеңбер ауданы","Ф1, Ф7",2);
+  add("Көше желісі","L_st","Көше ұзындығы, L",L.street/1000,"км","Шеңбер ішіндегі көше кесінділерінің қосындысы","Ф2",2);
+  add("Көше желісі","L_mj","оның ішінде негізгі көшелер",L.major/1000,"км","primary / secondary / trunk","",2);
+  add("Көше желісі","L_sv","Аула және қызметтік жолдар",L.service/1000,"км","service / track","",2);
+  add("Көше желісі","L_wk","Тек жаяу жүретін жолдар",L.walk/1000,"км","footway / path / steps","",2);
+  add("Көше желісі","rhoL","Көше тығыздығы, L/A",L.street/1000/km2,"км/км²","L ÷ A","",1);
+  add("Көше желісі","delta","Көшелер арасы, δ = 2A/L",L.street > 0 ? 2*A/L.street : NaN,"м","Тор үшін L/A = 2/δ","Ф2 (δ)");
+  add("Көше желісі","Nst","Атауы бар көше саны",names.size,"дана","OSM «name» бойынша бірегей атаулар","");
+  add("Көше желісі","Nun","Атауы жоқ көше бөліктері",unnamed,"дана","Атауы көрсетілмеген жол сызықтары","");
+  add("Көше желісі","Nseg","Көше сегменті (қиылыс арасы)",topo.segments,"дана","Σ дәреже(түйін≠2) ÷ 2","");
+  add("Көше желісі","lseg","Орташа сегмент ұзындығы",topo.segments ? L.street / topo.segments : NaN,"м","L ÷ сегмент саны","");
+  add("Көше желісі","order","Тор реттілігі, Φ (0–1)",ori.order,"","Бағдар энтропиясы: Φ = 1 − ((H − H_тор)/(H_max − H_тор))²","φ таңдау",2);
+  add("Көше желісі","theta","Басым көше бағыты",ori.main,"°","36 бағанды гистограмманың шыңы","Жолақ стратегиясы");
+  add("Қиылыстар","NI","Қиылыс саны",inter.length,"дана","Дәрежесі ≥ 3 түйіндер, 12 м ішінде біріктірілген","");
+  add("Қиылыстар","rhoI","Қиылыс тығыздығы",rhoI,"/км²","Қиылыс саны ÷ A","",1);
+  add("Қиылыстар","deltaI","Квартал өлшемі, 1/√ρ",rhoI > 0 ? 1000/Math.sqrt(rhoI) : NaN,"м","Тор үшін ρ = 1/δ²","Ф2 тексеру");
+  add("Қиылыстар","ND","Тұйық көше саны",topo.deadEnds.length,"дана","Дәрежесі = 1 түйіндер","");
+  add("Қиылыстар","kbar","Орташа түйін дәрежесі",topo.meanDegree,"","Қиылыстар мен тұйықтар бойынша","",2);
+  add("Айналма","phiW","Айналма коэффициенті (жаяу), φ̂",cW.c,"","Σ көше қашықтығы ÷ Σ түзу қашықтық, "+cW.pairs+" жұп","Ф7, Ф8 (φ)",3);
+  add("Айналма","phiD","Айналма коэффициенті (көлік), φ̂",cD.c,"","Бір жақты көшелер ескеріледі, "+cD.pairs+" жұп","Ф16 (φ)",3);
+  add("Айналма","phiRef","Тең торлы қала үшін теория",4/Math.PI,"","4/π (Манхэттен торы)","Салыстыру",3);
+  add("Кедергілер","L_rail","Темір жол ұзындығы",L.rail/1000,"км","railway = rail (станция жолдарымен)","",2);
+  add("Кедергілер","Xw","Темір жолдан жаяу өту орны",crossWalk,"дана","Жол мен рельс қиылысатын нүктелер, 60 м ішінде біріктірілген","");
+  add("Кедергілер","Xd","Темір жолдан көлікпен өту орны",crossDrive,"дана","Тек көлік жүретін жолдар","");
+  add("Кедергілер","Xg","оның ішінде көпір / туннель",gradeSep,"дана","bridge / tunnel белгісі","");
+  add("Кедергілер","kappa","Темір жол кедергісі, κ",cW.kRail,"","φ̂(рельсті кесетін жұптар) ÷ φ̂(бір жақтағы жұптар), қашықтық топтары бойынша; "+cW.nRail+" жұп","Ф7 түзетуі",2);
+  add("Кедергілер","L_wat","Өзен / канал ұзындығы",L.water/1000,"км","waterway = river | canal","",2);
+  add("Кедергілер","Xwat","Өзен / каналдан өту орны",cw.points.length,"дана","Көпірлер","");
+  add("Кедергілер","kappaW","Өзен / канал кедергісі, κ",cW.kWater,"","Дәл сол әдіс; ≈1 болса, кедергі емес","",2);
+  add("Ғимараттар","NB","Ғимарат саны",inB.length,"дана","Шеңбер ішіндегі building","");
+  add("Ғимараттар","NBr","Тұрғын үй (анық)",cnt.res,"дана","house / residential / apartments ...","");
+  add("Ғимараттар","NBu","Түрі белгісіз",cnt.unk,"дана","building = yes","");
+  add("Ғимараттар","H","Үй саны бағасы, H",cnt.res + cnt.unk,"дана","Тұрғын + белгісіз (болжам)","Ф5 (H)");
+  add("Ғимараттар","rhoB","Ғимарат тығыздығы",inB.length / km2,"/км²","","",0);
+  add("Ғимараттар","cov","Құрылыс тығыздығы",foot / A * 100,"%","Ғимарат табаны ÷ A","",1);
+  add("Ғимараттар","acc","Үйден көшеге дейінгі орташа қашықтық",accN ? accSum / accN : NaN,"м","Ең жақын жаяу жол түйініне дейін","s₀ (қызмет уақыты)");
+  add("Қолжетімділік","rW","Емханадан үйге орташа қашықтық (жаяу)",accW.mean,"м","Көше желісі бойынша, Dijkstra","Ф7, Ф15 (r)");
+  add("Қолжетімділік","rWe","сол үйлерге түзу қашықтық",accW.eu,"м","","",0);
+  add("Қолжетімділік","rWmax","Ең алыс үй (жаяу)",accW.max,"м","","");
+  add("Қолжетімділік","rD","Емханадан үйге орташа қашықтық (көлік)",accD.mean,"м","Бір жақты көшелермен","Ф16 (r̄)");
+  add("Қолжетімділік","reach","Жаяу жетуге болатын үй үлесі",accW.reach * 100,"%","Емханамен байланысқан желі","Дерек сапасы",1);
+  add("Қолжетімділік","snap","Емханадан ең жақын көшеге дейін",dW.d,"м","","");
+
+  const warn = [];
+  if(!roads.length) warn.push("Бұл аумақта OSM-да жол табылмады.");
+  if(inB.length < 30 * km2 && L.street > 0) warn.push("Ғимарат өте аз белгіленген: OSM-да үйлер толық сызылмаған болуы мүмкін. H мәнін қолмен тексеріңіз.");
+  if(inB.length > 50 && cnt.unk / inB.length > 0.8) warn.push("OSM-да ғимараттардың көбінің түрі көрсетілмеген (building = yes): H барлық ғимаратты қамтиды, оған дүкен, мектеп, қора да кіреді. Нақты үй санын емхананың тіркеу тізімінен алыңыз.");
+  if(names.size + unnamed > 0 && unnamed / (names.size + unnamed) > 0.5) warn.push("Көшелердің жартысынан көбінің атауы жоқ: көше саны толық емес.");
+  if(accW.reach < 0.9 && homes.length) warn.push(`Үйлердің ${Math.round((1 - accW.reach) * 100)}%-ы емханамен байланысқан жаяу желіге қосылмаған: картада жол үзілген болуы мүмкін.`);
+  if(dW.d > 150) warn.push(`Емхана нүктесі ең жақын жолдан ${Math.round(dW.d)} м қашық: координатаны тексеріңіз.`);
+
+  return {R, A, L, vars:V, warn, topo, ori, cross:{rail:cr.points, water:cw.points}, circuity:{walk:cW, drive:cD},
+    access:{walk:accW, drive:accD}, Gw, Gd, maskW, maskD, ixw, ixd, depotW:dW, depotD:dD, homes, inB, counts:cnt};
+}
+
+return {parse, analyze, buildGraph, dijkstra, pathTo, nodeIndex, nearest, largestComponent, reachMask, overpassQuery,
+  projector, rng, hull, hullArea, clipLen, segX, polyAreaCentroid, topology, orientation, crossings};
+})();
+
+
+</script>
 <script>
 (function(){
 "use strict";
-/* ================================================================ state */
-const STORE_KEY = "dariModel.state.v1", SCEN_KEY = "dariModel.scenarios.v1";
-const DEFAULT = {
-  v:1, isExample:true, seed:7,
-  territory:{L:8, W:5, cx:2, cy:1.5},
-  groups:[{id:"G1", name:"1-топ (мысал)", alpha:0.6, tau:31},{id:"G2", name:"2-топ (мысал)", alpha:0.8, tau:31}],
-  areas:[
-    {id:"U1", name:"1-аймақ", L:1.2, W:1.0, x:1.2, y:1.0, nL:6, nW:8, pop:1800, houses:420, S:1, B:180, f:5, pat:{G1:120,G2:60}},
-    {id:"U2", name:"2-аймақ", L:1.5, W:1.2, x:3.0, y:2.2, nL:5, nW:7, pop:1900, houses:450, S:1, B:180, f:5, pat:{G1:120,G2:60}},
-    {id:"U3", name:"3-аймақ (шеткері)", L:2.0, W:1.5, x:6.5, y:4.0, nL:4, nW:5, pop:1700, houses:380, S:1, B:180, f:5, pat:{G1:120,G2:60}}
-  ],
-  drugs:[{group:"G1", name:"Дәрі 1", packs:2},{group:"G1", name:"Дәрі 2", packs:1},{group:"G2", name:"Дәрі 3", packs:3}],
-  params:{walk:4.5, s0:8, p:0.08, k:0.7124, phi:1.273, beta:0, norm:3, z:1.645,
-          veh:20, shift:360, vcount:1, C:25, cfix:1500, cn:2500, cd:1800, ckm:80, co2:0.231, safety:2,
-          ring:0, tau_sat:10, pick_share:0.3, pick_q:2, pick_min:120, pick_s1:3},
-  weights:{cost:3, staff:2, co2:1, delay:2, cont:1},
-  mapMethod:"AUTO"
-};
-const clone = o => JSON.parse(JSON.stringify(o));
-function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
-function lsSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
-function validState(s){ return s && s.territory && Array.isArray(s.areas) && Array.isArray(s.groups) && s.params && s.weights; }
-let S = (()=>{ try{ const t = JSON.parse(lsGet(STORE_KEY)); if(validState(t)) return Object.assign(clone(DEFAULT), t); }catch(e){} return clone(DEFAULT); })();
-
-/* ================================================================ formulas F1-F18 */
-const K_BHH = 0.7124;
-function f5(n,H){ return H>0 ? H*(1-Math.pow(1-1/H, n)) : n; }
-function f7(n,A,r,tours,k,phi,beta){ if(!(n>0)) return 0; return 2*r*tours + k*phi*Math.sqrt(n*A) + k*phi*beta*Math.sqrt(A); }
-function f8(n,A,r,v,s0,k,phi,beta){ return f7(n,A,r,1,k,phi,beta)/v + n*s0; }
-function f10(A,r,v,s0,B,k,phi,beta){ const a=s0, b=k*phi*Math.sqrt(A)/v, c=2*r/v + k*phi*beta*Math.sqrt(A)/v - B;
-  if(c>=0) return 0; const x=(-b+Math.sqrt(b*b-4*a*c))/(2*a); return x*x; }
-function f11(f,p,zoned){ const h = zoned ? 7 : 7/f; return h*(0.5 + p/(1-p)); }
-function f15(vw,vc,cnMin,cdMin,ckm,cfix){ const g = cnMin/vw - (cnMin+cdMin)/vc - ckm; return g>0 ? cfix/(2*g) : null; }
-function f16(n,A,rbar,C,k,phi,beta){ if(!(n>0)) return 0; return 2*rbar*Math.ceil(n/C) + k*phi*Math.sqrt(n*A) + k*phi*beta*Math.sqrt(A); }
-const peak = (x,z) => x + z*Math.sqrt(Math.max(x,0));
-function P(){ const p = Object.assign({}, S.params); for(const k in p) p[k] = +p[k]; p.v_w = p.walk/60; p.v_c = p.veh/60; return p; }
-
-/* ================================================================ state per area */
-function states(fOv){
-  const p = P(), t = S.territory;
-  const rows = S.areas.map(a=>{
-    const A = +a.L * +a.W, r = p.phi*Math.hypot(+a.x - +t.cx, +a.y - +t.cy);
-    let lam = 0; for(const g of S.groups){ lam += (+((a.pat||{})[g.id])||0) * (+g.alpha) / Math.max(+g.tau,1); }
-    const f = fOv || Math.max(1, Math.min(5, Math.round(+a.f)||1));
-    const n = 7*lam/f, m = f5(n, +a.houses), att = m/(1-p.p);
-    return {id:a.id, name:a.name, L:+a.L, W:+a.W, x:+a.x, y:+a.y, A, r, lam, S:Math.max(1, Math.round(+a.S)||1), B:+a.B, f, n, m, att, H:+a.houses};
-  });
-  const TL=+t.L, TW=+t.W, cx=+t.cx, cy=+t.cy;
-  const dx=Math.max(0,-cx,cx-TL), dy=Math.max(0,-cy,cy-TW);
-  rows.A_T = TL*TW; rows.r0 = p.phi*Math.hypot(dx,dy); rows.R_bound = 1.12*(TL+TW)/4;
-  return rows;
-}
-const meanF = st => st.reduce((s,a)=>s+a.f,0)/Math.max(st.length,1);
-const walkT = (n,A,r,p) => f8(n,A,r,p.v_w,p.s0,p.k,p.phi,p.beta);
-function base(code){ return {code, walk_min:0, crew_min:0, veh_km:0, walk_km:0, tours:0, patient_km:0, point_min:0, team_mean:0, team_peak:0, feasible:true, cont:CONT[code], viol:0}; }
-function finish(res,p,fd,delay){
-  const dm = fd*30/7; res.days = dm;
-  res.cost = dm*(res.walk_min/60*p.cn + res.crew_min/60*(p.cn+p.cd) + res.veh_km*p.ckm + res.tours*p.cfix + res.point_min/60*p.cn);
-  res.co2 = dm*res.veh_km*p.co2;
-  res.staff = dm*(res.walk_min + 2*res.crew_min + res.point_min)/60;
-  res.patient_km = dm*res.patient_km;
-  res.delay = delay; return res;
-}
-/* ================================================================ methods M0-M6 */
-const NAMES = {M0:"Тікелей сапар", M1:"Бекітілген кіші аймақтар", M2:"Емханадан радиалды жапырақтар", M3:"Сақиналы-радиалды аралас", M4:"Екі эшелонды (спутник нүкте)", M5:"Беру пункттері", M6:"Аймақ-күн (k-means)"};
-const DESC = {M0:"әр пациентке жеке барып-қайту", M1:"әр топқа өз аймағы, күнделікті маршрут", M2:"емхана — бастау, топтар жақыннан алысқа", M3:"жақын аймақ жаяу, алыс аймақ көлікпен", M4:"көлік → спутник нүкте → жаяу", M5:"пациенттің бір бөлігі пункттен алады", M6:"аймақ апта күндеріне бөлінеді"};
-const CONT = {M0:true,M1:true,M2:false,M3:true,M4:true,M5:true,M6:true};
-function m0(st,p){ const res=base("M0");
-  for(const s of st){ const ri=Math.sqrt(s.r*s.r + Math.pow(p.phi*(s.L+s.W)/4,2)); const per=2*ri/p.v_w + p.s0;
-    res.walk_min += s.att*per; res.walk_km += s.att*2*ri;
-    const tp = peak(s.att,p.z)/s.S*per; res.team_mean=Math.max(res.team_mean, s.att/s.S*per); res.team_peak=Math.max(res.team_peak,tp);
-    if(tp>s.B){ res.feasible=false; res.viol=Math.max(res.viol,tp/s.B); } }
-  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
-function m1raw(st,p,zoned,code){ const res=base(code||(zoned?"M6":"M1"));
-  for(const s of st){ const Ad = zoned ? s.A/s.f : s.A;
-    const T = walkT(s.att/s.S, Ad/s.S, s.r, p), Tp = walkT(peak(s.att,p.z)/s.S, Ad/s.S, s.r, p);
-    res.walk_min += s.S*T; res.walk_km += s.S*f7(s.att/s.S, Ad/s.S, s.r, 1, p.k, p.phi, p.beta);
-    res.team_mean=Math.max(res.team_mean,T); res.team_peak=Math.max(res.team_peak,Tp);
-    if(Tp>s.B){ res.feasible=false; res.viol=Math.max(res.viol,Tp/s.B); } }
-  return res; }
-function m1(st,p){ return finish(m1raw(st,p,false),p,meanF(st),f11(meanF(st),p.p,false)); }
-function m6(st,p){ return finish(m1raw(st,p,true),p,meanF(st),f11(meanF(st),p.p,true)); }
-function m2(st,p){ const res=base("M2");
-  const N=st.reduce((s,a)=>s+a.att,0), ST=st.reduce((s,a)=>s+a.S,0);
-  if(!(N>0)) return finish(res,p,meanF(st),NaN);
-  const delta=N/st.A_T, r0=st.r0, Rm=st.R_bound;
-  const plen = np => { let w=Math.sqrt(12/delta), R=np/(delta*w); if(R>Rm){ R=Rm; w=np/(delta*R); } return 2*r0 + 2*R + np*w/6; };
-  const np=N/ST, npk=peak(N,p.z)/ST, Lp=plen(np), Lpk=plen(npk);
-  const T=Lp/p.v_w + np*p.s0, Tp=Lpk/p.v_w + npk*p.s0, Bmin=Math.min(...st.map(s=>s.B));
-  Object.assign(res,{walk_min:ST*T, walk_km:ST*Lp, team_mean:T, team_peak:Tp, feasible:Tp<=Bmin, viol:Tp>Bmin?Tp/Bmin:0, petal_w:Math.sqrt(12/delta)});
-  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
-function rstar(p){ return f15(p.v_w,p.v_c,p.cn/60,p.cd/60,p.ckm,p.cfix); }
-function m3(st,p,rho){ if(rho==null){ rho = p.ring>0 ? p.ring : (rstar(p) || 1e9); }
-  const inner=st.filter(s=>s.r<=rho), outer=st.filter(s=>s.r>rho);
-  const res = inner.length ? m1raw(inner,p,false,"M3") : base("M3"); res.code="M3"; res.cont=true; res.rho=rho;
-  if(outer.length){ const N=outer.reduce((s,a)=>s+a.att,0);
-    const rbar = N>0 ? outer.reduce((s,a)=>s+a.r*a.att,0)/N : 0, Ao=outer.reduce((s,a)=>s+a.A,0);
-    const D=f16(N,Ao,rbar,p.C,p.k,p.phi,p.beta), crew=D/p.v_c + N*p.s0;
-    const Np=peak(N,p.z), Dp=f16(Np,Ao,rbar,p.C,p.k,p.phi,p.beta), crewp=Dp/p.v_c + Np*p.s0, cap=p.vcount*p.shift;
-    Object.assign(res,{veh_km:D, crew_min:crew, tours:N>0?Math.ceil(N/p.C):0, vutil:crew/cap});
-    if(crewp>cap){ res.feasible=false; res.viol=Math.max(res.viol,crewp/cap); } }
-  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
-function m4(st,p){ const res=base("M4"); const h=st.reduce((s,a)=>s+a.S,0), tau=p.tau_sat;
-  const lv=f7(h,st.A_T,st.r0,1,p.k,p.phi,p.beta);
-  for(const s of st){ const T=walkT(s.att/s.S,s.A/s.S,0,p)+tau, Tp=walkT(peak(s.att,p.z)/s.S,s.A/s.S,0,p)+tau;
-    res.walk_min+=s.S*T; res.walk_km+=s.S*f7(s.att/s.S,s.A/s.S,0,1,p.k,p.phi,p.beta);
-    res.team_mean=Math.max(res.team_mean,T); res.team_peak=Math.max(res.team_peak,Tp);
-    if(Tp>s.B){ res.feasible=false; res.viol=Math.max(res.viol,Tp/s.B); } }
-  res.veh_km=lv; res.crew_min=lv/p.v_c + h*tau; res.tours=1; const cap=p.vcount*p.shift;
-  if(res.crew_min>cap){ res.feasible=false; res.viol=Math.max(res.viol,res.crew_min/cap); }
-  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
-function m5(st,p){ const pi=Math.min(Math.max(p.pick_share,0),1), q=Math.max(1,Math.round(p.pick_q));
-  const st2 = st.map(s=>Object.assign({},s,{att:s.att*(1-pi)})); st2.A_T=st.A_T; st2.r0=st.r0; st2.R_bound=st.R_bound;
-  const res = m1raw(st2,p,false,"M5"); res.cont=true;
-  const pk = st.reduce((s,a)=>s+a.n*pi,0);
-  res.patient_km = pk*Math.sqrt(st.A_T/q); res.point_min = q*p.pick_min + pk*p.pick_s1;
-  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
-const MFUN = {M0:m0,M1:m1,M2:m2,M3:(st,p)=>m3(st,p,null),M4:m4,M5:m5,M6:m6};
-function ruleR1(st,p){ const N=st.reduce((s,a)=>s+a.att,0), ST=st.reduce((s,a)=>s+a.S,0);
-  if(!(N>0)) return null; const delta=N/st.A_T;
-  const lhs = st.reduce((s,a)=>s+2*a.r*a.S,0) - 2*ST*st.r0, rhs=(2/Math.sqrt(3) - p.k*p.phi)*N/Math.sqrt(delta);
-  const cov = st.reduce((s,a)=>s+a.A,0)/st.A_T, np=N/ST, Ropt=np/(delta*Math.sqrt(12/delta));
-  return {lhs, rhs, prefer: lhs<rhs ? "M1":"M2", valid: cov>=0.8 && Ropt<=st.R_bound, cov}; }
-
-/* ================================================================ AI: method + parameter search */
-function aiSearch(){
-  const p=P(); const cands=[]; const st0=states(null);
-  const maxR = Math.max(0, ...st0.map(s=>s.r)), rs = rstar(p);
-  const rhoGrid = [...new Set([rs,0.5,1,1.5,2,3,4,6].filter(x=>x && x>0 && x<maxR))].sort((a,b)=>a-b);
-  for(let f=1; f<=5; f++){
-    const st=states(f);
-    for(const code of ["M0","M1","M2","M3","M4","M5","M6"]){
-      if(code==="M6" && f===1) continue;
-      if(code==="M5" && !(p.pick_share>0)) continue;
-      if(code==="M3"){ if(p.ring>0) cands.push({code,f,rho:p.ring,res:m3(st,p,p.ring)});
-        else for(const rho of rhoGrid) cands.push({code,f,rho,res:m3(st,p,rho)}); continue; }
-      cands.push({code,f,res:MFUN[code](st,p)});
-    }
-  }
-  for(const c of cands){ c.ok = c.res.feasible && c.res.delay <= p.norm + 1e-9; }
-  const pool = cands.some(c=>c.ok) ? cands.filter(c=>c.ok) : cands;
-  const W=S.weights, keys=[["cost","cost"],["staff","staff"],["co2","co2"],["delay","delay"]];
-  const rng={}; for(const [k,f] of keys){ const v=pool.map(c=>c.res[f]).filter(Number.isFinite); rng[k]=[Math.min(...v), Math.max(...v)]; }
-  for(const c of cands){ let s=0;
-    for(const [k,f] of keys){ const [lo,hi]=rng[k]; const v=c.res[f]; s += (+W[k]||0) * (Number.isFinite(v) ? (hi>lo ? (v-lo)/(hi-lo) : 0) : 1); }
-    s += (+W.cont||0) * (c.res.cont ? 0 : 1);
-    if(!c.ok) s += 100 + 10*Math.max(c.res.viol||1, c.res.delay/p.norm || 1);
-    c.score=s; }
-  cands.sort((a,b)=>a.score-b.score);
-  const best=cands[0]; const alts=[]; const seen=new Set([best.code]);
-  for(const c of cands){ if(!seen.has(c.code)){ seen.add(c.code); alts.push(c); } if(alts.length>=3) break; }
-  return {best, alts, anyOk:cands.some(c=>c.ok), n:cands.length, rs};
-}
-
-/* ================================================================ formatting */
-const nf0 = new Intl.NumberFormat("ru-RU",{maximumFractionDigits:0}), nf1 = new Intl.NumberFormat("ru-RU",{maximumFractionDigits:1,minimumFractionDigits:1}), nf2=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2});
-const F0=v=>Number.isFinite(v)?nf0.format(v):"—", F1=v=>Number.isFinite(v)?nf1.format(v):"—", F2=v=>Number.isFinite(v)?nf2.format(v):"—";
-const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function confText(c){ let t=`${c.f} күн/апта`; if(c.code==="M3") t+=`, сақина радиусы ${F2(c.rho)} км`; if(c.code==="M6") t+=`, ${c.f} күндік аймақ`; if(c.code==="M5") t+=`, ${F0(S.params.pick_share*100)}% пунктке`; return t; }
-
-/* ================================================================ inputs UI */
 const $ = id => document.getElementById(id);
-function fld(label, unit, path, val, opt={}){ const id="in_"+path.replace(/[^\w]/g,"_");
-  const type=opt.type||"number"; const attrs = type==="number" ? `inputmode="decimal" step="${opt.step||"any"}" ${opt.min!=null?`min="${opt.min}"`:""} ${opt.max!=null?`max="${opt.max}"`:""}` : "";
-  return `<div class="fld"${opt.span?` style="grid-column:span ${opt.span}"`:""}><label for="${id}">${esc(label)}${unit?` <span class="u">(${esc(unit)})</span>`:""}</label><input id="${id}" type="${type}" ${attrs} data-path="${path}" value="${esc(val)}"></div>`; }
-function rangeFld(label, path, val){ const id="in_"+path.replace(/[^\w]/g,"_");
-  return `<div class="fld"><label for="${id}">${esc(label)}: <b class="num" id="${id}_v">${val}</b></label><input id="${id}" type="range" min="0" max="5" step="1" data-path="${path}" value="${val}"></div>`; }
-function renderInputs(){
-  const t=S.territory, p=S.params, W=S.weights;
-  let h = `
-  <details class="blk" open><summary><span><span class="h">1. Аумақ</span><br><span class="s">ұзындығы, ені, емхананың орны</span></span></summary><div class="blk-body">
-    <div class="fields">${fld("Ұзындығы","км","territory.L",t.L,{min:0.1})}${fld("Ені","км","territory.W",t.W,{min:0.1})}
-    ${fld("Емхана X","км","territory.cx",t.cx)}${fld("Емхана Y","км","territory.cy",t.cy)}</div>
-    <p class="hint">Координаталар аумақтың сол жақ төменгі бұрышынан, км-мен.</p></div></details>
+const ST_KEY = "dariModel.net.v1", STORE_KEY = "dariModel.state.v1";
+const AYAN = [41.464551, 69.148520];
+const EP = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://maps.mail.ru/osm/tools/overpass/api/interpreter"];
+const K_BHH = 0.7124;
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
+const DEF_U = {lat:AYAN[0], lon:AYAN[1], R:1500, n:30, K:3, mode:"walk", method:"AI", seed:1, vw:4.5, vc:20, s0:8,
+  layers:{inter:false, dead:false, cross:true, walk:true, routes:true}};
+const U = (() => { let t = {}; try{ t = JSON.parse(lsGet(ST_KEY)) || {}; }catch(e){}
+  const u = Object.assign({}, DEF_U, t); u.layers = Object.assign({}, DEF_U.layers, t.layers || {}); return u; })();
+const saveU = () => lsSet(ST_KEY, JSON.stringify(U));
 
-  <details class="blk" open><summary><span><span class="h">2. Аймақтар мен топтар</span><br><span class="s">көшелер, халық, үй, жеткізуші топ, кесте</span></span></summary><div class="blk-body">`;
-  S.areas.forEach((a,i)=>{ h += `<div class="sub"><div class="row-h"><b>${esc(a.name||a.id)}</b>${S.areas.length>1?`<button type="button" class="x" data-del-area="${i}" aria-label="Аймақты өшіру">Өшіру</button>`:""}</div>
-      <div class="fields three">${fld("Атауы","",`areas.${i}.name`,a.name,{type:"text",span:3})}
-      ${fld("Ұзындығы","км",`areas.${i}.L`,a.L,{min:0.05})}${fld("Ені","км",`areas.${i}.W`,a.W,{min:0.05})}${fld("Центр X","км",`areas.${i}.x`,a.x)}
-      ${fld("Центр Y","км",`areas.${i}.y`,a.y)}${fld("Көше (ұзындық бойы)","дана",`areas.${i}.nL`,a.nL,{min:0,step:1})}${fld("Көше (ені бойы)","дана",`areas.${i}.nW`,a.nW,{min:0,step:1})}
-      ${fld("Тіркелген халық","адам",`areas.${i}.pop`,a.pop,{min:0,step:1})}${fld("Үй саны","дана",`areas.${i}.houses`,a.houses,{min:1,step:1})}${fld("Жеткізуші топ","саны",`areas.${i}.S`,a.S,{min:1,step:1})}
-      ${fld("Топқа уақыт","мин/күн",`areas.${i}.B`,a.B,{min:10,step:5})}${fld("Жеткізу күні","күн/апта",`areas.${i}.f`,a.f,{min:1,max:5,step:1})}</div>
-      <div class="fields three">${S.groups.map(g=>fld(`Д-есеп: ${g.name||g.id}`,"адам",`areas.${i}.pat.${g.id}`,(a.pat||{})[g.id]||0,{min:0,step:1})).join("")}</div></div>`; });
-  h += `<button type="button" id="addArea">+ Аймақ қосу</button></div></details>
+const nf = d => new Intl.NumberFormat("ru-RU", {maximumFractionDigits:d, minimumFractionDigits:d});
+const NF = [nf(0), nf(1), nf(2), nf(3)];
+const F = (v, d) => Number.isFinite(v) ? NF[d || 0].format(v) : "—";
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tick = () => new Promise(r => setTimeout(r, 0));
+function status(id, msg, cls){ const e = $(id); e.textContent = msg || ""; e.className = "status" + (cls ? " " + cls : ""); }
 
-  <details class="blk"><summary><span><span class="h">3. Д-есеп топтары</span><br><span class="s">үйге жеткізу үлесі, дәрі беру кезеңі</span></span></summary><div class="blk-body">`;
-  S.groups.forEach((g,i)=>{ h += `<div class="sub"><div class="row-h"><b>${esc(g.id)}</b>${S.groups.length>1?`<button type="button" class="x" data-del-group="${i}">Өшіру</button>`:""}</div>
-      <div class="fields three">${fld("Атауы","",`groups.${i}.name`,g.name,{type:"text",span:3})}${fld("Үйге жеткізу үлесі","0–1",`groups.${i}.alpha`,g.alpha,{min:0,max:1,step:0.05})}${fld("Кезең","күн",`groups.${i}.tau`,g.tau,{min:1,step:1})}</div></div>`; });
-  h += `<button type="button" id="addGroup">+ Топ қосу</button></div></details>
+let OSM = null, DATA = null, RES = null, LAY = null, PLAN = null, depot = [0, 0], pick = false;
+const V = {x:0, y:0, s:0.3};
 
-  <details class="blk"><summary><span><span class="h">4. Дәрілер</span><br><span class="s">бір кезеңге қаптама (Ф17)</span></span></summary><div class="blk-body">`;
-  S.drugs.forEach((d,i)=>{ h += `<div class="sub"><div class="row-h"><b>${esc(d.name||("Дәрі "+(i+1)))}</b><button type="button" class="x" data-del-drug="${i}">Өшіру</button></div>
-      <div class="fields three">${fld("Атауы","",`drugs.${i}.name`,d.name,{type:"text"})}
-      <div class="fld"><label for="dg_${i}">Топ</label><select id="dg_${i}" data-path="drugs.${i}.group">${S.groups.map(g=>`<option value="${esc(g.id)}"${g.id===d.group?" selected":""}>${esc(g.id)}</option>`).join("")}</select></div>
-      ${fld("Қаптама/кезең","дана",`drugs.${i}.packs`,d.packs,{min:0,step:1})}</div></div>`; });
-  h += `<button type="button" id="addDrug">+ Дәрі қосу</button></div></details>
-
-  <details class="blk"><summary><span><span class="h">5. Параметрлер</span><br><span class="s">қозғалыс, көлік, құн, норма, әдіс баптаулары</span></span></summary><div class="blk-body">
-    <div class="fields">${fld("Жаяу жылдамдық","км/сағ","params.walk",p.walk,{min:1,max:8,step:0.1})}${fld("Бір үйдегі уақыт","мин","params.s0",p.s0,{min:0,step:0.5})}
-    ${fld("Үйде болмау ықтималдығы","0–1","params.p",p.p,{min:0,max:0.9,step:0.01})}${fld("Кешігу нормасы","күн","params.norm",p.norm,{min:0.5,step:0.5})}
-    ${fld("Шың коэффициенті z","1,645 = 95%","params.z",p.z,{min:0,max:4,step:0.1})}${fld("Сақтық қор","апта","params.safety",p.safety,{min:0,step:0.5})}</div>
-    <div class="fields three">${fld("Маршрут тұрақтысы k","","params.k",p.k,{step:0.01})}${fld("Көше коэф. φ","","params.phi",p.phi,{step:0.01})}${fld("Аз аялдама β","","params.beta",p.beta,{step:0.1})}</div>
-    <div class="fields">${fld("Көлік жылдамдығы","км/сағ","params.veh",p.veh,{min:5,max:90})}${fld("Көлік ауысымы","мин","params.shift",p.shift,{min:30,step:10})}
-    ${fld("Көлік саны","дана","params.vcount",p.vcount,{min:0,step:1})}${fld("Маршруттағы аялдама шегі","дана","params.C",p.C,{min:1,step:1})}
-    ${fld("Мейірбике сағаты","₸","params.cn",p.cn,{min:0,step:100})}${fld("Жүргізуші сағаты","₸","params.cd",p.cd,{min:0,step:100})}
-    ${fld("Көлік 1 км","₸","params.ckm",p.ckm,{min:0,step:5})}${fld("Бір маршрут шығыны","₸","params.cfix",p.cfix,{min:0,step:100})}
-    ${fld("CO₂ 1 км","кг","params.co2",p.co2,{min:0,step:0.01})}</div>
-    <div class="fields">${fld("М3: сақина радиусы (0 = r*)","км","params.ring",p.ring,{min:0,step:0.1})}${fld("М4: спутникте күту","мин","params.tau_sat",p.tau_sat,{min:0})}
-    ${fld("М5: пунктке ауысатын үлес","0–1","params.pick_share",p.pick_share,{min:0,max:1,step:0.05})}${fld("М5: пункт саны","дана","params.pick_q",p.pick_q,{min:1,step:1})}
-    ${fld("М5: пункттің жұмыс уақыты","мин/күн","params.pick_min",p.pick_min,{min:0,step:10})}${fld("М5: бір беру","мин","params.pick_s1",p.pick_s1,{min:0,step:0.5})}</div>
-  </div></details>
-
-  <details class="blk" open><summary><span><span class="h">6. ЖИ не маңызды деп есептейді</span><br><span class="s">салмақтар: 0 = маңызсыз, 5 = өте маңызды</span></span></summary><div class="blk-body">
-    <div class="fields">${rangeFld("Шығын","weights.cost",W.cost)}${rangeFld("Қызметкер уақыты","weights.staff",W.staff)}${rangeFld("CO₂","weights.co2",W.co2)}${rangeFld("Пациенттің күтуі","weights.delay",W.delay)}${rangeFld("Мейірбике–пациент байланысы","weights.cont",W.cont)}</div>
-    <p class="hint">ЖИ барлық әдісті (М0–М6) және аптасына 1–5 жеткізу күнін, М3 үшін сақина радиусын тексереді. Кешігу нормасы мен уақыт шегі бұзылмайтын нұсқалардың ішінен салмақталған ең жақсысын таңдайды.</p>
-  </div></details>`;
-  $("inputs").innerHTML = h;
+/* ================================================================ 1. орын */
+function parseCoord(s){
+  const m = String(s || "").match(/-?\d+(?:[.,]\d+)?/g); if(!m || m.length < 2) return null;
+  const lat = +m[0].replace(",", "."), lon = +m[1].replace(",", ".");
+  if(!(lat >= -85 && lat <= 85 && lon >= -180 && lon <= 180)) return null; return [lat, lon];
 }
-function setPath(path, value){ const parts=path.split("."); let o=S; for(let i=0;i<parts.length-1;i++){ const k=parts[i]; if(o[k]==null) o[k]={}; o=o[k]; }
-  o[parts[parts.length-1]] = value; }
-document.addEventListener("input", e=>{ const el=e.target; if(!el.dataset || !el.dataset.path) return;
-  const path=el.dataset.path; if(el.type==="number" && el.value==="" ) return;
-  if(el.type==="text") { setPath(path, el.value); } else if(el.tagName==="SELECT"){ setPath(path, el.value); } else { const v=parseFloat(String(el.value).replace(",",".")); if(!Number.isFinite(v)) return; setPath(path, v); }
-  if(el.type==="range"){ const o=$(el.id+"_v"); if(o) o.textContent=el.value; }
-  S.isExample=false; schedule(path.startsWith("weights")||path.startsWith("params.pick")||path.startsWith("params.ring")?"soft":"hard"); });
-document.addEventListener("change", e=>{ const el=e.target; if(el.tagName==="SELECT" && el.dataset.path){ setPath(el.dataset.path, el.value); S.isExample=false; schedule("hard"); } });
-document.addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return;
-  if(b.id==="addArea"){ const n=S.areas.length+1, last=S.areas[S.areas.length-1]; const a=clone(last); a.id="U"+Date.now().toString(36).slice(-4); a.name=n+"-аймақ";
-    a.x=Math.min(+S.territory.L-a.L/2, +last.x+0.5); a.y=Math.min(+S.territory.W-a.W/2, +last.y+0.5); S.areas.push(a); structural(); }
-  else if(b.dataset.delArea!=null){ S.areas.splice(+b.dataset.delArea,1); structural(); }
-  else if(b.id==="addGroup"){ let k=S.groups.length+1; while(S.groups.some(g=>g.id==="G"+k)) k++; S.groups.push({id:"G"+k,name:k+"-топ",alpha:0.5,tau:31}); S.areas.forEach(a=>{ a.pat=a.pat||{}; a.pat["G"+k]=0; }); structural(); }
-  else if(b.dataset.delGroup!=null){ const g=S.groups.splice(+b.dataset.delGroup,1)[0]; S.areas.forEach(a=>{ if(a.pat) delete a.pat[g.id]; }); S.drugs=S.drugs.filter(d=>d.group!==g.id); structural(); }
-  else if(b.id==="addDrug"){ S.drugs.push({group:S.groups[0].id,name:"Дәрі "+(S.drugs.length+1),packs:1}); structural(); }
-  else if(b.dataset.delDrug!=null){ S.drugs.splice(+b.dataset.delDrug,1); structural(); }
-  else if(b.dataset.pick){ S.mapMethod=b.dataset.pick; $("mapMethod").value=S.mapMethod; schedule("hard"); document.getElementById("map").scrollIntoView({behavior:"smooth",block:"start"}); }
+function setR(v){ v = Math.max(300, Math.min(3000, Math.round(+v / 50) * 50 || 1500)); $("radR").value = v; $("radN").value = v; U.R = v; updQuery(); }
+function updQuery(){ const c = parseCoord($("coord").value) || [U.lat, U.lon]; $("qText").value = NET.overpassQuery(c[0], c[1], +$("radN").value || U.R); }
+$("coord").value = `${U.lat.toFixed(6)}, ${U.lon.toFixed(6)}`;
+setR(U.R);
+$("radR").addEventListener("input", e => setR(e.target.value));
+$("radN").addEventListener("change", e => setR(e.target.value));
+$("coord").addEventListener("input", updQuery);
+$("btnAyan").addEventListener("click", () => { $("coord").value = `${AYAN[0]}, ${AYAN[1]}`; setR(1500); status("st1", "Аян емханасының координатасы қойылды. «Картаны құру» басыңыз."); });
+$("btnGeo").addEventListener("click", () => {
+  if(!navigator.geolocation){ status("st1", "Бұл браузер орынды анықтай алмайды.", "err"); return; }
+  status("st1", "Орын анықталуда…");
+  navigator.geolocation.getCurrentPosition(p => { $("coord").value = `${p.coords.latitude.toFixed(6)}, ${p.coords.longitude.toFixed(6)}`; updQuery();
+    status("st1", `Орын анықталды (дәлдігі ≈ ${Math.round(p.coords.accuracy)} м).`, "ok"); },
+    () => status("st1", "Орынға рұқсат берілмеді. Координатаны қолмен енгізіңіз.", "err"), {enableHighAccuracy:true, timeout:15000});
 });
-function structural(){ S.isExample=false; renderInputs(); schedule("hard"); }
-
-/* ================================================================ render results */
-let AI=null;
-function renderAI(){
-  const p=P(); AI=aiSearch(); const b=AI.best, r=b.res; const warns=checkData();
-  const ok = b.ok;
-  let why=[];
-  if(ok) why.push(`Кешігу нормасы (${F1(p.norm)} күн) мен топтардың уақыт шегі сақталады; ${AI.n} нұсқаның ішінде салмақталған баға бойынша ең жақсысы.`);
-  else why.push(`Қазіргі ресурспен ешбір нұсқа нормаға толық сыймайды. Ең аз бұзушылығы бар нұсқа көрсетілді: ${r.viol>1?`шың күні топ уақыты шектен ${F0((r.viol-1)*100)}% асады`:`орташа күту ${F1(r.delay)} күн, норма ${F1(p.norm)} күн`}.`);
-  if(b.code==="M3") why.push(`Сақина радиусы ${F2(b.rho)} км: одан әрі аймақтарға көлік арзан (Ф15, r* = ${AI.rs?F2(AI.rs)+" км":"жоқ"}).`);
-  if(!r.cont) why.push("Бұл әдісте мейірбике мен пациенттің тұрақты байланысы сақталмайды (Лемма 4).");
-  const st=states(b.f); const R1=ruleR1(st,p);
-  if(R1) why.push(`R1 ережесі (Лемма 3): ${R1.prefer==="M1"?"бекітілген аймақтар (М1)":"радиалды жапырақтар (М2)"} қысқа. Артық жол ${F1(R1.lhs)} км, үнем ${F1(R1.rhs)} км${R1.valid?"":". Ереже шарттары толық орындалмайды (тығыздық біркелкі емес немесе жапырақ шектелген)"}.`);
-  if(!ok){ const need = st.map(s=>{ for(let k=s.S;k<=s.S+40;k++){ const Tp=walkT(peak(s.att,p.z)/k,s.A/k,s.r,p); if(Tp<=s.B) return k-s.S; } return null; });
-    const add=need.reduce((s,v)=>s+(v||0),0); if(add>0) why.push(`М1 бойынша нормаға жету үшін шамамен ${add} жеткізуші топ қосу керек (Ф14) немесе топқа бөлінген уақытты арттыру керек.`); }
-  $("ai").innerHTML = `<div class="ai-head"><div><div class="eyebrow">ЖИ ұсынысы · ${ok?"норма сақталады":"ресурс жетпейді"}</div>
-      <div class="ai-title">${b.code} · ${esc(NAMES[b.code])}</div><div class="ai-conf">${esc(DESC[b.code])}; ${esc(confText(b))}</div></div>
-      <span class="chip ${ok?"ok":"no"}">${ok?"Орындалады":"Орындалмайды"}</span></div>
-    <div class="kpis">
-      <div class="kpi"><div class="v">${F0(r.cost/1000)}</div><div class="l">мың ₸ / ай</div></div>
-      <div class="kpi"><div class="v">${F0(r.staff)}</div><div class="l">қызметкер сағаты / ай</div></div>
-      <div class="kpi"><div class="v">${F0(r.co2)}</div><div class="l">кг CO₂e / ай</div></div>
-      <div class="kpi"><div class="v">${F1(r.delay)}</div><div class="l">орташа күту, күн</div></div>
-    </div>
-    <ul class="why">${why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
-    <div class="alts">${AI.alts.map(a=>`<span class="alt">${a.code} · ${esc(NAMES[a.code])}, ${esc(confText(a))}: ${F0(a.res.cost/1000)} мың ₸, ${F1(a.res.delay)} күн ${a.ok?"":"· нормаға сыймайды"}</span>`).join("")}</div>
-    ${warns.length?`<div class="warns">${warns.map(w=>`<div>${esc(w)}</div>`).join("")}</div>`:""}`;
-}
-function checkData(){ const w=[]; const t=S.territory;
-  S.areas.forEach(a=>{ if(+a.x-a.L/2 < -1e-9 || +a.x+a.L/2 > +t.L+1e-9 || +a.y-a.W/2 < -1e-9 || +a.y+a.W/2 > +t.W+1e-9) w.push(`${a.name}: аймақ аумақ шегінен шығып тұр — координатаны немесе аумақ өлшемін тексеріңіз.`); });
-  S.groups.forEach(g=>{ if(!(g.alpha>=0 && g.alpha<=1)) w.push(`${g.name}: үйге жеткізу үлесі 0 мен 1 аралығында болуы керек.`); });
-  if(!(S.params.p>=0 && S.params.p<0.9)) w.push("Үйде болмау ықтималдығы 0–0,9 аралығында болуы керек.");
-  return w; }
-function renderMethods(){
-  const p=P(), st=states(null); const rows=["M0","M1","M2","M3","M4","M5","M6"].map(c=>({c,res:MFUN[c](st,p)}));
-  const bestCode = AI && AI.best.code;
-  $("methods").innerHTML = `<div class="card-h"><div><div class="eyebrow">Енгізілген кесте бойынша (әр аймақтың өз күн саны)</div><h2>Әдістерді салыстыру</h2></div></div>
-  <div class="tbl"><table><thead><tr><th>Әдіс</th><th>Норма</th><th class="n">Топтың ең ауыр күні, мин</th><th class="n">Қызметкер, сағ/ай</th><th class="n">Шығын, мың ₸/ай</th><th class="n">CO₂, кг/ай</th><th class="n">Күту, күн</th><th>Байланыс</th><th></th></tr></thead><tbody>
-  ${rows.map(({c,res})=>{ const ok=res.feasible && res.delay<=p.norm+1e-9; return `<tr class="${c===bestCode?"is-best":""} ${(S.mapMethod===c)?"sel":""}">
-    <td><b>${c}</b> ${esc(NAMES[c])}<div class="small muted">${esc(DESC[c])}</div></td>
-    <td>${ok?'<span class="chip ok">сай</span>':(res.feasible?'<span class="chip mid">күту ұзақ</span>':'<span class="chip no">уақыт жетпейді</span>')}</td>
-    <td class="n">${F0(res.team_peak)}</td><td class="n">${F0(res.staff)}</td><td class="n">${F0(res.cost/1000)}</td><td class="n">${F0(res.co2)}</td><td class="n">${F1(res.delay)}</td>
-    <td>${res.cont?"сақталады":"жоқ"}</td><td><button type="button" class="x" data-pick="${c}">Картада</button></td></tr>`; }).join("")}
-  </tbody></table></div><p class="hint" style="margin-top:8px">Жасыл жол — ЖИ таңдаған әдіс (ол аптадағы күн санын да өзі іздейді, сондықтан ЖИ картасындағы сандар осы кестеден өзгеше болуы мүмкін).</p>`;
-}
-function renderAreas(){
-  const p=P(), st=states(null);
-  $("areasCard").innerHTML = `<div class="card-h"><div><div class="eyebrow">М1 бойынша, Ф3–Ф14</div><h2>Аймақтар</h2></div></div>
-  <div class="tbl"><table><thead><tr><th>Аймақ</th><th class="n">Емханадан, км</th><th class="n">Пациент/күн (λ)</th><th class="n">Бару/жеткізу күні</th><th class="n">Топ уақыты, мин</th><th class="n">Сыйымдылық n*</th><th class="n">Ұсынылатын күн/апта</th><th class="n">Қажет топ</th><th>Күй</th></tr></thead><tbody>
-  ${st.map(s=>{ const T=walkT(s.att/s.S,s.A/s.S,s.r,p), Tp=walkT(peak(s.att,p.z)/s.S,s.A/s.S,s.r,p);
-     const ns=f10(s.A/s.S,s.r,p.v_w,p.s0,s.B,p.k,p.phi,p.beta);
-     let fr=null; for(let f=1;f<=5;f++){ const n=7*s.lam/f, att=f5(n,s.H)/(1-p.p); if(walkT(peak(att,p.z)/s.S,s.A/s.S,s.r,p)<=s.B && f11(f,p.p,false)<=p.norm){ fr=f; break; } }
-     let sq=null; for(let k=1;k<=60;k++){ if(walkT(peak(s.att,p.z)/k,s.A/k,s.r,p)<=s.B){ sq=k; break; } }
-     const ok=Tp<=s.B;
-     return `<tr><td><b>${esc(s.name)}</b></td><td class="n">${F2(s.r)}</td><td class="n">${F1(s.lam)}</td><td class="n">${F1(s.att)}</td><td class="n">${F0(T)} / ${F0(Tp)}</td><td class="n">${ns>0?F1(ns):"алыс"}</td><td class="n">${fr||"—"}</td><td class="n">${sq||"—"}</td><td>${ok?'<span class="chip ok">сыяды</span>':'<span class="chip no">шектен асады</span>'}</td></tr>`; }).join("")}
-  </tbody></table></div><p class="hint" style="margin-top:8px">Топ уақыты: орташа күн / шың күні (z). n* — бір топтың күніне ең көп бару саны (Ф10). «алыс» — бөлінген уақытқа жаяу барып-қайтудың өзі сыймайды.</p>`;
-}
-function renderDrugs(){
-  const p=P(); const rows=S.drugs.map(d=>{ const g=S.groups.find(x=>x.id===d.group); if(!g) return null;
-    const D=S.areas.reduce((s,a)=>s+(+((a.pat||{})[g.id])||0),0); const Q=D*(+d.packs)*30/Math.max(+g.tau,1); return {d,g,Q,St:Q*(1+7*p.safety/30)}; }).filter(Boolean);
-  $("drugsCard").innerHTML = `<div class="card-h"><div><div class="eyebrow">Ф17</div><h2>Дәрі қажеттілігі</h2></div></div>
-  <div class="tbl"><table><thead><tr><th>Дәрі</th><th>Топ</th><th class="n">30 күнге, қаптама</th><th class="n">Толықтыру деңгейі (${F1(p.safety)} апта қормен)</th></tr></thead><tbody>
-  ${rows.map(r=>`<tr><td>${esc(r.d.name)}</td><td>${esc(r.g.name)}</td><td class="n">${F0(r.Q)}</td><td class="n">${F0(r.St)}</td></tr>`).join("")||`<tr><td colspan="4" class="muted">Дәрі енгізілмеген</td></tr>`}
-  </tbody></table></div>`;
-}
-
-/* ================================================================ map: instance + anytime optimiser */
-function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-const dist=(a,b)=>Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1]);
-function kmeans(pts,k,rnd,balance){ k=Math.max(1,Math.min(k,pts.length)); if(k===1) return pts.map(()=>0);
-  const C=[pts[Math.floor(rnd()*pts.length)].slice()];
-  while(C.length<k){ const d=pts.map(p=>Math.min(...C.map(c=>(p[0]-c[0])**2+(p[1]-c[1])**2))); const s=d.reduce((a,b)=>a+b,0); let u=rnd()*s, i=0; while(i<d.length-1 && (u-=d[i])>0) i++; C.push(pts[i].slice()); }
-  let lab=new Array(pts.length).fill(0);
-  for(let it=0; it<25; it++){ lab=pts.map(p=>{ let bi=0,bd=1e18; C.forEach((c,j)=>{ const d=(p[0]-c[0])**2+(p[1]-c[1])**2; if(d<bd){bd=d;bi=j;} }); return bi; });
-    for(let j=0;j<k;j++){ const m=pts.filter((_,i)=>lab[i]===j); if(m.length){ C[j][0]=m.reduce((s,p)=>s+p[0],0)/m.length; C[j][1]=m.reduce((s,p)=>s+p[1],0)/m.length; } } }
-  if(balance){ const cap=Math.ceil(pts.length/k*1.12);
-    for(let round=0; round<4; round++){ const cnt=new Array(k).fill(0); lab.forEach(l=>cnt[l]++);
-      for(let j=0;j<k;j++){ if(cnt[j]<=cap) continue; const idx=pts.map((p,i)=>i).filter(i=>lab[i]===j).sort((a,b)=>((pts[b][0]-C[j][0])**2+(pts[b][1]-C[j][1])**2)-((pts[a][0]-C[j][0])**2+(pts[a][1]-C[j][1])**2));
-        for(const i of idx.slice(0,cnt[j]-cap)){ const order=C.map((c,jj)=>[jj,(pts[i][0]-c[0])**2+(pts[i][1]-c[1])**2]).sort((a,b)=>a[1]-b[1]);
-          for(const [jj] of order){ if(jj!==j && cnt[jj]<cap){ lab[i]=jj; cnt[jj]++; cnt[j]--; break; } } } } } }
-  return lab; }
-function sweep(pts,center,parts){ const o=pts.map((p,i)=>[i,Math.atan2(p[1]-center[1],p[0]-center[0])]).sort((a,b)=>a[1]-b[1]); const out=[]; const n=o.length;
-  for(let j=0;j<parts;j++){ out.push(o.slice(Math.round(j*n/parts), Math.round((j+1)*n/parts)).map(x=>pts[x[0]])); } return out; }
-function nnOrder(depot, pts){ const rem=pts.slice(), seq=[]; let cur=depot; while(rem.length){ let bi=0,bd=1e18; rem.forEach((p,i)=>{ const d=dist(cur,p); if(d<bd){bd=d;bi=i;} }); cur=rem.splice(bi,1)[0]; seq.push(cur); } return seq; }
-function rlen(r){ const s=r.seq; if(!s.length) return 0; let L=dist(r.depot,s[0]); for(let i=1;i<s.length;i++) L+=dist(s[i-1],s[i]); return L+dist(s[s.length-1],r.depot); }
-
-function buildInstance(sel){
-  const p=P(), t=S.territory, rnd=mulberry(S.seed*7919+13), depot=[+t.cx,+t.cy];
-  const code=sel.code, f=sel.f, st=states(f); const routes=[], marks=[];
-  const genPts=(s,count)=>{ const a=[]; for(let i=0;i<count;i++) a.push([s.x-s.L/2+rnd()*s.L, s.y-s.W/2+rnd()*s.W]); return a; };
-  const areaPts = st.map(s=>genPts(s, Math.max(0,Math.round(s.att))));
-  const addTeams=(pts,k,dep,mode,group,col,label,budget,extraMin)=>{ const lab=kmeans(pts,k,rnd,true); for(let j=0;j<Math.max(1,Math.min(k,pts.length||1));j++){ const sub=pts.filter((_,i)=>lab[i]===j);
-      routes.push({depot:dep, seq:nnOrder(dep,sub), mode, group, col, label:label+(k>1?` · ${j+1}-топ`:""), budget, extra:extraMin||0}); } };
-  if(code==="M0"){ st.forEach((s,i)=>areaPts[i].forEach(q=>routes.push({depot, seq:[q], mode:"walk", group:"g"+routes.length, col:i, label:s.name, budget:s.B, extra:0, star:true}))); }
-  else if(code==="M1"||code==="M5"){ st.forEach((s,i)=>{ let pts=areaPts[i]; if(code==="M5"){ pts=pts.filter(()=>rnd()>=p.pick_share); }
-      addTeams(pts,s.S,depot,"walk","a"+i,i,s.name,s.B); });
-    if(code==="M5"){ const all=[].concat(...areaPts); const q=Math.max(1,Math.round(p.pick_q)); marks.push({type:"pickup",pt:depot});
-      if(q>1 && all.length){ const lab=kmeans(all,q-1,rnd,false); for(let j=0;j<q-1;j++){ const m=all.filter((_,i)=>lab[i]===j); if(m.length) marks.push({type:"pickup",pt:[m.reduce((s,a)=>s+a[0],0)/m.length, m.reduce((s,a)=>s+a[1],0)/m.length]}); } } } }
-  else if(code==="M6"){ st.forEach((s,i)=>{ const week=genPts(s,Math.max(0,Math.round(s.att*s.f))); const lab=kmeans(week,s.f,rnd,true); const day=week.filter((_,j)=>lab[j]===0);
-      addTeams(day,s.S,depot,"walk","a"+i,i,s.name+" (1-күн аймағы)",s.B); }); }
-  else if(code==="M2"){ const all=[].concat(...areaPts); const ST=st.reduce((a,s)=>a+s.S,0); const Bmin=Math.min(...st.map(s=>s.B));
-      sweep(all,depot,ST).forEach((sub,j)=>routes.push({depot, seq:nnOrder(depot,sub), mode:"walk", group:"petal", col:j, label:`${j+1}-жапырақ`, budget:Bmin, extra:0})); }
-  else if(code==="M3"){ const rho=sel.rho!=null?sel.rho:(p.ring>0?p.ring:(rstar(p)||1e9)); const outer=[];
-      st.forEach((s,i)=>{ if(s.r<=rho) addTeams(areaPts[i],s.S,depot,"walk","a"+i,i,s.name,s.B); else outer.push(...areaPts[i]); });
-      if(outer.length){ const nr=Math.max(1,Math.ceil(outer.length/p.C)); sweep(outer,depot,nr).forEach((sub,j)=>routes.push({depot, seq:nnOrder(depot,sub), mode:"veh", group:"veh", col:7, label:`Көлік ${j+1}`, budget:p.shift, extra:0})); }
-      marks.push({type:"ring", r:rho}); }
-  else if(code==="M4"){ const sats=st.map(s=>[s.x,s.y]);
-      routes.push({depot, seq:nnOrder(depot,sats), mode:"veh", group:"veh", col:7, label:"Көлік: спутниктер", budget:p.shift, extra:sats.length*p.tau_sat, fixedStops:true});
-      st.forEach((s,i)=>{ marks.push({type:"sat",pt:sats[i]}); addTeams(areaPts[i],s.S,sats[i],"walk","a"+i,i,s.name,s.B,p.tau_sat); }); }
-  routes.forEach(r=>{ r.len=rlen(r); });
-  return {routes, marks, code, f, rho:sel.rho, initKm:routes.reduce((s,r)=>s+r.len,0)};
-}
-/* ---- local search moves */
-function twoOpt(r){ const s=r.seq, n=s.length; if(n<3) return false; let imp=false;
-  const pt=i=> (i<0||i>=n) ? r.depot : s[i];
-  for(let i=0;i<n-1;i++) for(let j=i+1;j<n;j++){ const a=pt(i-1), b=s[i], c=s[j], d=pt(j+1);
-    if(dist(a,c)+dist(b,d) < dist(a,b)+dist(c,d)-1e-9){ let x=i,y=j; while(x<y){ const tmp=s[x]; s[x]=s[y]; s[y]=tmp; x++; y--; } imp=true; } }
-  return imp; }
-function orOpt(r){ const s=r.seq, n=s.length; if(n<3) return false;
-  for(let L=1; L<=3 && L<n; L++) for(let i=0;i+L<=n;i++){
-    const prev=i===0?r.depot:s[i-1], first=s[i], last=s[i+L-1], next=i+L>=n?r.depot:s[i+L];
-    const gain=dist(prev,first)+dist(last,next)-dist(prev,next);
-    const rest=s.slice(0,i).concat(s.slice(i+L)), seg=s.slice(i,i+L);
-    for(let k=0;k<=rest.length;k++){ if(k===i) continue; const u=k===0?r.depot:rest[k-1], v=k===rest.length?r.depot:rest[k];
-      const add1=dist(u,first)+dist(last,v)-dist(u,v), add2=dist(u,last)+dist(first,v)-dist(u,v);
-      if(Math.min(add1,add2) < gain-1e-9){ const sg = add2<add1 ? seg.slice().reverse() : seg; r.seq=rest.slice(0,k).concat(sg,rest.slice(k)); return true; } } }
-  return false; }
-function rtime(r,p){ const v = r.mode==="veh" ? p.v_c : p.v_w; const stops = r.fixedStops ? 0 : r.seq.length; return r.len/v + stops*p.s0 + (r.extra||0); }
-function relocate(routes,p){ let moved=false;
-  const groups={}; routes.forEach((r,i)=>{ if(r.star||r.fixedStops) return; (groups[r.group]=groups[r.group]||[]).push(r); });
-  for(const g in groups){ const rs=groups[g]; if(rs.length<2) continue;
-    for(const a of rs) for(let i=0;i<a.seq.length;i++){ const prev=i===0?a.depot:a.seq[i-1], x=a.seq[i], next=i===a.seq.length-1?a.depot:a.seq[i+1];
-      const gain=dist(prev,x)+dist(x,next)-dist(prev,next);
-      let best=null;
-      for(const b of rs){ if(b===a) continue; for(let k=0;k<=b.seq.length;k++){ const u=k===0?b.depot:b.seq[k-1], v=k===b.seq.length?b.depot:b.seq[k];
-          const add=dist(u,x)+dist(x,v)-dist(u,v); if(add<gain-1e-9 && (!best||add<best.add)) best={b,k,add}; } }
-      if(best){ const tb=rtime(best.b,p) + best.add/(best.b.mode==="veh"?p.v_c:p.v_w) + p.s0; const ta=rtime(a,p);
-        if(tb<=Math.max(best.b.budget, ta)){ a.seq.splice(i,1); best.b.seq.splice(best.k,0,x); a.len=rlen(a); best.b.len=rlen(best.b); moved=true; i--; } } } }
-  return moved; }
-function localOpt(r){ let any=false; for(let guard=0; guard<50; guard++){ const a=twoOpt(r); const b=orOpt(r); if(!(a||b)) break; any=true; } r.len=rlen(r); return any; }
-function kick(r,rnd){ const s=r.seq, n=s.length; if(n<8) return false; const p1=1+Math.floor(rnd()*(n/4)), p2=p1+1+Math.floor(rnd()*(n/4)), p3=p2+1+Math.floor(rnd()*(n/4));
-  if(p3>=n) return false; r.seq=s.slice(0,p1).concat(s.slice(p2,p3), s.slice(p1,p2), s.slice(p3)); return true; }
-
-let OPT=null, rafId=0;
-function startOpt(inst){ cancelAnimationFrame(rafId); OPT={inst, phase:"local", iter:0, stale:0, done:false, rnd:mulberry(S.seed*31+7), lastDraw:0, bestKm:inst.initKm, t0:performance.now()}; drawMap(); rafId=requestAnimationFrame(loop); }
-function totalKm(){ return OPT.inst.routes.reduce((s,r)=>s+r.len,0); }
-function loop(ts){ if(!OPT || OPT.done) return; const p=P(); const end=performance.now()+11; const R=OPT.inst.routes;
-  while(performance.now()<end && !OPT.done){
-    if(OPT.phase==="local"){ let any=false; for(const r of R){ if(r.star||r.fixedStops&&r.seq.length<3) continue; if(localOpt(r)) any=true; } if(relocate(R,p)) any=true; for(const r of R) r.len=rlen(r); OPT.iter++; if(!any) OPT.phase="kick"; }
-    else { const cand=R.filter(r=>!r.star && r.seq.length>=8); if(!cand.length){ OPT.done=true; break; }
-      const r=cand[Math.floor(OPT.rnd()*cand.length)]; const saved=r.seq.slice(), oldLen=r.len;
-      if(kick(r,OPT.rnd)){ localOpt(r); if(r.len < oldLen-1e-9){ OPT.stale=0; relocate(R,p); R.forEach(x=>x.len=rlen(x)); } else { r.seq=saved; r.len=oldLen; OPT.stale++; } } else OPT.stale++;
-      OPT.iter++; if(OPT.stale>=350) OPT.done=true; }
+$("qCopy").addEventListener("click", async () => { try{ await navigator.clipboard.writeText($("qText").value); status("st1", "Сұраныс көшірілді.", "ok"); }
+  catch(e){ $("qText").select(); status("st1", "Мәтінді белгілеп, қолмен көшіріңіз."); } });
+$("fileOsm").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const c = parseCoord($("coord").value); if(!c){ status("st1", "Алдымен координатаны дұрыс енгізіңіз.", "err"); return; }
+  try{ const txt = await f.text(); const j = JSON.parse(txt); if(!j.elements) throw new Error("elements жоқ");
+    j._bytes = txt.length; processOSM(j, c[0], c[1], +$("radN").value, true); }
+  catch(err){ status("st1", "Файл оқылмады: бұл Overpass JSON емес (" + err.message + ").", "err"); }
+});
+$("btnLoad").addEventListener("click", async () => {
+  const c = parseCoord($("coord").value); if(!c){ status("st1", "Координата дұрыс емес. Мысалы: 41.464551, 69.148520", "err"); return; }
+  const R = +$("radN").value; $("btnLoad").disabled = true;
+  try{ const osm = await fetchOSM(c[0], c[1], R); processOSM(osm, c[0], c[1], R, true); }
+  catch(err){ const blocked = /fetch|network|Load failed|NetworkError/i.test(err.message);
+    status("st1", blocked
+      ? "Бұл беттен OSM серверіне қосылу мүмкін емес (claude.ai көрінісінде сыртқы серверлер жабық). Толық нұсқа GitHub Pages сайтында жұмыс істейді. Мұнда деректі қолмен жүктеңіз немесе «Мысал аудан» батырмасын басыңыз."
+      : `Карта деректері жүктелмеді (${err.message}). OSM серверлері бос емес болуы мүмкін: 1–2 минуттан кейін қайталаңыз немесе деректі қолмен жүктеңіз.`, "err"); }
+  finally{ $("btnLoad").disabled = false; }
+});
+async function fetchOSM(lat, lon, R){
+  const q = NET.overpassQuery(lat, lon, R); let last = "";
+  for(const ep of EP){
+    const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 120000);
+    try{
+      status("st1", `OSM серверінен жүктелуде… (${new URL(ep).host})`);
+      const r = await fetch(ep, {method:"POST", body:"data=" + encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"}, signal:ctl.signal});
+      clearTimeout(tm);
+      if(!r.ok){ last = "сервер коды " + r.status; continue; }
+      const txt = await r.text(), j = JSON.parse(txt); j._bytes = txt.length; return j;
+    }catch(e){ clearTimeout(tm); last = e.name === "AbortError" ? "күту уақыты бітті" : (e.message || "желі қатесі"); }
   }
-  OPT.bestKm=totalKm(); if(ts-OPT.lastDraw>120 || OPT.done){ OPT.lastDraw=ts; drawMap(); }
-  if(!OPT.done) rafId=requestAnimationFrame(loop); }
-
-function mapSelection(){ if(S.mapMethod && S.mapMethod!=="AUTO") return {code:S.mapMethod, f:null, rho:null, auto:false};
-  const b=AI.best; return {code:b.code, f:b.f, rho:b.rho, auto:true}; }
-const COLV=i=>`var(--c${(i%8)+1})`;
-function drawMap(){ if(!OPT) return; const inst=OPT.inst, t=S.territory, p=P(); const L=+t.L, W=+t.W; const pad=Math.max(L,W)*0.04;
-  const X=x=>x, Y=y=>W-y; const svg=$("mapSvg"); svg.setAttribute("viewBox",`${-pad} ${-pad} ${L+2*pad} ${W+2*pad}`);
-  const rr=Math.max(L,W)*0.009; let h=`<rect x="0" y="0" width="${L}" height="${W}" fill="var(--map)" stroke="var(--line)" vector-effect="non-scaling-stroke" stroke-width="1"/>`;
-  S.areas.forEach((a,i)=>{ const n=+a.nL||0, m=+a.nW||0; const x0=a.x-a.L/2, y0=a.y-a.W/2;
-    for(let k=1;k<=n;k++){ const yy=y0+a.W*k/(n+1); h+=`<line x1="${X(x0)}" y1="${Y(yy)}" x2="${X(x0+a.L)}" y2="${Y(yy)}" stroke="var(--street)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }
-    for(let k=1;k<=m;k++){ const xx=x0+a.L*k/(m+1); h+=`<line x1="${X(xx)}" y1="${Y(y0)}" x2="${X(xx)}" y2="${Y(y0+a.W)}" stroke="var(--street)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }
-    h+=`<rect x="${X(x0)}" y="${Y(y0+a.W)}" width="${a.L}" height="${a.W}" fill="none" stroke="${COLV(i)}" stroke-opacity=".55" stroke-dasharray="4 3" vector-effect="non-scaling-stroke" stroke-width="1.2"/>`;
-    h+=`<text x="${X(x0)+rr}" y="${Y(y0+a.W)+rr*3.2}" font-size="${rr*2.6}" fill="var(--ink2)" font-family="IBM Plex Sans, system-ui, sans-serif">${esc(a.name)}</text>`; });
-  for(const mk of inst.marks){ if(mk.type==="ring" && mk.r<1e8){ const rad=mk.r/p.phi; h+=`<circle cx="${X(+t.cx)}" cy="${Y(+t.cy)}" r="${rad}" fill="none" stroke="var(--muted)" stroke-dasharray="6 4" vector-effect="non-scaling-stroke" stroke-width="1"/>`; } }
-  inst.routes.forEach(r=>{ if(!r.seq.length) return; const col = r.mode==="veh" ? "var(--ink2)" : COLV(r.col);
-    const pts=[r.depot,...r.seq,r.depot]; let d=""; for(let i=0;i<pts.length;i++){ const [x,y]=pts[i]; if(i===0){ d+=`M${X(x)} ${Y(y)}`; } else { const [px,py]=pts[i-1]; d+=`L${X(x)} ${Y(py)}L${X(x)} ${Y(y)}`; } }
-    h+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="${r.star?1:1.8}" stroke-opacity="${r.star?.45:.9}" ${r.mode==="veh"?'stroke-dasharray="7 4"':""} vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`;
-    if(!r.fixedStops) r.seq.forEach(q=>{ h+=`<circle cx="${X(q[0])}" cy="${Y(q[1])}" r="${rr}" fill="${col}" stroke="var(--map)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }); });
-  for(const mk of inst.marks){ if(mk.type==="sat"){ const [x,y]=mk.pt; h+=`<path d="M${X(x)} ${Y(y)-rr*2.6}L${X(x)+rr*2.2} ${Y(y)+rr*1.6}L${X(x)-rr*2.2} ${Y(y)+rr*1.6}Z" fill="var(--c4)" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }
-    if(mk.type==="pickup"){ const [x,y]=mk.pt; h+=`<rect x="${X(x)-rr*2}" y="${Y(y)-rr*2}" width="${rr*4}" height="${rr*4}" transform="rotate(45 ${X(x)} ${Y(y)})" fill="var(--c5)" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; } }
-  h+=`<rect x="${X(+t.cx)-rr*2.4}" y="${Y(+t.cy)-rr*2.4}" width="${rr*4.8}" height="${rr*4.8}" fill="var(--accent)" stroke="var(--map)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
-  h+=`<text x="${X(+t.cx)+rr*3.4}" y="${Y(+t.cy)+rr*1.2}" font-size="${rr*3}" font-weight="600" fill="var(--ink)" font-family="IBM Plex Sans, system-ui, sans-serif">Емхана</text>`;
-  svg.innerHTML=h;
-  const walk=inst.routes.filter(r=>r.mode==="walk").reduce((s,r)=>s+r.len,0), veh=inst.routes.filter(r=>r.mode==="veh").reduce((s,r)=>s+r.len,0);
-  const worst=Math.max(0,...inst.routes.filter(r=>r.mode==="walk").map(r=>rtime(r,p)));
-  const over=inst.routes.filter(r=>r.mode==="walk" && rtime(r,p)>r.budget).length;
-  const imp = OPT.bestKm>0 ? (1-OPT.bestKm/inst.initKm)*100 : 0;
-  const stF=states(inst.f); const fr = inst.code==="M3" ? m3(stF,p,inst.rho!=null?inst.rho:null) : MFUN[inst.code](stF,p);
-  $("mapStat").innerHTML = `<div class="kpi"><div class="v">${F1(walk)}</div><div class="l">жаяу км / күн</div></div>
-    <div class="kpi"><div class="v">${F1(veh)}</div><div class="l">көлік км / күн</div></div>
-    <div class="kpi"><div class="v">${F0(worst)}</div><div class="l">ең ұзақ жаяу маршрут, мин${over?` · <b style="color:var(--bad)">${over} маршрут шектен асады</b>`:""}</div></div>
-    <div class="kpi"><div class="v">${F1(fr.walk_km+fr.veh_km)}</div><div class="l">формула бағасы, км / күн</div></div>`;
-  $("optBar").style.width = (OPT.done?100:Math.min(98, OPT.stale/350*100))+"%";
-  $("optStatus").textContent = OPT.done ? `ЖИ маршрутты тұрақтандырды: ${F0(OPT.iter)} қадам, жалпы жол ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%). Айнымалыны өзгертсеңіз, іздеу қайта басталады.`
-      : `ЖИ маршрутты жақсартып жатыр: ${F0(OPT.iter)} қадам, қазір ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%)…`;
-  const sel=mapSelection(); $("mapTitle").textContent = `${inst.code} · ${NAMES[inst.code]}${sel.auto?" (ЖИ таңдауы)":""}, ${inst.f||"кесте бойынша"}${inst.f?" күн/апта":""}`;
-  const used=[...new Set(inst.routes.filter(r=>r.mode==="walk").map(r=>r.col))].slice(0,8);
-  $("mapLegend").innerHTML = `<span><i class="sw" style="background:var(--accent)"></i>Емхана</span>`+
-    (inst.code==="M2" ? `<span>Түс = жапырақ (топ)</span>` : used.map(c=>`<span><i class="sw" style="background:${COLV(c)}"></i>${esc((S.areas[c]||{}).name||"")}</span>`).join(""))+
-    (inst.routes.some(r=>r.mode==="veh")?`<span><i class="sw" style="background:var(--ink2)"></i>Көлік (үзік сызық)</span>`:"")+
-    (inst.marks.some(m=>m.type==="sat")?`<span>▲ спутник нүкте</span>`:"")+(inst.marks.some(m=>m.type==="pickup")?`<span>◆ беру пункті</span>`:"")+(inst.marks.some(m=>m.type==="ring")?`<span>- - сақина шекарасы</span>`:"");
+  throw new Error(last || "сервер жауап бермеді");
 }
-function fillMapSelect(){ const s=$("mapMethod"); s.innerHTML=`<option value="AUTO">ЖИ таңдауы (авто)</option>`+Object.keys(NAMES).map(c=>`<option value="${c}">${c} · ${NAMES[c]}</option>`).join(""); s.value=S.mapMethod||"AUTO"; }
-$("mapMethod").addEventListener("change", e=>{ S.mapMethod=e.target.value; save(); lastMapKey=""; refreshMap(); renderMethods(); });
-$("btnReseed").addEventListener("click", ()=>{ S.seed=(S.seed*1103515245+12345)%2147483647; save(); lastMapKey=""; refreshMap(); });
 
-let lastMapKey="";
-function refreshMap(){ const sel=mapSelection(); const key=JSON.stringify([sel, S.territory, S.areas, S.groups, S.params, S.seed]); if(key===lastMapKey) return; lastMapKey=key; startOpt(buildInstance(sel)); }
+/* ---------- мысал аудан: ойдан құрылған тор, темір жол, канал (сервер қолжетімсіз кезде көрсету үшін) ---------- */
+function demoOSM(lat0, lon0){
+  const pr = NET.projector(lat0, lon0), el = []; let id = 1; const rnd = NET.rng(42);
+  const jit = new Map(), P = (x, y) => { const k = x + "_" + y; if(!jit.has(k)) jit.set(k, [x + (rnd() - .5) * 18, y + (rnd() - .5) * 18]); return jit.get(k); };
+  const g = p => { const q = pr.inv(p[0], p[1]); return {lat:q[0], lon:q[1]}; };
+  const way = (tags, pts) => el.push({type:"way", id:id++, tags, nodes:pts.map(p => "n" + p[0] + "_" + p[1]), geometry:pts.map(p => g(P(p[0], p[1])))});
+  const D = 110, M = 1650, xs = []; for(let v = -M; v <= M; v += D) xs.push(v);
+  const railY = 5 * D + D / 2, cut = x => !(x === 0 || x === 6 * D || x === -8 * D);
+  for(const y of xs) way({highway:y === 0 ? "primary" : "residential"}, xs.map(x => [x, y]));
+  for(const x of xs){ if(!cut(x)){ way({highway:"residential"}, xs.filter(y => y <= 5 * D).map(y => [x, y]).concat([[x, railY]], xs.filter(y => y >= 6 * D).map(y => [x, y]))); }
+    else { way({highway:"residential"}, xs.filter(y => y <= 5 * D).map(y => [x, y])); way({highway:"residential"}, xs.filter(y => y >= 6 * D).map(y => [x, y])); } }
+  const rp = []; for(let x = -M - D; x <= M + D; x += D){ rp.push([x, railY]); } el.push({type:"way", id:id++, tags:{railway:"rail"}, nodes:rp.map(p => (cut(p[0]) ? "r" : "n") + p[0] + "_" + p[1]), geometry:rp.map(p => g(cut(p[0]) ? p : P(p[0], p[1])))});
+  const cp = []; for(let y = -M; y <= M; y += 50) cp.push([-5 * D - D / 2 + Math.sin(y / 300) * 40, y]); el.push({type:"way", id:id++, tags:{waterway:"canal"}, nodes:cp.map((_, i) => "c" + i), geometry:cp.map(g)});
+  for(let x = -M + D / 2; x < M; x += D) for(let y = -M + D / 2; y < M; y += D){ if(Math.abs(y - railY) < D) continue; const k = rnd() < 0.15 ? 1 : rnd() < 0.5 ? 2 : 3;
+    for(let i = 0; i < k; i++){ const cx = x + (i - (k - 1) / 2) * 30 + (rnd() - .5) * 8, cy = y + (rnd() - .5) * 30, w = 7 + rnd() * 5, h = 7 + rnd() * 5;
+      el.push({type:"way", id:id++, tags:{building:rnd() < 0.9 ? "house" : "yes"}, nodes:[1, 2, 3, 4, 5].map(q => "b" + id + "_" + q), geometry:[[cx-w,cy-h],[cx+w,cy-h],[cx+w,cy+h],[cx-w,cy+h],[cx-w,cy-h]].map(g)}); } }
+  return {elements:el, _demo:true};
+}
+$("btnDemo").addEventListener("click", () => { const c = parseCoord($("coord").value) || AYAN; processOSM(demoOSM(c[0], c[1]), c[0], c[1], 1500, false); });
 
-/* ================================================================ orchestration */
-let timer=0;
-function schedule(){ clearTimeout(timer); timer=setTimeout(()=>{ recompute(); save(); }, 160); }
-function recompute(){ try{ renderAI(); renderMethods(); renderAreas(); renderDrugs(); refreshMap(); updateBadge(); }catch(err){ $("ai").innerHTML=`<div class="warns"><div>Есептеу кезінде қате: ${esc(err.message)}. Енгізілген мәндерді тексеріңіз.</div></div>`; } }
-function updateBadge(){ const b=$("dataBadge"); b.textContent = S.isExample ? "Мысал деректер" : "Өз деректеріңіз"; b.classList.toggle("own", !S.isExample); }
-function save(){ lsSet(STORE_KEY, JSON.stringify(S)); }
+/* ---------- IndexedDB кэш: соңғы карта (қайта ашқанда серверге бармау үшін) ---------- */
+function idb(){ return new Promise((res, rej) => { try{ const r = indexedDB.open("dariModelNet", 1);
+  r.onupgradeneeded = () => r.result.createObjectStore("osm"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }catch(e){ rej(e); } }); }
+async function cachePut(v){ try{ const db = await idb(); db.transaction("osm", "readwrite").objectStore("osm").put(v, "last"); }catch(e){} }
+async function cacheGet(){ try{ const db = await idb(); return await new Promise(res => { const q = db.transaction("osm").objectStore("osm").get("last");
+  q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); }catch(e){ return null; } }
 
-/* ================================================================ data panel */
-function scenList(){ try{ return JSON.parse(lsGet(SCEN_KEY))||{}; }catch(e){ return {}; } }
-function renderScen(){ const L=scenList(); const names=Object.keys(L).sort();
-  $("scList").innerHTML = names.length ? names.map(n=>`<li><span>${esc(n)} <span class="small muted">${esc(new Date(L[n].t).toLocaleString("ru-RU"))}</span></span><span class="row"><button type="button" data-load="${esc(n)}">Ашу</button><button type="button" class="x" data-rm="${esc(n)}">Өшіру</button></span></li>`).join("") : `<li class="muted small">Әзірге сақталған сценарий жоқ.</li>`; }
-$("btnData").addEventListener("click", ()=>{ $("expText").value=JSON.stringify(S); renderScen(); $("dataPanel").hidden=false; $("dpClose").focus(); });
-$("dpClose").addEventListener("click", ()=>{ $("dataPanel").hidden=true; });
-$("dataPanel").addEventListener("click", e=>{ if(e.target.id==="dataPanel") $("dataPanel").hidden=true;
-  const ld=e.target.closest("[data-load]"), rm=e.target.closest("[data-rm]");
-  if(ld){ const L=scenList(); const it=L[ld.dataset.load]; if(it && validState(it.s)){ S=Object.assign(clone(DEFAULT), it.s); renderInputs(); fillMapSelect(); lastMapKey=""; recompute(); save(); $("scMsg").textContent=`«${ld.dataset.load}» ашылды.`; } }
-  if(rm){ const L=scenList(); delete L[rm.dataset.rm]; lsSet(SCEN_KEY, JSON.stringify(L)); renderScen(); } });
-$("scSave").addEventListener("click", ()=>{ const n=$("scName").value.trim(); const m=$("scMsg"); if(!n){ m.textContent="Сценарийге атау беріңіз."; m.classList.add("err"); return; }
-  const L=scenList(); L[n]={t:Date.now(), s:clone(S)}; const ok=lsSet(SCEN_KEY, JSON.stringify(L)); m.classList.toggle("err",!ok); m.textContent= ok?`«${n}» осы құрылғыда сақталды.`:"Бұл браузер деректерді сақтауға рұқсат бермейді. Экспорт мәтінін көшіріп алыңыз."; renderScen(); });
-$("expCopy").addEventListener("click", ()=>{ const ta=$("expText"); const m=$("expMsg");
-  (navigator.clipboard ? navigator.clipboard.writeText(ta.value) : Promise.reject()).then(()=>{ m.textContent="Көшірілді."; }).catch(()=>{ ta.focus(); ta.select(); m.textContent="Мәтін белгіленді — көшіріңіз (Ctrl+C / ұзақ басу)."; }); });
-$("impBtn").addEventListener("click", ()=>{ const m=$("impMsg"); try{ const s=JSON.parse($("impText").value); if(!validState(s)) throw new Error("құрылымы сәйкес емес");
-    S=Object.assign(clone(DEFAULT), s); renderInputs(); fillMapSelect(); lastMapKey=""; recompute(); save(); m.classList.remove("err"); m.textContent="Деректер жүктелді."; }
-  catch(err){ m.classList.add("err"); m.textContent="Импорт сәтсіз: мәтін осы беттің экспорты болуы керек ("+err.message+")."; } });
-$("btnReset").addEventListener("click", ()=>{ const b=$("btnReset");
-  if(b.dataset.confirm!=="1"){ b.dataset.confirm="1"; b.textContent="Иә, мысалды жүктеу"; setTimeout(()=>{ b.dataset.confirm=""; b.textContent="Мысалды қайта жүктеу"; }, 4000); return; }
-  b.dataset.confirm=""; b.textContent="Мысалды қайта жүктеу"; S=clone(DEFAULT); renderInputs(); fillMapSelect(); lastMapKey=""; recompute(); save(); });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("dataPanel").hidden=true; });
+function processOSM(osm, lat, lon, R, fresh){
+  OSM = osm; U.lat = lat; U.lon = lon; U.R = R; saveU();
+  if(fresh) cachePut({lat, lon, R, osm, t:Date.now()});
+  status("st1", "Жолдар, ғимараттар және кедергілер талдануда…");
+  setTimeout(() => {
+    try{
+      DATA = NET.parse(osm, lat, lon); depot = [0, 0];
+      if(!DATA.roads.length){ status("st1", "Бұл шеңберде OSM-да бірде-бір жол табылмады. Координатаны не радиусты өзгертіңіз.", "err"); return; }
+      RES = NET.analyze(DATA, R, {depot});
+      LAY = buildLayers(DATA); $("mapEmpty").hidden = true; fitView(); renderVars();
+      const tg = $("dataTag"); tg.hidden = false; tg.classList.toggle("demo", !!osm._demo);
+      tg.textContent = osm._demo ? "Мысал: ойдан құрылған аудан" : `OSM · ${lat.toFixed(4)}, ${lon.toFixed(4)} · R ${F(R)} м`;
+      ["s3", "s4", "s4r", "s5"].forEach(id => $(id).classList.remove("disabled"));
+      const kb = osm._bytes ? ` · ${F(osm._bytes / 1024, 0)} КБ` : "";
+      if(osm._demo){ status("st1", "Ойдан құрылған мысал аудан көрсетілді. Нақты карта үшін координатаны беріп, «Картаны құру» басыңыз.", "ok"); planRoutes(); return; }
+      status("st1", `Дайын: ${F(DATA.roads.length)} жол сызығы, ${F(RES.inB.length)} ғимарат, ${F(RES.topo.intersections.length)} қиылыс${kb}.`, "ok");
+      planRoutes();
+    }catch(err){ console.error(err); status("st1", "Талдау кезінде қате: " + err.message, "err"); }
+  }, 30);
+}
 
-/* ================================================================ boot */
-renderInputs(); fillMapSelect(); recompute();
-window.__dariModel = {states, MFUN, aiSearch, ruleR1, get S(){ return S; }};
+/* ================================================================ 2. карта */
+const cv = $("cv"), ctx = cv.getContext("2d");
+function buildLayers(D){
+  const L = {bld:new Path2D(), major:new Path2D(), street:new Path2D(), service:new Path2D(), walk:new Path2D(), rail:new Path2D(), water:new Path2D(), waterA:new Path2D()};
+  const line = (p, xy) => { p.moveTo(xy[0], xy[1]); for(let i = 2; i < xy.length; i += 2) p.lineTo(xy[i], xy[i + 1]); };
+  const poly = (p, xy) => { line(p, xy); p.closePath(); };
+  D.blds.forEach(b => poly(L.bld, b.xy)); D.waterAreas.forEach(w => poly(L.waterA, w.xy));
+  D.waters.forEach(w => line(L.water, w.xy)); D.rails.forEach(r => line(L.rail, r.xy)); D.roads.forEach(r => line(L[r.cls], r.xy));
+  return L;
+}
+function size(){ const r = cv.getBoundingClientRect(); return [Math.max(1, r.width), Math.max(1, r.height)]; }
+function fitView(){ const [w, h] = size(); V.x = 0; V.y = 0; V.s = Math.min(w, h) / (2 * U.R * 1.06); draw(); }
+const toWorld = (px, py) => { const [w, h] = size(); return [V.x + (px - w / 2) / V.s, V.y - (py - h / 2) / V.s]; };
+const toScr = (x, y, w, h) => [w / 2 + (x - V.x) * V.s, h / 2 - (y - V.y) * V.s];
+let drawQ = 0; function requestDraw(){ if(!drawQ) drawQ = requestAnimationFrame(() => { drawQ = 0; draw(); }); }
+function draw(){
+  const [w, h] = size(), dpr = window.devicePixelRatio || 1;
+  if(cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){ cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const cs = getComputedStyle(document.documentElement), c = n => cs.getPropertyValue(n).trim();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = c("--m-bg"); ctx.fillRect(0, 0, cv.width, cv.height);
+  if(!LAY) return;
+  const s = V.s, px = v => v / s, z = Math.min(3, Math.max(0.8, Math.sqrt(s / 0.25)));
+  ctx.setTransform(s * dpr, 0, 0, -s * dpr, (w / 2 - V.x * s) * dpr, (h / 2 + V.y * s) * dpr);
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  ctx.fillStyle = c("--m-water"); ctx.fill(LAY.waterA);
+  ctx.strokeStyle = c("--m-water"); ctx.lineWidth = px(3 * z); ctx.stroke(LAY.water);
+  ctx.fillStyle = c("--m-bld"); ctx.fill(LAY.bld);
+  if(s > 1.2){ ctx.strokeStyle = c("--m-bld-edge"); ctx.lineWidth = px(0.8); ctx.stroke(LAY.bld); }
+  ctx.strokeStyle = c("--m-svc"); ctx.lineWidth = px(1.4 * z); ctx.stroke(LAY.service);
+  if(U.layers.walk){ ctx.setLineDash([px(3 * z), px(2.5 * z)]); ctx.strokeStyle = c("--m-walk"); ctx.lineWidth = px(1.1 * z); ctx.stroke(LAY.walk); ctx.setLineDash([]); }
+  ctx.strokeStyle = c("--m-case"); ctx.lineWidth = px(3.8 * z); ctx.stroke(LAY.street);
+  ctx.strokeStyle = c("--m-major-case"); ctx.lineWidth = px(6 * z); ctx.stroke(LAY.major);
+  ctx.strokeStyle = c("--m-road"); ctx.lineWidth = px(2.4 * z); ctx.stroke(LAY.street);
+  ctx.strokeStyle = c("--m-major"); ctx.lineWidth = px(4.2 * z); ctx.stroke(LAY.major);
+  ctx.strokeStyle = c("--m-rail"); ctx.lineWidth = px(3.2 * z); ctx.stroke(LAY.rail);
+  ctx.setLineDash([px(5 * z), px(5 * z)]); ctx.strokeStyle = c("--m-rail2"); ctx.lineWidth = px(1.4 * z); ctx.stroke(LAY.rail); ctx.setLineDash([]);
+  // маршруттар
+  if(U.layers.routes && PLAN && PLAN.cur){
+    PLAN.cur.routes.forEach((r, i) => { if(!r.path) r.path = routePath(r);
+      ctx.strokeStyle = c("--m-bg"); ctx.globalAlpha = .9; ctx.lineWidth = px(7.5); ctx.stroke(r.path);
+      ctx.strokeStyle = c(`--c${(i % 8) + 1}`); ctx.globalAlpha = .92; ctx.lineWidth = px(4.2); ctx.stroke(r.path); ctx.globalAlpha = 1; });
+  }
+  // шеңбер сыртын күңгірттеу
+  const big = new Path2D(); const R = U.R, W2 = Math.max(w, h) / s * 4;
+  big.rect(V.x - W2, V.y - W2, 2 * W2, 2 * W2); big.moveTo(R, 0); big.arc(0, 0, R, 0, Math.PI * 2, true);
+  ctx.fillStyle = c("--m-dim"); ctx.fill(big, "evenodd");
+  ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.strokeStyle = c("--m-ring"); ctx.lineWidth = px(1.5); ctx.setLineDash([px(6), px(5)]); ctx.stroke(); ctx.setLineDash([]);
+  // экран координатасындағы белгілер
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const onScr = (x, y) => { const p = toScr(x, y, w, h); return p[0] > -10 && p[0] < w + 10 && p[1] > -10 && p[1] < h + 10 ? p : null; };
+  if(U.layers.inter && RES){ ctx.fillStyle = c("--m-inter"); const r0 = s > 0.6 ? 2.6 : 1.8;
+    for(const q of RES.topo.intersections){ const p = onScr(q.x, q.y); if(p){ ctx.beginPath(); ctx.arc(p[0], p[1], r0, 0, 7); ctx.fill(); } } }
+  if(U.layers.dead && RES){ ctx.strokeStyle = c("--m-dead"); ctx.lineWidth = 1.5;
+    for(const q of RES.topo.deadEnds){ const p = onScr(q[0], q[1]); if(p){ ctx.strokeRect(p[0] - 2.5, p[1] - 2.5, 5, 5); } } }
+  if(U.layers.cross && RES){ ctx.fillStyle = c("--m-cross"); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 1.5;
+    for(const q of RES.cross.rail.concat(RES.cross.water)){ const p = onScr(q.x, q.y); if(!p) continue;
+      ctx.beginPath(); ctx.moveTo(p[0], p[1] - 7); ctx.lineTo(p[0] + 7, p[1]); ctx.lineTo(p[0], p[1] + 7); ctx.lineTo(p[0] - 7, p[1]); ctx.closePath(); ctx.fill(); ctx.stroke();
+      if(!q.drive){ ctx.fillStyle = c("--m-bg"); ctx.beginPath(); ctx.arc(p[0], p[1], 2.2, 0, 7); ctx.fill(); ctx.fillStyle = c("--m-cross"); } } }
+  if(PLAN && PLAN.cur){ ctx.lineWidth = 1.5; ctx.strokeStyle = c("--m-bg");
+    PLAN.cur.routes.forEach((r, i) => { ctx.fillStyle = c(`--c${(i % 8) + 1}`);
+      for(const k of r.seq){ const q = PLAN.pts[k], p = onScr(q.x, q.y); if(!p) continue; ctx.beginPath(); ctx.arc(p[0], p[1], 4.2, 0, 7); ctx.fill(); ctx.stroke(); } }); }
+  const dp = toScr(depot[0], depot[1], w, h);
+  ctx.fillStyle = c("--m-depot"); ctx.strokeStyle = c("--m-bg"); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.rect(dp[0] - 9, dp[1] - 9, 18, 18); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#fff"; ctx.fillRect(dp[0] - 1.8, dp[1] - 6, 3.6, 12); ctx.fillRect(dp[0] - 6, dp[1] - 1.8, 12, 3.6);
+  // масштаб сызғышы
+  const target = 90 / s, pow = Math.pow(10, Math.floor(Math.log10(target))), nice = [1, 2, 5, 10].map(k => k * pow).filter(v => v <= target).pop() || pow;
+  $("scaleB").style.width = (nice * s) + "px"; $("scaleT").textContent = nice >= 1000 ? `${nice / 1000} км` : `${nice} м`;
+}
+/* жылжыту / масштабтау: тінтуір, сенсор, шымшу */
+const ptrs = new Map(); let pinch = null, moved = 0;
+function zoomAt(px, py, f){ const wp = toWorld(px, py), [w, h] = size(); V.s = Math.min(30, Math.max(0.01, V.s * f));
+  V.x = wp[0] - (px - w / 2) / V.s; V.y = wp[1] + (py - h / 2) / V.s; requestDraw(); }
+cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.offsetX, e.offsetY]); if(ptrs.size === 1) moved = 0;
+  if(ptrs.size === 2){ const [a, b] = [...ptrs.values()], mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; pinch = {d:Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, s:V.s, w:toWorld(mid[0], mid[1])}; } });
+cv.addEventListener("pointermove", e => { if(!ptrs.has(e.pointerId)) return; const pr = ptrs.get(e.pointerId), cur = [e.offsetX, e.offsetY]; ptrs.set(e.pointerId, cur);
+  if(ptrs.size === 1){ V.x -= (cur[0] - pr[0]) / V.s; V.y += (cur[1] - pr[1]) / V.s; moved += Math.abs(cur[0] - pr[0]) + Math.abs(cur[1] - pr[1]); requestDraw(); }
+  else if(ptrs.size === 2 && pinch){ const [a, b] = [...ptrs.values()], [w, h] = size(), mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    V.s = Math.min(30, Math.max(0.01, pinch.s * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d));
+    V.x = pinch.w[0] - (mid[0] - w / 2) / V.s; V.y = pinch.w[1] + (mid[1] - h / 2) / V.s; moved += 99; requestDraw(); } });
+function ptrEnd(e){ const was = ptrs.has(e.pointerId); ptrs.delete(e.pointerId); if(ptrs.size < 2) pinch = null;
+  if(was && e.type === "pointerup" && moved < 6 && pick && RES) setDepot(toWorld(e.offsetX, e.offsetY)); }
+cv.addEventListener("pointerup", ptrEnd); cv.addEventListener("pointercancel", ptrEnd);
+cv.addEventListener("wheel", e => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, Math.exp(-e.deltaY * 0.0015)); }, {passive:false});
+$("zIn").addEventListener("click", () => { const [w, h] = size(); zoomAt(w / 2, h / 2, 1.5); });
+$("zOut").addEventListener("click", () => { const [w, h] = size(); zoomAt(w / 2, h / 2, 1 / 1.5); });
+$("zFit").addEventListener("click", fitView);
+window.addEventListener("resize", requestDraw);
+try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", requestDraw); }catch(e){}
+document.querySelectorAll("#layers input").forEach(i => { i.checked = !!U.layers[i.dataset.l];
+  i.addEventListener("change", () => { U.layers[i.dataset.l] = i.checked; saveU(); requestDraw(); }); });
+
+function setDepot(wp){
+  if(Math.hypot(wp[0], wp[1]) > U.R){ status("stOpt", "Емхана шеңбер ішінде болуы керек.", "err"); return; }
+  depot = wp; pick = false; $("btnPick").setAttribute("aria-pressed", "false"); cv.classList.remove("pick");
+  status("stOpt", "Емхана орны өзгерді: қолжетімділік пен маршрут қайта есептелуде…");
+  setTimeout(() => { RES = NET.analyze(DATA, U.R, {depot}); renderVars(); planRoutes(); }, 20);
+}
+$("btnPick").addEventListener("click", () => { pick = !pick; $("btnPick").setAttribute("aria-pressed", String(pick)); cv.classList.toggle("pick", pick);
+  status("stOpt", pick ? "Картадан емхана орнын басыңыз." : ""); });
+
+/* ================================================================ 3. айнымалылар кестесі */
+const KEY_VARS = new Set(["A", "L_st", "delta", "NI", "phiW", "phiD", "Xw", "kappa", "H", "rW"]);
+function renderVars(){
+  if(!RES) return;
+  $("warns").innerHTML = RES.warn.map(w => `<div>${esc(w)}</div>`).join("");
+  let h = `<thead><tr><th>Айнымалы</th><th class="n">Мән</th><th>Қалай анықталды</th><th>Модельде</th></tr></thead><tbody>`, g = "";
+  for(const v of RES.vars){
+    if(v.group !== g){ g = v.group; h += `<tr class="g"><td colspan="4">${esc(g)}</td></tr>`; }
+    h += `<tr class="${KEY_VARS.has(v.key) ? "key" : ""}"><td>${esc(v.label)}</td><td class="v">${F(v.value, v.fmt)}${v.unit ? " " + esc(v.unit) : ""}</td>
+      <td class="how">${esc(v.how)}</td><td class="mdl">${v.model ? `<span class="tag">${esc(v.model)}</span>` : ""}</td></tr>`;
+  }
+  $("varTbl").innerHTML = h + "</tbody>";
+}
+
+/* ================================================================ 4. маршрут: нақты көше бойынша */
+function bindNum(id, key, lo, hi, int){ const e = $(id); e.value = U[key];
+  e.addEventListener("change", () => { let v = +e.value; if(!Number.isFinite(v)) v = DEF_U[key]; v = Math.max(lo, Math.min(hi, int ? Math.round(v) : v)); e.value = v; U[key] = v; saveU(); planRoutes(); }); }
+bindNum("rN", "n", 1, 120, true); bindNum("rK", "K", 1, 8, true); bindNum("rVw", "vw", 1, 8); bindNum("rVc", "vc", 5, 60); bindNum("rS0", "s0", 0, 60);
+$("rMode").value = U.mode; $("rMode").addEventListener("change", e => { U.mode = e.target.value; saveU(); planRoutes(); });
+$("rMethod").value = U.method; $("rMethod").addEventListener("change", e => { U.method = e.target.value; saveU(); if(PLAN) selectMethod(); });
+$("btnSeed").addEventListener("click", () => { U.seed++; saveU(); planRoutes(); });
+
+function routePath(r){ const p = new Path2D(), G = PLAN.G, t = [0].concat(r.seq, [0]); let first = true;
+  for(let i = 0; i + 1 < t.length; i++){ const nodes = NET.pathTo(PLAN.prevs[t[i]], PLAN.pts[t[i + 1]].node);
+    for(const v of nodes){ if(first){ p.moveTo(G.X[v], G.Y[v]); first = false; } else p.lineTo(G.X[v], G.Y[v]); } }
+  return p; }
+const tourLen = (seq, D) => { if(!seq.length) return 0; let L = D[0][seq[0]]; for(let i = 1; i < seq.length; i++) L += D[seq[i - 1]][seq[i]]; return L + D[seq[seq.length - 1]][0]; };
+function twoOpt(seq, D){ const t = [0].concat(seq, [0]); let imp = false;
+  for(let i = 0; i < t.length - 3; i++) for(let j = i + 2; j < t.length - 1; j++){
+    const d = D[t[i]][t[j]] + D[t[i + 1]][t[j + 1]] - D[t[i]][t[i + 1]] - D[t[j]][t[j + 1]];
+    if(d < -1e-6){ let a = i + 1, b = j; while(a < b){ const x = t[a]; t[a] = t[b]; t[b] = x; a++; b--; } imp = true; } }
+  if(imp) seq.splice(0, seq.length, ...t.slice(1, -1)); return imp; }
+function orOpt(seq, D){ const n = seq.length; if(n < 3) return false;
+  for(let len = 1; len <= 3; len++) for(let i = 0; i + len <= n; i++){
+    const t = [0].concat(seq, [0]), a = t[i], s0 = t[i + 1], s1 = t[i + len], b = t[i + len + 1];
+    const rem = D[a][s0] + D[s1][b] - D[a][b]; let best = -1e-6, bj = -1, rev = false;
+    for(let j = 0; j < t.length - 1; j++){ if(j >= i && j <= i + len) continue; const c = t[j], d = t[j + 1];
+      const a1 = D[c][s0] + D[s1][d] - D[c][d] - rem, a2 = D[c][s1] + D[s0][d] - D[c][d] - rem;
+      if(a1 < best){ best = a1; bj = j; rev = false; } if(a2 < best){ best = a2; bj = j; rev = true; } }
+    if(bj >= 0){ const seg = seq.splice(i, len); if(rev) seg.reverse(); seq.splice(bj < i ? bj : bj - len, 0, ...seg); return true; } }
+  return false; }
+function localOpt(seq, D){ for(let g = 0; g < 60; g++){ const a = twoOpt(seq, D), b = orOpt(seq, D); if(!a && !b) break; } }
+function nnSeq(ids, D){ const rem = ids.slice(), out = []; let cur = 0;
+  while(rem.length){ let bi = 0; for(let i = 1; i < rem.length; i++) if(D[cur][rem[i]] < D[cur][rem[bi]]) bi = i; cur = rem.splice(bi, 1)[0]; out.push(cur); } return out; }
+function partition(pts, K, kind, rnd){ // pts[0] — емхана
+  const ids = pts.map((_, i) => i).slice(1), groups = Array.from({length:K}, () => []);
+  if(kind === "sweep"){
+    const o = ids.map(i => [i, Math.atan2(pts[i].y - pts[0].y, pts[i].x - pts[0].x)]).sort((a, b) => a[1] - b[1]);
+    let gi = 0, gap = -1; for(let i = 0; i < o.length; i++){ const nx = o[(i + 1) % o.length][1] + (i + 1 === o.length ? 2 * Math.PI : 0), g = nx - o[i][1]; if(g > gap){ gap = g; gi = (i + 1) % o.length; } }
+    const rot = o.slice(gi).concat(o.slice(0, gi)); rot.forEach((q, k) => groups[Math.min(K - 1, Math.floor(k * K / rot.length))].push(q[0])); return groups;
+  }
+  // теңгерімді k-means
+  const q0 = pts[ids[Math.floor(rnd() * ids.length)]]; let C = [[q0.x, q0.y]];
+  while(C.length < K){ let best = null, bd = -1; for(const i of ids){ const d = Math.min(...C.map(c => Math.hypot(pts[i].x - c[0], pts[i].y - c[1]))); if(d > bd){ bd = d; best = i; } } C.push([pts[best].x, pts[best].y]); }
+  const cap = Math.ceil(ids.length / K); let asg = new Map();
+  for(let it = 0; it < 15; it++){
+    const pairs = []; for(const i of ids) C.forEach((c, k) => pairs.push([Math.hypot(pts[i].x - c[0], pts[i].y - c[1]), i, k])); pairs.sort((a, b) => a[0] - b[0]);
+    const cnt = new Array(K).fill(0); asg = new Map(); for(const [, i, k] of pairs){ if(asg.has(i) || cnt[k] >= cap) continue; asg.set(i, k); cnt[k]++; }
+    C = C.map((c, k) => { const m = ids.filter(i => asg.get(i) === k); return m.length ? [m.reduce((s, i) => s + pts[i].x, 0) / m.length, m.reduce((s, i) => s + pts[i].y, 0) / m.length] : c; });
+  }
+  for(const i of ids) groups[asg.get(i)].push(i); return groups;
+}
+function routeTime(r){ return tourLen(r.seq, PLAN.D) / PLAN.v + r.seq.length * U.s0 + r.seq.reduce((s, k) => s + 2 * PLAN.pts[k].acc, 0) / PLAN.v; }
+function objective(routes){ let tot = 0, mx = 0; for(const r of routes){ const t = routeTime(r); tot += t; mx = Math.max(mx, t); } return tot + 0.5 * mx; }
+function relocate(routes){ let moved = false;
+  for(let a = 0; a < routes.length; a++) for(let i = 0; i < routes[a].seq.length; i++){
+    const base = objective(routes), k = routes[a].seq[i]; if(routes[a].seq.length <= 1) continue;
+    routes[a].seq.splice(i, 1); let best = base - 1e-6, bb = -1, bp = -1;
+    for(let b = 0; b < routes.length; b++){ if(b === a) continue; const s = routes[b].seq;
+      for(let p = 0; p <= s.length; p++){ s.splice(p, 0, k); const v = objective(routes); s.splice(p, 1); if(v < best){ best = v; bb = b; bp = p; } } }
+    if(bb >= 0){ routes[bb].seq.splice(bp, 0, k); localOpt(routes[bb].seq, PLAN.Ds); localOpt(routes[a].seq, PLAN.Ds); moved = true; }
+    else routes[a].seq.splice(i, 0, k); }
+  return moved; }
+function solve(kind){ const rnd = NET.rng(U.seed * 131 + 7);
+  const groups = partition(PLAN.pts, Math.min(U.K, PLAN.pts.length - 1), kind === "M1" ? "kmeans" : "sweep", rnd);
+  const routes = groups.filter(g => g.length).map(g => { const seq = nnSeq(g, PLAN.Ds); localOpt(seq, PLAN.Ds); return {seq}; });
+  if(kind === "AI"){ for(let g = 0; g < 4; g++) if(!relocate(routes)) break; }
+  return {kind, routes}; }
+
+let planTok = 0, raf = 0;
+async function planRoutes(){
+  if(!RES) return; const tok = ++planTok; cancelAnimationFrame(raf); PLAN = null; requestDraw();
+  const walk = U.mode === "walk", G = walk ? RES.Gw : RES.Gd, mask = walk ? RES.maskW : RES.maskD, key = walk ? "wn" : "dn", akey = walk ? "wd" : "dd";
+  const dep = walk ? RES.depotW : RES.depotD;
+  if(dep.node < 0){ status("stOpt", "Емхана нүктесі жол желісіне қосылмады: емхананы картадан жолға жақын жерге қойыңыз.", "err"); return; }
+  const pool = RES.homes.filter(b => b[key] >= 0 && mask[b[key]]);
+  if(pool.length < 2){ status("stOpt", "Маршрут құруға жететін үй табылмады (OSM-да ғимарат аз).", "err"); return; }
+  const n = Math.min(U.n, pool.length), rnd = NET.rng(U.seed * 7919 + 13), idx = pool.map((_, i) => i);
+  for(let i = 0; i < n; i++){ const j = i + Math.floor(rnd() * (idx.length - i)); const x = idx[i]; idx[i] = idx[j]; idx[j] = x; }
+  const pts = [{x:G.X[dep.node], y:G.Y[dep.node], node:dep.node, acc:0}].concat(idx.slice(0, n).map(i => { const b = pool[i]; return {x:b.cx, y:b.cy, node:b[key], acc:b[akey]}; }));
+  const N = pts.length, D = Array.from({length:N}, () => new Float64Array(N)), prevs = new Array(N);
+  for(let i = 0; i < N; i++){ const r = NET.dijkstra(G, pts[i].node); prevs[i] = r.prev; for(let j = 0; j < N; j++) D[i][j] = r.dist[pts[j].node];
+    if(i % 5 === 4){ status("stOpt", `Көше бойынша қашықтық матрицасы: ${i + 1} / ${N}`); $("optBar").style.width = (40 * (i + 1) / N) + "%"; await tick(); if(tok !== planTok) return; } }
+  const Ds = D.map((row, i) => row.map((v, j) => (v + D[j][i]) / 2));
+  PLAN = {G, pts, D, Ds, prevs, walk, v:(walk ? U.vw : U.vc) * 1000 / 60, phi:walk ? RES.circuity.walk.c : RES.circuity.drive.c};
+  status("stOpt", "Үш әдіс салыстырылуда…"); await tick(); if(tok !== planTok) return;
+  PLAN.all = {M1:solve("M1"), M2:solve("M2"), AI:solve("AI")};
+  selectMethod();
+}
+function selectMethod(){ cancelAnimationFrame(raf); PLAN.cur = PLAN.all[U.method] || PLAN.all.AI; PLAN.cur.routes.forEach(r => r.path = null);
+  renderRoutes(); requestDraw(); startILS(); }
+function startILS(){ const cur = PLAN.cur, rnd = NET.rng(U.seed * 17 + 3), t0 = performance.now(); let stale = 0, it = 0, last = 0;
+  const tok = planTok;
+  function step(){ if(tok !== planTok || PLAN.cur !== cur) return; const end = performance.now() + 12; let improved = false;
+    while(performance.now() < end){ it++;
+      const r = cur.routes[Math.floor(rnd() * cur.routes.length)], n = r.seq.length;
+      if(n >= 8){ const old = r.seq.slice(), L0 = tourLen(old, PLAN.Ds);
+        const p1 = 1 + Math.floor(rnd() * (n / 3)), p2 = p1 + 1 + Math.floor(rnd() * (n / 3)), p3 = Math.min(n - 1, p2 + 1 + Math.floor(rnd() * (n / 3)));
+        r.seq = old.slice(0, p1).concat(old.slice(p2, p3), old.slice(p1, p2), old.slice(p3)); localOpt(r.seq, PLAN.Ds);
+        if(tourLen(r.seq, PLAN.Ds) < L0 - 1e-6){ improved = true; r.path = null; stale = 0; } else { r.seq = old; stale++; } }
+      else stale++;
+      if(cur.kind === "AI" && it % 40 === 0 && relocate(cur.routes)){ cur.routes.forEach(q => q.path = null); improved = true; stale = 0; } }
+    const el = performance.now() - t0; $("optBar").style.width = (40 + 60 * Math.min(1, el / 8000)) + "%";
+    if(improved || performance.now() - last > 400){ last = performance.now(); renderRoutes(true); requestDraw(); }
+    if(el < 8000 && stale < 600) raf = requestAnimationFrame(step);
+    else { $("optBar").style.width = "100%"; renderRoutes(); status("stOpt", `ЖИ ізденісі аяқталды: ${F(it)} итерация. Параметрді өзгертсеңіз, маршрут қайта құрылады.`, "ok"); } }
+  status("stOpt", "ЖИ маршрутты жақсартып жатыр (ILS: 2-opt, Or-opt, қос көпір)…"); raf = requestAnimationFrame(step);
+}
+function evalPlan(pl){
+  const phi = PLAN.phi, p0 = PLAN.pts[0];
+  const rows = pl.routes.map(r => { const len = tourLen(r.seq, PLAN.D), P = r.seq.map(k => [PLAN.pts[k].x, PLAN.pts[k].y]), n = P.length;
+    const A = NET.hullArea(P), cx = P.reduce((s, q) => s + q[0], 0) / n, cy = P.reduce((s, q) => s + q[1], 0) / n, rr = phi * Math.hypot(cx - p0.x, cy - p0.y);
+    const f7 = 2 * rr + K_BHH * phi * Math.sqrt(n * A); return {n, len, time:routeTime(r), f7, rr, tsp:phi * Math.sqrt(n * A)}; });
+  const tot = rows.reduce((s, q) => s + q.len, 0), tf = rows.reduce((s, q) => s + q.f7, 0), mx = Math.max(...rows.map(q => q.time)), tt = rows.reduce((s, q) => s + q.time, 0);
+  const num = rows.reduce((s, q) => s + (q.len - 2 * q.rr), 0), den = rows.reduce((s, q) => s + q.tsp, 0);
+  return {rows, tot, tf, mx, tt, kEmp:den > 0 ? num / den : NaN};
+}
+const MN = {AI:"ЖИ: еркін оңтайландыру", M1:"М1: бекітілген аймақтар", M2:"М2: радиалды жапырақтар"};
+function renderRoutes(light){
+  if(!PLAN || !PLAN.cur) return; const e = evalPlan(PLAN.cur);
+  $("routeKpi").innerHTML = [["Жалпы жол", F(e.tot / 1000, 2) + " км"], ["Ең ұзақ маршрут", F(e.mx, 0) + " мин"], ["Ф7 қателігі", (e.tot ? F((e.tf - e.tot) / e.tot * 100, 1) : "—") + " %"], ["k эмп. (теория 0,7124)", F(e.kEmp, 3)]]
+    .map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  $("routeSub").textContent = `${PLAN.walk ? "Жаяу" : "Көлік"} · ${PLAN.pts.length - 1} үй · φ̂ = ${F(PLAN.phi, 3)}`;
+  if(!light){
+    const ev = {}; for(const k in PLAN.all) ev[k] = k === PLAN.cur.kind ? e : evalPlan(PLAN.all[k]);
+    const best = Object.keys(ev).reduce((a, b) => ev[a].tt + 0.5 * ev[a].mx <= ev[b].tt + 0.5 * ev[b].mx ? a : b);
+    $("methTbl").innerHTML = `<thead><tr><th>Әдіс</th><th class="n">Жалпы жол, км</th><th class="n">Ең ұзақ маршрут, мин</th><th class="n">Жалпы уақыт, мин</th></tr></thead><tbody>` +
+      Object.keys(ev).map(k => `<tr class="${k === best ? "is-best" : ""} ${k === PLAN.cur.kind ? "sel" : ""}"><td>${MN[k]}${k === best ? ' <span class="chip best">үздік</span>' : ""}</td>
+        <td class="n">${F(ev[k].tot / 1000, 2)}</td><td class="n">${F(ev[k].mx, 0)}</td><td class="n">${F(ev[k].tt, 0)}</td></tr>`).join("") + "</tbody>";
+  }
+  $("routeTbl").innerHTML = `<thead><tr><th>Маршрут</th><th class="n">Үй</th><th class="n">Көше бойынша, км</th><th class="n">Уақыт, мин</th><th class="n">Ф7 бағасы, км</th><th class="n">Айырма</th></tr></thead><tbody>` +
+    e.rows.map((q, i) => `<tr><td><span class="sw" style="background:var(--c${(i % 8) + 1})"></span> ${i + 1}</td><td class="n">${q.n}</td><td class="n">${F(q.len / 1000, 2)}</td>
+      <td class="n">${F(q.time, 0)}</td><td class="n">${F(q.f7 / 1000, 2)}</td><td class="n">${q.len ? F((q.f7 - q.len) / q.len * 100, 1) + " %" : "—"}</td></tr>`).join("") +
+    `<tr><td><b>Барлығы</b></td><td class="n">${PLAN.pts.length - 1}</td><td class="n">${F(e.tot / 1000, 2)}</td><td class="n">${F(e.tt, 0)}</td><td class="n">${F(e.tf / 1000, 2)}</td><td class="n">${e.tot ? F((e.tf - e.tot) / e.tot * 100, 1) + " %" : "—"}</td></tr></tbody>`;
+}
+
+/* ================================================================ 5. модельге жіберу */
+const DEFAULT_MODEL = {v:1, isExample:true, seed:7, territory:{L:8, W:5, cx:2, cy:1.5},
+  groups:[{id:"G1", name:"1-топ (мысал)", alpha:0.6, tau:31}, {id:"G2", name:"2-топ (мысал)", alpha:0.8, tau:31}],
+  areas:[{id:"U1", name:"1-аймақ", L:1.2, W:1.0, x:1.2, y:1.0, nL:6, nW:8, pop:1800, houses:420, S:1, B:180, f:5, pat:{G1:120, G2:60}}],
+  drugs:[{group:"G1", name:"Дәрі 1", packs:2}, {group:"G2", name:"Дәрі 3", packs:3}],
+  params:{walk:4.5, s0:8, p:0.08, k:0.7124, phi:1.273, beta:0, norm:3, z:1.645, veh:20, shift:360, vcount:1, C:25, cfix:1500, cn:2500, cd:1800, ckm:80, co2:0.231, safety:2,
+    ring:0, tau_sat:10, pick_share:0.3, pick_q:2, pick_min:120, pick_s1:3},
+  weights:{cost:3, staff:2, co2:1, delay:2, cont:1}, mapMethod:"AUTO"};
+$("btnSend").addEventListener("click", () => {
+  if(!RES){ status("st5", "Алдымен картаны құрыңыз.", "err"); return; }
+  let S; try{ S = JSON.parse(lsGet(STORE_KEY)); }catch(e){ S = null; }
+  if(!S || !S.params || !Array.isArray(S.areas)) S = JSON.parse(JSON.stringify(DEFAULT_MODEL));
+  const R = U.R, km = v => Math.round(v / 10) / 100, v = k => (RES.vars.find(q => q.key === k) || {}).value;
+  const homes = RES.homes; if(homes.length < U.K){ status("st5", "Аймақ құруға үй жеткіліксіз.", "err"); return; }
+  const pts = [{x:depot[0], y:depot[1]}].concat(homes.map(b => ({x:b.cx, y:b.cy})));
+  const groups = partition(pts, U.K, "kmeans", NET.rng(5)), delta = v("delta") || 100;
+  const totPat = {}; for(const a of S.areas) for(const g in (a.pat || {})) totPat[g] = (totPat[g] || 0) + (+a.pat[g] || 0);
+  const tmpl = S.areas[0] || DEFAULT_MODEL.areas[0];
+  S.areas = groups.filter(g => g.length).map((g, i) => {
+    const xs = g.map(k => pts[k].x), ys = g.map(k => pts[k].y), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const Lm = Math.max(200, x1 - x0), Wm = Math.max(200, y1 - y0), pat = {};
+    for(const gid in totPat) pat[gid] = Math.round(totPat[gid] * g.length / homes.length);
+    return {id:"Z" + (i + 1), name:`${i + 1}-аймақ (карта)`, L:km(Lm), W:km(Wm), x:km(R + (x0 + x1) / 2), y:km(R + (y0 + y1) / 2),
+      nL:Math.max(1, Math.round(Wm / delta)), nW:Math.max(1, Math.round(Lm / delta)), pop:0, houses:g.length, S:1, B:+tmpl.B || 180, f:+tmpl.f || 5, pat}; });
+  S.territory = {L:km(2 * R), W:km(2 * R), cx:km(R + depot[0]), cy:km(R + depot[1])};
+  const phi = U.mode === "walk" ? v("phiW") : v("phiD"); if(Number.isFinite(phi)) S.params.phi = Math.round(phi * 1000) / 1000;
+  S.isExample = false; S.source = {lat:U.lat, lon:U.lon, R, t:new Date().toISOString().slice(0, 10), H:v("H"), delta:Math.round(delta)};
+  if(!lsSet(STORE_KEY, JSON.stringify(S))){ status("st5", "Браузер деректерді сақтауға рұқсат бермеді.", "err"); return; }
+  status("st5", "Жазылды. Формулалар моделі ашылуда…", "ok"); setTimeout(() => { location.href = "model.html"; }, 300);
+});
+
+/* ================================================================ іске қосу */
+draw();
+cacheGet().then(c => { if(OSM) return;
+  if(c && c.osm){ $("coord").value = `${c.lat.toFixed(6)}, ${c.lon.toFixed(6)}`; setR(c.R); processOSM(c.osm, c.lat, c.lon, c.R, false);
+    setTimeout(() => status("st1", "Соңғы нақты карта осы құрылғыдан ашылды. Жаңарту үшін «Картаны құру» басыңыз.", "ok"), 400); }
+  else processOSM(demoOSM(U.lat, U.lon), U.lat, U.lon, 1500, false); });
 })();
+
 </script>
 
 </body>

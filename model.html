@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Дәрі тарату моделі: Ф1–Ф18 формулалары, М0–М6 әдістері.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231C6B55'/%3E%3Cpath d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z' fill='white'/%3E%3C/svg%3E">
+<style>html,body{margin:0}</style>
+</head>
+<body>
+<title>Дәрі тарату моделі</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EEF2EF; --surface:#FFFFFF; --surface2:#F6F8F6; --ink:#15201C; --ink2:#46544E; --muted:#6F7C76;
+  --line:#D5DCD7; --line2:#E6EBE7; --accent:#1C6B55; --accent-ink:#FFFFFF; --accent-soft:#E1EFE9;
+  --good:#1E7A3C; --good-soft:#E3F3E7; --warn:#A45A00; --warn-soft:#FBEFD9; --bad:#B42318; --bad-soft:#FBE7E5;
+  --map:#FBFCFA; --street:#E3E8E4;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#eda100; --c5:#e87ba4; --c6:#008300; --c7:#4a3aa7; --c8:#e34948;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --f-cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1412; --surface:#151D1A; --surface2:#1B2421; --ink:#E5ECE8; --ink2:#B3C0BA; --muted:#86938D;
+    --line:#2C3833; --line2:#232E2A; --accent:#4DB592; --accent-ink:#0E1412; --accent-soft:#1C3129;
+    --good:#56C57A; --good-soft:#15291C; --warn:#F2A33A; --warn-soft:#2E2312; --bad:#F2766B; --bad-soft:#321816;
+    --map:#121A17; --street:#1F2A26;
+    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c6:#008300; --c7:#9085e9; --c8:#e66767;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1412; --surface:#151D1A; --surface2:#1B2421; --ink:#E5ECE8; --ink2:#B3C0BA; --muted:#86938D;
+  --line:#2C3833; --line2:#232E2A; --accent:#4DB592; --accent-ink:#0E1412; --accent-soft:#1C3129;
+  --good:#56C57A; --good-soft:#15291C; --warn:#F2A33A; --warn-soft:#2E2312; --bad:#F2766B; --bad-soft:#321816;
+  --map:#121A17; --street:#1F2A26;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c6:#008300; --c7:#9085e9; --c8:#e66767;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+.wrap{max-width:1360px;margin:0 auto;padding-inline:16px;padding-block:14px 40px}
+h1,h2,h3{font-family:var(--f-cond);font-weight:600;letter-spacing:.005em;text-wrap:balance;margin:0}
+h1{font-size:26px;line-height:1.15}
+h2{font-size:18px}
+h3{font-size:15px}
+.num,td.n,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+header.top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;padding-block:6px 14px;border-bottom:1px solid var(--line)}
+header.top p{margin:6px 0 0;color:var(--ink2);max-width:62ch}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 9px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-weight:500}
+.badge.own{background:var(--accent-soft);color:var(--accent)}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:500}
+button.ghost{background:transparent}
+button.x{padding:3px 8px;font-size:12px;color:var(--muted)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav.jump{display:flex;gap:6px;overflow-x:auto;padding-block:10px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg)}
+nav.jump a{flex:none;font-size:12.5px;text-decoration:none;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--surface)}
+nav.jump a:hover{color:var(--accent);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:4px}
+@media (min-width:1080px){.grid{grid-template-columns:420px minmax(0,1fr)} nav.jump{display:none} .inputs{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.results{display:flex;flex-direction:column;gap:16px;min-width:0}
+.inputs{display:flex;flex-direction:column;gap:10px;min-width:0}
+details.blk{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+details.blk>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.blk>summary::-webkit-details-marker{display:none}
+details.blk>summary .h{font-family:var(--f-cond);font-weight:600;font-size:15px}
+details.blk>summary .s{font-size:12px;color:var(--muted)}
+details.blk>summary::after{content:"+";font-family:var(--f-mono);color:var(--muted)}
+details.blk[open]>summary::after{content:"–"}
+.blk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:12px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+.fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fld{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fld label{font-size:12px;color:var(--ink2);line-height:1.25}
+.fld label .u{color:var(--muted)}
+.fld input,.fld select{width:100%;font:inherit;font-family:var(--f-mono);font-size:13.5px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--ink)}
+.fld input[type=text]{font-family:var(--f-body)}
+.fld input[type=range]{padding:0;accent-color:var(--accent);background:transparent;border:0}
+.sub{border:1px solid var(--line2);border-radius:8px;padding:10px;background:var(--surface2);display:flex;flex-direction:column;gap:10px}
+.sub .row-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sub .row-h b{font-family:var(--f-cond);font-weight:600}
+.hint{font-size:12px;color:var(--muted);margin:0}
+.eyebrow{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.ai-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 16px;align-items:flex-start}
+.ai-title{font-family:var(--f-cond);font-size:22px;font-weight:600;line-height:1.2;margin-top:4px}
+.ai-conf{margin-top:4px;color:var(--ink2)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.fields.three{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{border:1px solid var(--line2);background:var(--surface2);border-radius:8px;padding:10px}
+.kpi .v{font-family:var(--f-mono);font-size:19px;font-weight:500}
+.kpi .l{font-size:12px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.chip.ok{background:var(--good-soft);color:var(--good)}
+.chip.no{background:var(--bad-soft);color:var(--bad)}
+.chip.mid{background:var(--warn-soft);color:var(--warn)}
+.chip.best{background:var(--accent);color:var(--accent-ink)}
+.why{margin:12px 0 0;padding-left:18px;color:var(--ink2);display:flex;flex-direction:column;gap:4px}
+.alts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.alt{font-size:12.5px;border:1px dashed var(--line);border-radius:8px;padding:6px 9px;color:var(--ink2)}
+.tbl{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+td.n,th.n{text-align:right;white-space:nowrap}
+tr.is-best td{background:var(--accent-soft)}
+tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.card-h{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:space-between;align-items:center}
+.map-wrap{margin-top:10px;border:1px solid var(--line2);border-radius:8px;background:var(--map);overflow:hidden}
+svg.map{display:block;width:100%;height:auto}
+.map-stat{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+@media (max-width:640px){.map-stat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.progress{height:4px;border-radius:4px;background:var(--line2);overflow:hidden;margin-top:8px}
+.progress>i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:3px;border-radius:2px;display:inline-block}
+.warns{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.warns div{font-size:12.5px;background:var(--warn-soft);color:var(--warn);padding:7px 10px;border-radius:7px}
+.panel-data{position:fixed;inset:0;background:rgba(10,16,14,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+@media (min-width:720px){.panel-data{align-items:center}}
+.panel-data .box{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;max-width:720px;width:100%;max-height:88vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+textarea{width:100%;min-height:110px;font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface2);color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row input[type=text]{flex:1;min-width:140px;font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--ink)}
+ul.saved{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+ul.saved li{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid var(--line2);border-radius:8px;padding:6px 8px}
+footer{margin-top:22px;color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:6px;max-width:90ch}
+.msg{font-size:12.5px;color:var(--accent)}
+.msg.err{color:var(--bad)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">МСАК · д-есептегі пациенттер · үйге жеткізу</div>
+      <h1>Дәрі тарату моделі</h1>
+      <p>Кез келген айнымалыны өзгертіңіз: есеп бірден жаңарады. ЖИ үздік тарату әдісін таңдайды және картада маршрутты үздіксіз жақсартады.</p>
+    </div>
+    <div class="tools">
+      <a href="index.html" style="font-size:13px;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:8px">← Көше картасы</a>
+      <span id="dataBadge" class="badge">Мысал деректер</span>
+      <button id="btnData" type="button">Деректер: сақтау / көшіру</button>
+      <button id="btnReset" type="button" class="ghost">Мысалды қайта жүктеу</button>
+    </div>
+  </header>
+
+  <nav class="jump" aria-label="Бөлімдер">
+    <a href="#inputs">Енгізу</a><a href="#ai">ЖИ ұсынысы</a><a href="#map">Карта</a><a href="#methods">Әдістер</a><a href="#areasCard">Аймақтар</a><a href="#drugsCard">Дәрі</a>
+  </nav>
+
+  <main class="grid">
+    <section id="inputs" class="inputs" aria-label="Кіріс деректер"></section>
+
+    <section class="results">
+      <article id="ai" class="card" aria-live="polite"></article>
+
+      <article id="map" class="card">
+        <div class="card-h">
+          <div>
+            <div class="eyebrow">Бір жеткізу күнінің маршруттары</div>
+            <h2 id="mapTitle">Карта</h2>
+          </div>
+          <div class="row">
+            <div class="fld" style="min-width:210px">
+              <label for="mapMethod">Картадағы әдіс</label>
+              <select id="mapMethod"></select>
+            </div>
+            <button id="btnReseed" type="button" title="Үйлердің басқа кездейсоқ орналасуы">Жаңа үйлер</button>
+          </div>
+        </div>
+        <div class="map-wrap"><svg id="mapSvg" class="map" role="img" aria-label="Аумақ, аймақтар және маршруттар картасы"></svg></div>
+        <div class="progress" aria-hidden="true"><i id="optBar"></i></div>
+        <p id="optStatus" class="small muted" style="margin:6px 0 0"></p>
+        <div class="map-stat" id="mapStat"></div>
+        <div class="legend" id="mapLegend"></div>
+        <p class="hint" style="margin-top:8px">Мекенжай жоқ кезде үйлер аймақ ішінде кездейсоқ қойылады (Б2 болжамы). Қашықтық көше торы бойынша (|Δx|+|Δy|) есептеледі. ЖИ: аймақтарды k-means арқылы бөледі, маршрутты 2-opt, Or-opt, топтар арасында ауыстыру және қайта бастау (ILS) арқылы қысқартады.</p>
+      </article>
+
+      <article id="methods" class="card"></article>
+      <article id="areasCard" class="card"></article>
+      <article id="drugsCard" class="card"></article>
+    </section>
+  </main>
+
+  <footer>
+    <div>Модель: Ф1–Ф18 формулалары, М0–М6 әдістері, Лемма 1–4 («Д-есептегі пациенттерге дәріні үйге таратудың математикалық моделі», v0.2). Негізі: Beardwood–Halton–Hammersley (1959), Daganzo (1984), Newell &amp; Daganzo (1986), Gillett &amp; Miller (1974), Perboli және т.б. (2011).</div>
+    <div>Деректер тек осы құрылғыдағы браузерде сақталады. Телефон мен компьютер арасында көшіру үшін «Деректер» терезесін пайдаланыңыз. Пациенттің аты-жөні, ЖСН, мекенжайы енгізілмейді.</div>
+  </footer>
+</div>
+
+<div id="dataPanel" class="panel-data" hidden>
+  <div class="box" role="dialog" aria-modal="true" aria-labelledby="dpTitle">
+    <div class="card-h"><h2 id="dpTitle">Деректер</h2><button type="button" id="dpClose">Жабу</button></div>
+    <div class="sub">
+      <b>Осы құрылғыда сақталған сценарийлер</b>
+      <div class="row"><input type="text" id="scName" placeholder="Сценарий атауы, мысалы: 2027 жоспар"><button type="button" class="primary" id="scSave">Сақтау</button></div>
+      <ul class="saved" id="scList"></ul>
+      <span class="msg" id="scMsg"></span>
+    </div>
+    <div class="sub">
+      <b>Басқа құрылғыға көшіру</b>
+      <p class="hint">1) Мына мәтінді көшіріңіз. 2) Екінші құрылғыда осы бетті ашып, төмендегі «Импорт» өрісіне қойыңыз.</p>
+      <textarea id="expText" readonly aria-label="Экспорт мәтіні"></textarea>
+      <div class="row"><button type="button" id="expCopy">Көшіру</button><span class="msg" id="expMsg"></span></div>
+      <label for="impText" class="small">Импорт</label>
+      <textarea id="impText" placeholder="Мұнда экспорт мәтінін қойыңыз"></textarea>
+      <div class="row"><button type="button" class="primary" id="impBtn">Импорттау</button><span class="msg" id="impMsg"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ================================================================ state */
+const STORE_KEY = "dariModel.state.v1", SCEN_KEY = "dariModel.scenarios.v1";
+const DEFAULT = {
+  v:1, isExample:true, seed:7,
+  territory:{L:8, W:5, cx:2, cy:1.5},
+  groups:[{id:"G1", name:"1-топ (мысал)", alpha:0.6, tau:31},{id:"G2", name:"2-топ (мысал)", alpha:0.8, tau:31}],
+  areas:[
+    {id:"U1", name:"1-аймақ", L:1.2, W:1.0, x:1.2, y:1.0, nL:6, nW:8, pop:1800, houses:420, S:1, B:180, f:5, pat:{G1:120,G2:60}},
+    {id:"U2", name:"2-аймақ", L:1.5, W:1.2, x:3.0, y:2.2, nL:5, nW:7, pop:1900, houses:450, S:1, B:180, f:5, pat:{G1:120,G2:60}},
+    {id:"U3", name:"3-аймақ (шеткері)", L:2.0, W:1.5, x:6.5, y:4.0, nL:4, nW:5, pop:1700, houses:380, S:1, B:180, f:5, pat:{G1:120,G2:60}}
+  ],
+  drugs:[{group:"G1", name:"Дәрі 1", packs:2},{group:"G1", name:"Дәрі 2", packs:1},{group:"G2", name:"Дәрі 3", packs:3}],
+  params:{walk:4.5, s0:8, p:0.08, k:0.7124, phi:1.273, beta:0, norm:3, z:1.645,
+          veh:20, shift:360, vcount:1, C:25, cfix:1500, cn:2500, cd:1800, ckm:80, co2:0.231, safety:2,
+          ring:0, tau_sat:10, pick_share:0.3, pick_q:2, pick_min:120, pick_s1:3},
+  weights:{cost:3, staff:2, co2:1, delay:2, cont:1},
+  mapMethod:"AUTO"
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+function validState(s){ return s && s.territory && Array.isArray(s.areas) && Array.isArray(s.groups) && s.params && s.weights; }
+let S = (()=>{ try{ const t = JSON.parse(lsGet(STORE_KEY)); if(validState(t)) return Object.assign(clone(DEFAULT), t); }catch(e){} return clone(DEFAULT); })();
+
+/* ================================================================ formulas F1-F18 */
+const K_BHH = 0.7124;
+function f5(n,H){ return H>0 ? H*(1-Math.pow(1-1/H, n)) : n; }
+function f7(n,A,r,tours,k,phi,beta){ if(!(n>0)) return 0; return 2*r*tours + k*phi*Math.sqrt(n*A) + k*phi*beta*Math.sqrt(A); }
+function f8(n,A,r,v,s0,k,phi,beta){ return f7(n,A,r,1,k,phi,beta)/v + n*s0; }
+function f10(A,r,v,s0,B,k,phi,beta){ const a=s0, b=k*phi*Math.sqrt(A)/v, c=2*r/v + k*phi*beta*Math.sqrt(A)/v - B;
+  if(c>=0) return 0; const x=(-b+Math.sqrt(b*b-4*a*c))/(2*a); return x*x; }
+function f11(f,p,zoned){ const h = zoned ? 7 : 7/f; return h*(0.5 + p/(1-p)); }
+function f15(vw,vc,cnMin,cdMin,ckm,cfix){ const g = cnMin/vw - (cnMin+cdMin)/vc - ckm; return g>0 ? cfix/(2*g) : null; }
+function f16(n,A,rbar,C,k,phi,beta){ if(!(n>0)) return 0; return 2*rbar*Math.ceil(n/C) + k*phi*Math.sqrt(n*A) + k*phi*beta*Math.sqrt(A); }
+const peak = (x,z) => x + z*Math.sqrt(Math.max(x,0));
+function P(){ const p = Object.assign({}, S.params); for(const k in p) p[k] = +p[k]; p.v_w = p.walk/60; p.v_c = p.veh/60; return p; }
+
+/* ================================================================ state per area */
+function states(fOv){
+  const p = P(), t = S.territory;
+  const rows = S.areas.map(a=>{
+    const A = +a.L * +a.W, r = p.phi*Math.hypot(+a.x - +t.cx, +a.y - +t.cy);
+    let lam = 0; for(const g of S.groups){ lam += (+((a.pat||{})[g.id])||0) * (+g.alpha) / Math.max(+g.tau,1); }
+    const f = fOv || Math.max(1, Math.min(5, Math.round(+a.f)||1));
+    const n = 7*lam/f, m = f5(n, +a.houses), att = m/(1-p.p);
+    return {id:a.id, name:a.name, L:+a.L, W:+a.W, x:+a.x, y:+a.y, A, r, lam, S:Math.max(1, Math.round(+a.S)||1), B:+a.B, f, n, m, att, H:+a.houses};
+  });
+  const TL=+t.L, TW=+t.W, cx=+t.cx, cy=+t.cy;
+  const dx=Math.max(0,-cx,cx-TL), dy=Math.max(0,-cy,cy-TW);
+  rows.A_T = TL*TW; rows.r0 = p.phi*Math.hypot(dx,dy); rows.R_bound = 1.12*(TL+TW)/4;
+  return rows;
+}
+const meanF = st => st.reduce((s,a)=>s+a.f,0)/Math.max(st.length,1);
+const walkT = (n,A,r,p) => f8(n,A,r,p.v_w,p.s0,p.k,p.phi,p.beta);
+function base(code){ return {code, walk_min:0, crew_min:0, veh_km:0, walk_km:0, tours:0, patient_km:0, point_min:0, team_mean:0, team_peak:0, feasible:true, cont:CONT[code], viol:0}; }
+function finish(res,p,fd,delay){
+  const dm = fd*30/7; res.days = dm;
+  res.cost = dm*(res.walk_min/60*p.cn + res.crew_min/60*(p.cn+p.cd) + res.veh_km*p.ckm + res.tours*p.cfix + res.point_min/60*p.cn);
+  res.co2 = dm*res.veh_km*p.co2;
+  res.staff = dm*(res.walk_min + 2*res.crew_min + res.point_min)/60;
+  res.patient_km = dm*res.patient_km;
+  res.delay = delay; return res;
+}
+/* ================================================================ methods M0-M6 */
+const NAMES = {M0:"Тікелей сапар", M1:"Бекітілген кіші аймақтар", M2:"Емханадан радиалды жапырақтар", M3:"Сақиналы-радиалды аралас", M4:"Екі эшелонды (спутник нүкте)", M5:"Беру пункттері", M6:"Аймақ-күн (k-means)"};
+const DESC = {M0:"әр пациентке жеке барып-қайту", M1:"әр топқа өз аймағы, күнделікті маршрут", M2:"емхана — бастау, топтар жақыннан алысқа", M3:"жақын аймақ жаяу, алыс аймақ көлікпен", M4:"көлік → спутник нүкте → жаяу", M5:"пациенттің бір бөлігі пункттен алады", M6:"аймақ апта күндеріне бөлінеді"};
+const CONT = {M0:true,M1:true,M2:false,M3:true,M4:true,M5:true,M6:true};
+function m0(st,p){ const res=base("M0");
+  for(const s of st){ const ri=Math.sqrt(s.r*s.r + Math.pow(p.phi*(s.L+s.W)/4,2)); const per=2*ri/p.v_w + p.s0;
+    res.walk_min += s.att*per; res.walk_km += s.att*2*ri;
+    const tp = peak(s.att,p.z)/s.S*per; res.team_mean=Math.max(res.team_mean, s.att/s.S*per); res.team_peak=Math.max(res.team_peak,tp);
+    if(tp>s.B){ res.feasible=false; res.viol=Math.max(res.viol,tp/s.B); } }
+  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
+function m1raw(st,p,zoned,code){ const res=base(code||(zoned?"M6":"M1"));
+  for(const s of st){ const Ad = zoned ? s.A/s.f : s.A;
+    const T = walkT(s.att/s.S, Ad/s.S, s.r, p), Tp = walkT(peak(s.att,p.z)/s.S, Ad/s.S, s.r, p);
+    res.walk_min += s.S*T; res.walk_km += s.S*f7(s.att/s.S, Ad/s.S, s.r, 1, p.k, p.phi, p.beta);
+    res.team_mean=Math.max(res.team_mean,T); res.team_peak=Math.max(res.team_peak,Tp);
+    if(Tp>s.B){ res.feasible=false; res.viol=Math.max(res.viol,Tp/s.B); } }
+  return res; }
+function m1(st,p){ return finish(m1raw(st,p,false),p,meanF(st),f11(meanF(st),p.p,false)); }
+function m6(st,p){ return finish(m1raw(st,p,true),p,meanF(st),f11(meanF(st),p.p,true)); }
+function m2(st,p){ const res=base("M2");
+  const N=st.reduce((s,a)=>s+a.att,0), ST=st.reduce((s,a)=>s+a.S,0);
+  if(!(N>0)) return finish(res,p,meanF(st),NaN);
+  const delta=N/st.A_T, r0=st.r0, Rm=st.R_bound;
+  const plen = np => { let w=Math.sqrt(12/delta), R=np/(delta*w); if(R>Rm){ R=Rm; w=np/(delta*R); } return 2*r0 + 2*R + np*w/6; };
+  const np=N/ST, npk=peak(N,p.z)/ST, Lp=plen(np), Lpk=plen(npk);
+  const T=Lp/p.v_w + np*p.s0, Tp=Lpk/p.v_w + npk*p.s0, Bmin=Math.min(...st.map(s=>s.B));
+  Object.assign(res,{walk_min:ST*T, walk_km:ST*Lp, team_mean:T, team_peak:Tp, feasible:Tp<=Bmin, viol:Tp>Bmin?Tp/Bmin:0, petal_w:Math.sqrt(12/delta)});
+  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
+function rstar(p){ return f15(p.v_w,p.v_c,p.cn/60,p.cd/60,p.ckm,p.cfix); }
+function m3(st,p,rho){ if(rho==null){ rho = p.ring>0 ? p.ring : (rstar(p) || 1e9); }
+  const inner=st.filter(s=>s.r<=rho), outer=st.filter(s=>s.r>rho);
+  const res = inner.length ? m1raw(inner,p,false,"M3") : base("M3"); res.code="M3"; res.cont=true; res.rho=rho;
+  if(outer.length){ const N=outer.reduce((s,a)=>s+a.att,0);
+    const rbar = N>0 ? outer.reduce((s,a)=>s+a.r*a.att,0)/N : 0, Ao=outer.reduce((s,a)=>s+a.A,0);
+    const D=f16(N,Ao,rbar,p.C,p.k,p.phi,p.beta), crew=D/p.v_c + N*p.s0;
+    const Np=peak(N,p.z), Dp=f16(Np,Ao,rbar,p.C,p.k,p.phi,p.beta), crewp=Dp/p.v_c + Np*p.s0, cap=p.vcount*p.shift;
+    Object.assign(res,{veh_km:D, crew_min:crew, tours:N>0?Math.ceil(N/p.C):0, vutil:crew/cap});
+    if(crewp>cap){ res.feasible=false; res.viol=Math.max(res.viol,crewp/cap); } }
+  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
+function m4(st,p){ const res=base("M4"); const h=st.reduce((s,a)=>s+a.S,0), tau=p.tau_sat;
+  const lv=f7(h,st.A_T,st.r0,1,p.k,p.phi,p.beta);
+  for(const s of st){ const T=walkT(s.att/s.S,s.A/s.S,0,p)+tau, Tp=walkT(peak(s.att,p.z)/s.S,s.A/s.S,0,p)+tau;
+    res.walk_min+=s.S*T; res.walk_km+=s.S*f7(s.att/s.S,s.A/s.S,0,1,p.k,p.phi,p.beta);
+    res.team_mean=Math.max(res.team_mean,T); res.team_peak=Math.max(res.team_peak,Tp);
+    if(Tp>s.B){ res.feasible=false; res.viol=Math.max(res.viol,Tp/s.B); } }
+  res.veh_km=lv; res.crew_min=lv/p.v_c + h*tau; res.tours=1; const cap=p.vcount*p.shift;
+  if(res.crew_min>cap){ res.feasible=false; res.viol=Math.max(res.viol,res.crew_min/cap); }
+  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
+function m5(st,p){ const pi=Math.min(Math.max(p.pick_share,0),1), q=Math.max(1,Math.round(p.pick_q));
+  const st2 = st.map(s=>Object.assign({},s,{att:s.att*(1-pi)})); st2.A_T=st.A_T; st2.r0=st.r0; st2.R_bound=st.R_bound;
+  const res = m1raw(st2,p,false,"M5"); res.cont=true;
+  const pk = st.reduce((s,a)=>s+a.n*pi,0);
+  res.patient_km = pk*Math.sqrt(st.A_T/q); res.point_min = q*p.pick_min + pk*p.pick_s1;
+  return finish(res,p,meanF(st),f11(meanF(st),p.p,false)); }
+const MFUN = {M0:m0,M1:m1,M2:m2,M3:(st,p)=>m3(st,p,null),M4:m4,M5:m5,M6:m6};
+function ruleR1(st,p){ const N=st.reduce((s,a)=>s+a.att,0), ST=st.reduce((s,a)=>s+a.S,0);
+  if(!(N>0)) return null; const delta=N/st.A_T;
+  const lhs = st.reduce((s,a)=>s+2*a.r*a.S,0) - 2*ST*st.r0, rhs=(2/Math.sqrt(3) - p.k*p.phi)*N/Math.sqrt(delta);
+  const cov = st.reduce((s,a)=>s+a.A,0)/st.A_T, np=N/ST, Ropt=np/(delta*Math.sqrt(12/delta));
+  return {lhs, rhs, prefer: lhs<rhs ? "M1":"M2", valid: cov>=0.8 && Ropt<=st.R_bound, cov}; }
+
+/* ================================================================ AI: method + parameter search */
+function aiSearch(){
+  const p=P(); const cands=[]; const st0=states(null);
+  const maxR = Math.max(0, ...st0.map(s=>s.r)), rs = rstar(p);
+  const rhoGrid = [...new Set([rs,0.5,1,1.5,2,3,4,6].filter(x=>x && x>0 && x<maxR))].sort((a,b)=>a-b);
+  for(let f=1; f<=5; f++){
+    const st=states(f);
+    for(const code of ["M0","M1","M2","M3","M4","M5","M6"]){
+      if(code==="M6" && f===1) continue;
+      if(code==="M5" && !(p.pick_share>0)) continue;
+      if(code==="M3"){ if(p.ring>0) cands.push({code,f,rho:p.ring,res:m3(st,p,p.ring)});
+        else for(const rho of rhoGrid) cands.push({code,f,rho,res:m3(st,p,rho)}); continue; }
+      cands.push({code,f,res:MFUN[code](st,p)});
+    }
+  }
+  for(const c of cands){ c.ok = c.res.feasible && c.res.delay <= p.norm + 1e-9; }
+  const pool = cands.some(c=>c.ok) ? cands.filter(c=>c.ok) : cands;
+  const W=S.weights, keys=[["cost","cost"],["staff","staff"],["co2","co2"],["delay","delay"]];
+  const rng={}; for(const [k,f] of keys){ const v=pool.map(c=>c.res[f]).filter(Number.isFinite); rng[k]=[Math.min(...v), Math.max(...v)]; }
+  for(const c of cands){ let s=0;
+    for(const [k,f] of keys){ const [lo,hi]=rng[k]; const v=c.res[f]; s += (+W[k]||0) * (Number.isFinite(v) ? (hi>lo ? (v-lo)/(hi-lo) : 0) : 1); }
+    s += (+W.cont||0) * (c.res.cont ? 0 : 1);
+    if(!c.ok) s += 100 + 10*Math.max(c.res.viol||1, c.res.delay/p.norm || 1);
+    c.score=s; }
+  cands.sort((a,b)=>a.score-b.score);
+  const best=cands[0]; const alts=[]; const seen=new Set([best.code]);
+  for(const c of cands){ if(!seen.has(c.code)){ seen.add(c.code); alts.push(c); } if(alts.length>=3) break; }
+  return {best, alts, anyOk:cands.some(c=>c.ok), n:cands.length, rs};
+}
+
+/* ================================================================ formatting */
+const nf0 = new Intl.NumberFormat("ru-RU",{maximumFractionDigits:0}), nf1 = new Intl.NumberFormat("ru-RU",{maximumFractionDigits:1,minimumFractionDigits:1}), nf2=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:2});
+const F0=v=>Number.isFinite(v)?nf0.format(v):"—", F1=v=>Number.isFinite(v)?nf1.format(v):"—", F2=v=>Number.isFinite(v)?nf2.format(v):"—";
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function confText(c){ let t=`${c.f} күн/апта`; if(c.code==="M3") t+=`, сақина радиусы ${F2(c.rho)} км`; if(c.code==="M6") t+=`, ${c.f} күндік аймақ`; if(c.code==="M5") t+=`, ${F0(S.params.pick_share*100)}% пунктке`; return t; }
+
+/* ================================================================ inputs UI */
+const $ = id => document.getElementById(id);
+function fld(label, unit, path, val, opt={}){ const id="in_"+path.replace(/[^\w]/g,"_");
+  const type=opt.type||"number"; const attrs = type==="number" ? `inputmode="decimal" step="${opt.step||"any"}" ${opt.min!=null?`min="${opt.min}"`:""} ${opt.max!=null?`max="${opt.max}"`:""}` : "";
+  return `<div class="fld"${opt.span?` style="grid-column:span ${opt.span}"`:""}><label for="${id}">${esc(label)}${unit?` <span class="u">(${esc(unit)})</span>`:""}</label><input id="${id}" type="${type}" ${attrs} data-path="${path}" value="${esc(val)}"></div>`; }
+function rangeFld(label, path, val){ const id="in_"+path.replace(/[^\w]/g,"_");
+  return `<div class="fld"><label for="${id}">${esc(label)}: <b class="num" id="${id}_v">${val}</b></label><input id="${id}" type="range" min="0" max="5" step="1" data-path="${path}" value="${val}"></div>`; }
+function renderInputs(){
+  const t=S.territory, p=S.params, W=S.weights;
+  let h = `
+  <details class="blk" open><summary><span><span class="h">1. Аумақ</span><br><span class="s">ұзындығы, ені, емхананың орны</span></span></summary><div class="blk-body">
+    <div class="fields">${fld("Ұзындығы","км","territory.L",t.L,{min:0.1})}${fld("Ені","км","territory.W",t.W,{min:0.1})}
+    ${fld("Емхана X","км","territory.cx",t.cx)}${fld("Емхана Y","км","territory.cy",t.cy)}</div>
+    <p class="hint">Координаталар аумақтың сол жақ төменгі бұрышынан, км-мен.</p></div></details>
+
+  <details class="blk" open><summary><span><span class="h">2. Аймақтар мен топтар</span><br><span class="s">көшелер, халық, үй, жеткізуші топ, кесте</span></span></summary><div class="blk-body">`;
+  S.areas.forEach((a,i)=>{ h += `<div class="sub"><div class="row-h"><b>${esc(a.name||a.id)}</b>${S.areas.length>1?`<button type="button" class="x" data-del-area="${i}" aria-label="Аймақты өшіру">Өшіру</button>`:""}</div>
+      <div class="fields three">${fld("Атауы","",`areas.${i}.name`,a.name,{type:"text",span:3})}
+      ${fld("Ұзындығы","км",`areas.${i}.L`,a.L,{min:0.05})}${fld("Ені","км",`areas.${i}.W`,a.W,{min:0.05})}${fld("Центр X","км",`areas.${i}.x`,a.x)}
+      ${fld("Центр Y","км",`areas.${i}.y`,a.y)}${fld("Көше (ұзындық бойы)","дана",`areas.${i}.nL`,a.nL,{min:0,step:1})}${fld("Көше (ені бойы)","дана",`areas.${i}.nW`,a.nW,{min:0,step:1})}
+      ${fld("Тіркелген халық","адам",`areas.${i}.pop`,a.pop,{min:0,step:1})}${fld("Үй саны","дана",`areas.${i}.houses`,a.houses,{min:1,step:1})}${fld("Жеткізуші топ","саны",`areas.${i}.S`,a.S,{min:1,step:1})}
+      ${fld("Топқа уақыт","мин/күн",`areas.${i}.B`,a.B,{min:10,step:5})}${fld("Жеткізу күні","күн/апта",`areas.${i}.f`,a.f,{min:1,max:5,step:1})}</div>
+      <div class="fields three">${S.groups.map(g=>fld(`Д-есеп: ${g.name||g.id}`,"адам",`areas.${i}.pat.${g.id}`,(a.pat||{})[g.id]||0,{min:0,step:1})).join("")}</div></div>`; });
+  h += `<button type="button" id="addArea">+ Аймақ қосу</button></div></details>
+
+  <details class="blk"><summary><span><span class="h">3. Д-есеп топтары</span><br><span class="s">үйге жеткізу үлесі, дәрі беру кезеңі</span></span></summary><div class="blk-body">`;
+  S.groups.forEach((g,i)=>{ h += `<div class="sub"><div class="row-h"><b>${esc(g.id)}</b>${S.groups.length>1?`<button type="button" class="x" data-del-group="${i}">Өшіру</button>`:""}</div>
+      <div class="fields three">${fld("Атауы","",`groups.${i}.name`,g.name,{type:"text",span:3})}${fld("Үйге жеткізу үлесі","0–1",`groups.${i}.alpha`,g.alpha,{min:0,max:1,step:0.05})}${fld("Кезең","күн",`groups.${i}.tau`,g.tau,{min:1,step:1})}</div></div>`; });
+  h += `<button type="button" id="addGroup">+ Топ қосу</button></div></details>
+
+  <details class="blk"><summary><span><span class="h">4. Дәрілер</span><br><span class="s">бір кезеңге қаптама (Ф17)</span></span></summary><div class="blk-body">`;
+  S.drugs.forEach((d,i)=>{ h += `<div class="sub"><div class="row-h"><b>${esc(d.name||("Дәрі "+(i+1)))}</b><button type="button" class="x" data-del-drug="${i}">Өшіру</button></div>
+      <div class="fields three">${fld("Атауы","",`drugs.${i}.name`,d.name,{type:"text"})}
+      <div class="fld"><label for="dg_${i}">Топ</label><select id="dg_${i}" data-path="drugs.${i}.group">${S.groups.map(g=>`<option value="${esc(g.id)}"${g.id===d.group?" selected":""}>${esc(g.id)}</option>`).join("")}</select></div>
+      ${fld("Қаптама/кезең","дана",`drugs.${i}.packs`,d.packs,{min:0,step:1})}</div></div>`; });
+  h += `<button type="button" id="addDrug">+ Дәрі қосу</button></div></details>
+
+  <details class="blk"><summary><span><span class="h">5. Параметрлер</span><br><span class="s">қозғалыс, көлік, құн, норма, әдіс баптаулары</span></span></summary><div class="blk-body">
+    <div class="fields">${fld("Жаяу жылдамдық","км/сағ","params.walk",p.walk,{min:1,max:8,step:0.1})}${fld("Бір үйдегі уақыт","мин","params.s0",p.s0,{min:0,step:0.5})}
+    ${fld("Үйде болмау ықтималдығы","0–1","params.p",p.p,{min:0,max:0.9,step:0.01})}${fld("Кешігу нормасы","күн","params.norm",p.norm,{min:0.5,step:0.5})}
+    ${fld("Шың коэффициенті z","1,645 = 95%","params.z",p.z,{min:0,max:4,step:0.1})}${fld("Сақтық қор","апта","params.safety",p.safety,{min:0,step:0.5})}</div>
+    <div class="fields three">${fld("Маршрут тұрақтысы k","","params.k",p.k,{step:0.01})}${fld("Көше коэф. φ","","params.phi",p.phi,{step:0.01})}${fld("Аз аялдама β","","params.beta",p.beta,{step:0.1})}</div>
+    <div class="fields">${fld("Көлік жылдамдығы","км/сағ","params.veh",p.veh,{min:5,max:90})}${fld("Көлік ауысымы","мин","params.shift",p.shift,{min:30,step:10})}
+    ${fld("Көлік саны","дана","params.vcount",p.vcount,{min:0,step:1})}${fld("Маршруттағы аялдама шегі","дана","params.C",p.C,{min:1,step:1})}
+    ${fld("Мейірбике сағаты","₸","params.cn",p.cn,{min:0,step:100})}${fld("Жүргізуші сағаты","₸","params.cd",p.cd,{min:0,step:100})}
+    ${fld("Көлік 1 км","₸","params.ckm",p.ckm,{min:0,step:5})}${fld("Бір маршрут шығыны","₸","params.cfix",p.cfix,{min:0,step:100})}
+    ${fld("CO₂ 1 км","кг","params.co2",p.co2,{min:0,step:0.01})}</div>
+    <div class="fields">${fld("М3: сақина радиусы (0 = r*)","км","params.ring",p.ring,{min:0,step:0.1})}${fld("М4: спутникте күту","мин","params.tau_sat",p.tau_sat,{min:0})}
+    ${fld("М5: пунктке ауысатын үлес","0–1","params.pick_share",p.pick_share,{min:0,max:1,step:0.05})}${fld("М5: пункт саны","дана","params.pick_q",p.pick_q,{min:1,step:1})}
+    ${fld("М5: пункттің жұмыс уақыты","мин/күн","params.pick_min",p.pick_min,{min:0,step:10})}${fld("М5: бір беру","мин","params.pick_s1",p.pick_s1,{min:0,step:0.5})}</div>
+  </div></details>
+
+  <details class="blk" open><summary><span><span class="h">6. ЖИ не маңызды деп есептейді</span><br><span class="s">салмақтар: 0 = маңызсыз, 5 = өте маңызды</span></span></summary><div class="blk-body">
+    <div class="fields">${rangeFld("Шығын","weights.cost",W.cost)}${rangeFld("Қызметкер уақыты","weights.staff",W.staff)}${rangeFld("CO₂","weights.co2",W.co2)}${rangeFld("Пациенттің күтуі","weights.delay",W.delay)}${rangeFld("Мейірбике–пациент байланысы","weights.cont",W.cont)}</div>
+    <p class="hint">ЖИ барлық әдісті (М0–М6) және аптасына 1–5 жеткізу күнін, М3 үшін сақина радиусын тексереді. Кешігу нормасы мен уақыт шегі бұзылмайтын нұсқалардың ішінен салмақталған ең жақсысын таңдайды.</p>
+  </div></details>`;
+  $("inputs").innerHTML = h;
+}
+function setPath(path, value){ const parts=path.split("."); let o=S; for(let i=0;i<parts.length-1;i++){ const k=parts[i]; if(o[k]==null) o[k]={}; o=o[k]; }
+  o[parts[parts.length-1]] = value; }
+document.addEventListener("input", e=>{ const el=e.target; if(!el.dataset || !el.dataset.path) return;
+  const path=el.dataset.path; if(el.type==="number" && el.value==="" ) return;
+  if(el.type==="text") { setPath(path, el.value); } else if(el.tagName==="SELECT"){ setPath(path, el.value); } else { const v=parseFloat(String(el.value).replace(",",".")); if(!Number.isFinite(v)) return; setPath(path, v); }
+  if(el.type==="range"){ const o=$(el.id+"_v"); if(o) o.textContent=el.value; }
+  S.isExample=false; schedule(path.startsWith("weights")||path.startsWith("params.pick")||path.startsWith("params.ring")?"soft":"hard"); });
+document.addEventListener("change", e=>{ const el=e.target; if(el.tagName==="SELECT" && el.dataset.path){ setPath(el.dataset.path, el.value); S.isExample=false; schedule("hard"); } });
+document.addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return;
+  if(b.id==="addArea"){ const n=S.areas.length+1, last=S.areas[S.areas.length-1]; const a=clone(last); a.id="U"+Date.now().toString(36).slice(-4); a.name=n+"-аймақ";
+    a.x=Math.min(+S.territory.L-a.L/2, +last.x+0.5); a.y=Math.min(+S.territory.W-a.W/2, +last.y+0.5); S.areas.push(a); structural(); }
+  else if(b.dataset.delArea!=null){ S.areas.splice(+b.dataset.delArea,1); structural(); }
+  else if(b.id==="addGroup"){ let k=S.groups.length+1; while(S.groups.some(g=>g.id==="G"+k)) k++; S.groups.push({id:"G"+k,name:k+"-топ",alpha:0.5,tau:31}); S.areas.forEach(a=>{ a.pat=a.pat||{}; a.pat["G"+k]=0; }); structural(); }
+  else if(b.dataset.delGroup!=null){ const g=S.groups.splice(+b.dataset.delGroup,1)[0]; S.areas.forEach(a=>{ if(a.pat) delete a.pat[g.id]; }); S.drugs=S.drugs.filter(d=>d.group!==g.id); structural(); }
+  else if(b.id==="addDrug"){ S.drugs.push({group:S.groups[0].id,name:"Дәрі "+(S.drugs.length+1),packs:1}); structural(); }
+  else if(b.dataset.delDrug!=null){ S.drugs.splice(+b.dataset.delDrug,1); structural(); }
+  else if(b.dataset.pick){ S.mapMethod=b.dataset.pick; $("mapMethod").value=S.mapMethod; schedule("hard"); document.getElementById("map").scrollIntoView({behavior:"smooth",block:"start"}); }
+});
+function structural(){ S.isExample=false; renderInputs(); schedule("hard"); }
+
+/* ================================================================ render results */
+let AI=null;
+function renderAI(){
+  const p=P(); AI=aiSearch(); const b=AI.best, r=b.res; const warns=checkData();
+  const ok = b.ok;
+  let why=[];
+  if(ok) why.push(`Кешігу нормасы (${F1(p.norm)} күн) мен топтардың уақыт шегі сақталады; ${AI.n} нұсқаның ішінде салмақталған баға бойынша ең жақсысы.`);
+  else why.push(`Қазіргі ресурспен ешбір нұсқа нормаға толық сыймайды. Ең аз бұзушылығы бар нұсқа көрсетілді: ${r.viol>1?`шың күні топ уақыты шектен ${F0((r.viol-1)*100)}% асады`:`орташа күту ${F1(r.delay)} күн, норма ${F1(p.norm)} күн`}.`);
+  if(b.code==="M3") why.push(`Сақина радиусы ${F2(b.rho)} км: одан әрі аймақтарға көлік арзан (Ф15, r* = ${AI.rs?F2(AI.rs)+" км":"жоқ"}).`);
+  if(!r.cont) why.push("Бұл әдісте мейірбике мен пациенттің тұрақты байланысы сақталмайды (Лемма 4).");
+  const st=states(b.f); const R1=ruleR1(st,p);
+  if(R1) why.push(`R1 ережесі (Лемма 3): ${R1.prefer==="M1"?"бекітілген аймақтар (М1)":"радиалды жапырақтар (М2)"} қысқа. Артық жол ${F1(R1.lhs)} км, үнем ${F1(R1.rhs)} км${R1.valid?"":". Ереже шарттары толық орындалмайды (тығыздық біркелкі емес немесе жапырақ шектелген)"}.`);
+  if(!ok){ const need = st.map(s=>{ for(let k=s.S;k<=s.S+40;k++){ const Tp=walkT(peak(s.att,p.z)/k,s.A/k,s.r,p); if(Tp<=s.B) return k-s.S; } return null; });
+    const add=need.reduce((s,v)=>s+(v||0),0); if(add>0) why.push(`М1 бойынша нормаға жету үшін шамамен ${add} жеткізуші топ қосу керек (Ф14) немесе топқа бөлінген уақытты арттыру керек.`); }
+  $("ai").innerHTML = `<div class="ai-head"><div><div class="eyebrow">ЖИ ұсынысы · ${ok?"норма сақталады":"ресурс жетпейді"}</div>
+      <div class="ai-title">${b.code} · ${esc(NAMES[b.code])}</div><div class="ai-conf">${esc(DESC[b.code])}; ${esc(confText(b))}</div></div>
+      <span class="chip ${ok?"ok":"no"}">${ok?"Орындалады":"Орындалмайды"}</span></div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${F0(r.cost/1000)}</div><div class="l">мың ₸ / ай</div></div>
+      <div class="kpi"><div class="v">${F0(r.staff)}</div><div class="l">қызметкер сағаты / ай</div></div>
+      <div class="kpi"><div class="v">${F0(r.co2)}</div><div class="l">кг CO₂e / ай</div></div>
+      <div class="kpi"><div class="v">${F1(r.delay)}</div><div class="l">орташа күту, күн</div></div>
+    </div>
+    <ul class="why">${why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+    <div class="alts">${AI.alts.map(a=>`<span class="alt">${a.code} · ${esc(NAMES[a.code])}, ${esc(confText(a))}: ${F0(a.res.cost/1000)} мың ₸, ${F1(a.res.delay)} күн ${a.ok?"":"· нормаға сыймайды"}</span>`).join("")}</div>
+    ${warns.length?`<div class="warns">${warns.map(w=>`<div>${esc(w)}</div>`).join("")}</div>`:""}`;
+}
+function checkData(){ const w=[]; const t=S.territory;
+  S.areas.forEach(a=>{ if(+a.x-a.L/2 < -1e-9 || +a.x+a.L/2 > +t.L+1e-9 || +a.y-a.W/2 < -1e-9 || +a.y+a.W/2 > +t.W+1e-9) w.push(`${a.name}: аймақ аумақ шегінен шығып тұр — координатаны немесе аумақ өлшемін тексеріңіз.`); });
+  S.groups.forEach(g=>{ if(!(g.alpha>=0 && g.alpha<=1)) w.push(`${g.name}: үйге жеткізу үлесі 0 мен 1 аралығында болуы керек.`); });
+  if(!(S.params.p>=0 && S.params.p<0.9)) w.push("Үйде болмау ықтималдығы 0–0,9 аралығында болуы керек.");
+  return w; }
+function renderMethods(){
+  const p=P(), st=states(null); const rows=["M0","M1","M2","M3","M4","M5","M6"].map(c=>({c,res:MFUN[c](st,p)}));
+  const bestCode = AI && AI.best.code;
+  $("methods").innerHTML = `<div class="card-h"><div><div class="eyebrow">Енгізілген кесте бойынша (әр аймақтың өз күн саны)</div><h2>Әдістерді салыстыру</h2></div></div>
+  <div class="tbl"><table><thead><tr><th>Әдіс</th><th>Норма</th><th class="n">Топтың ең ауыр күні, мин</th><th class="n">Қызметкер, сағ/ай</th><th class="n">Шығын, мың ₸/ай</th><th class="n">CO₂, кг/ай</th><th class="n">Күту, күн</th><th>Байланыс</th><th></th></tr></thead><tbody>
+  ${rows.map(({c,res})=>{ const ok=res.feasible && res.delay<=p.norm+1e-9; return `<tr class="${c===bestCode?"is-best":""} ${(S.mapMethod===c)?"sel":""}">
+    <td><b>${c}</b> ${esc(NAMES[c])}<div class="small muted">${esc(DESC[c])}</div></td>
+    <td>${ok?'<span class="chip ok">сай</span>':(res.feasible?'<span class="chip mid">күту ұзақ</span>':'<span class="chip no">уақыт жетпейді</span>')}</td>
+    <td class="n">${F0(res.team_peak)}</td><td class="n">${F0(res.staff)}</td><td class="n">${F0(res.cost/1000)}</td><td class="n">${F0(res.co2)}</td><td class="n">${F1(res.delay)}</td>
+    <td>${res.cont?"сақталады":"жоқ"}</td><td><button type="button" class="x" data-pick="${c}">Картада</button></td></tr>`; }).join("")}
+  </tbody></table></div><p class="hint" style="margin-top:8px">Жасыл жол — ЖИ таңдаған әдіс (ол аптадағы күн санын да өзі іздейді, сондықтан ЖИ картасындағы сандар осы кестеден өзгеше болуы мүмкін).</p>`;
+}
+function renderAreas(){
+  const p=P(), st=states(null);
+  $("areasCard").innerHTML = `<div class="card-h"><div><div class="eyebrow">М1 бойынша, Ф3–Ф14</div><h2>Аймақтар</h2></div></div>
+  <div class="tbl"><table><thead><tr><th>Аймақ</th><th class="n">Емханадан, км</th><th class="n">Пациент/күн (λ)</th><th class="n">Бару/жеткізу күні</th><th class="n">Топ уақыты, мин</th><th class="n">Сыйымдылық n*</th><th class="n">Ұсынылатын күн/апта</th><th class="n">Қажет топ</th><th>Күй</th></tr></thead><tbody>
+  ${st.map(s=>{ const T=walkT(s.att/s.S,s.A/s.S,s.r,p), Tp=walkT(peak(s.att,p.z)/s.S,s.A/s.S,s.r,p);
+     const ns=f10(s.A/s.S,s.r,p.v_w,p.s0,s.B,p.k,p.phi,p.beta);
+     let fr=null; for(let f=1;f<=5;f++){ const n=7*s.lam/f, att=f5(n,s.H)/(1-p.p); if(walkT(peak(att,p.z)/s.S,s.A/s.S,s.r,p)<=s.B && f11(f,p.p,false)<=p.norm){ fr=f; break; } }
+     let sq=null; for(let k=1;k<=60;k++){ if(walkT(peak(s.att,p.z)/k,s.A/k,s.r,p)<=s.B){ sq=k; break; } }
+     const ok=Tp<=s.B;
+     return `<tr><td><b>${esc(s.name)}</b></td><td class="n">${F2(s.r)}</td><td class="n">${F1(s.lam)}</td><td class="n">${F1(s.att)}</td><td class="n">${F0(T)} / ${F0(Tp)}</td><td class="n">${ns>0?F1(ns):"алыс"}</td><td class="n">${fr||"—"}</td><td class="n">${sq||"—"}</td><td>${ok?'<span class="chip ok">сыяды</span>':'<span class="chip no">шектен асады</span>'}</td></tr>`; }).join("")}
+  </tbody></table></div><p class="hint" style="margin-top:8px">Топ уақыты: орташа күн / шың күні (z). n* — бір топтың күніне ең көп бару саны (Ф10). «алыс» — бөлінген уақытқа жаяу барып-қайтудың өзі сыймайды.</p>`;
+}
+function renderDrugs(){
+  const p=P(); const rows=S.drugs.map(d=>{ const g=S.groups.find(x=>x.id===d.group); if(!g) return null;
+    const D=S.areas.reduce((s,a)=>s+(+((a.pat||{})[g.id])||0),0); const Q=D*(+d.packs)*30/Math.max(+g.tau,1); return {d,g,Q,St:Q*(1+7*p.safety/30)}; }).filter(Boolean);
+  $("drugsCard").innerHTML = `<div class="card-h"><div><div class="eyebrow">Ф17</div><h2>Дәрі қажеттілігі</h2></div></div>
+  <div class="tbl"><table><thead><tr><th>Дәрі</th><th>Топ</th><th class="n">30 күнге, қаптама</th><th class="n">Толықтыру деңгейі (${F1(p.safety)} апта қормен)</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td>${esc(r.d.name)}</td><td>${esc(r.g.name)}</td><td class="n">${F0(r.Q)}</td><td class="n">${F0(r.St)}</td></tr>`).join("")||`<tr><td colspan="4" class="muted">Дәрі енгізілмеген</td></tr>`}
+  </tbody></table></div>`;
+}
+
+/* ================================================================ map: instance + anytime optimiser */
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const dist=(a,b)=>Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1]);
+function kmeans(pts,k,rnd,balance){ k=Math.max(1,Math.min(k,pts.length)); if(k===1) return pts.map(()=>0);
+  const C=[pts[Math.floor(rnd()*pts.length)].slice()];
+  while(C.length<k){ const d=pts.map(p=>Math.min(...C.map(c=>(p[0]-c[0])**2+(p[1]-c[1])**2))); const s=d.reduce((a,b)=>a+b,0); let u=rnd()*s, i=0; while(i<d.length-1 && (u-=d[i])>0) i++; C.push(pts[i].slice()); }
+  let lab=new Array(pts.length).fill(0);
+  for(let it=0; it<25; it++){ lab=pts.map(p=>{ let bi=0,bd=1e18; C.forEach((c,j)=>{ const d=(p[0]-c[0])**2+(p[1]-c[1])**2; if(d<bd){bd=d;bi=j;} }); return bi; });
+    for(let j=0;j<k;j++){ const m=pts.filter((_,i)=>lab[i]===j); if(m.length){ C[j][0]=m.reduce((s,p)=>s+p[0],0)/m.length; C[j][1]=m.reduce((s,p)=>s+p[1],0)/m.length; } } }
+  if(balance){ const cap=Math.ceil(pts.length/k*1.12);
+    for(let round=0; round<4; round++){ const cnt=new Array(k).fill(0); lab.forEach(l=>cnt[l]++);
+      for(let j=0;j<k;j++){ if(cnt[j]<=cap) continue; const idx=pts.map((p,i)=>i).filter(i=>lab[i]===j).sort((a,b)=>((pts[b][0]-C[j][0])**2+(pts[b][1]-C[j][1])**2)-((pts[a][0]-C[j][0])**2+(pts[a][1]-C[j][1])**2));
+        for(const i of idx.slice(0,cnt[j]-cap)){ const order=C.map((c,jj)=>[jj,(pts[i][0]-c[0])**2+(pts[i][1]-c[1])**2]).sort((a,b)=>a[1]-b[1]);
+          for(const [jj] of order){ if(jj!==j && cnt[jj]<cap){ lab[i]=jj; cnt[jj]++; cnt[j]--; break; } } } } } }
+  return lab; }
+function sweep(pts,center,parts){ const o=pts.map((p,i)=>[i,Math.atan2(p[1]-center[1],p[0]-center[0])]).sort((a,b)=>a[1]-b[1]); const out=[]; const n=o.length;
+  for(let j=0;j<parts;j++){ out.push(o.slice(Math.round(j*n/parts), Math.round((j+1)*n/parts)).map(x=>pts[x[0]])); } return out; }
+function nnOrder(depot, pts){ const rem=pts.slice(), seq=[]; let cur=depot; while(rem.length){ let bi=0,bd=1e18; rem.forEach((p,i)=>{ const d=dist(cur,p); if(d<bd){bd=d;bi=i;} }); cur=rem.splice(bi,1)[0]; seq.push(cur); } return seq; }
+function rlen(r){ const s=r.seq; if(!s.length) return 0; let L=dist(r.depot,s[0]); for(let i=1;i<s.length;i++) L+=dist(s[i-1],s[i]); return L+dist(s[s.length-1],r.depot); }
+
+function buildInstance(sel){
+  const p=P(), t=S.territory, rnd=mulberry(S.seed*7919+13), depot=[+t.cx,+t.cy];
+  const code=sel.code, f=sel.f, st=states(f); const routes=[], marks=[];
+  const genPts=(s,count)=>{ const a=[]; for(let i=0;i<count;i++) a.push([s.x-s.L/2+rnd()*s.L, s.y-s.W/2+rnd()*s.W]); return a; };
+  const areaPts = st.map(s=>genPts(s, Math.max(0,Math.round(s.att))));
+  const addTeams=(pts,k,dep,mode,group,col,label,budget,extraMin)=>{ const lab=kmeans(pts,k,rnd,true); for(let j=0;j<Math.max(1,Math.min(k,pts.length||1));j++){ const sub=pts.filter((_,i)=>lab[i]===j);
+      routes.push({depot:dep, seq:nnOrder(dep,sub), mode, group, col, label:label+(k>1?` · ${j+1}-топ`:""), budget, extra:extraMin||0}); } };
+  if(code==="M0"){ st.forEach((s,i)=>areaPts[i].forEach(q=>routes.push({depot, seq:[q], mode:"walk", group:"g"+routes.length, col:i, label:s.name, budget:s.B, extra:0, star:true}))); }
+  else if(code==="M1"||code==="M5"){ st.forEach((s,i)=>{ let pts=areaPts[i]; if(code==="M5"){ pts=pts.filter(()=>rnd()>=p.pick_share); }
+      addTeams(pts,s.S,depot,"walk","a"+i,i,s.name,s.B); });
+    if(code==="M5"){ const all=[].concat(...areaPts); const q=Math.max(1,Math.round(p.pick_q)); marks.push({type:"pickup",pt:depot});
+      if(q>1 && all.length){ const lab=kmeans(all,q-1,rnd,false); for(let j=0;j<q-1;j++){ const m=all.filter((_,i)=>lab[i]===j); if(m.length) marks.push({type:"pickup",pt:[m.reduce((s,a)=>s+a[0],0)/m.length, m.reduce((s,a)=>s+a[1],0)/m.length]}); } } } }
+  else if(code==="M6"){ st.forEach((s,i)=>{ const week=genPts(s,Math.max(0,Math.round(s.att*s.f))); const lab=kmeans(week,s.f,rnd,true); const day=week.filter((_,j)=>lab[j]===0);
+      addTeams(day,s.S,depot,"walk","a"+i,i,s.name+" (1-күн аймағы)",s.B); }); }
+  else if(code==="M2"){ const all=[].concat(...areaPts); const ST=st.reduce((a,s)=>a+s.S,0); const Bmin=Math.min(...st.map(s=>s.B));
+      sweep(all,depot,ST).forEach((sub,j)=>routes.push({depot, seq:nnOrder(depot,sub), mode:"walk", group:"petal", col:j, label:`${j+1}-жапырақ`, budget:Bmin, extra:0})); }
+  else if(code==="M3"){ const rho=sel.rho!=null?sel.rho:(p.ring>0?p.ring:(rstar(p)||1e9)); const outer=[];
+      st.forEach((s,i)=>{ if(s.r<=rho) addTeams(areaPts[i],s.S,depot,"walk","a"+i,i,s.name,s.B); else outer.push(...areaPts[i]); });
+      if(outer.length){ const nr=Math.max(1,Math.ceil(outer.length/p.C)); sweep(outer,depot,nr).forEach((sub,j)=>routes.push({depot, seq:nnOrder(depot,sub), mode:"veh", group:"veh", col:7, label:`Көлік ${j+1}`, budget:p.shift, extra:0})); }
+      marks.push({type:"ring", r:rho}); }
+  else if(code==="M4"){ const sats=st.map(s=>[s.x,s.y]);
+      routes.push({depot, seq:nnOrder(depot,sats), mode:"veh", group:"veh", col:7, label:"Көлік: спутниктер", budget:p.shift, extra:sats.length*p.tau_sat, fixedStops:true});
+      st.forEach((s,i)=>{ marks.push({type:"sat",pt:sats[i]}); addTeams(areaPts[i],s.S,sats[i],"walk","a"+i,i,s.name,s.B,p.tau_sat); }); }
+  routes.forEach(r=>{ r.len=rlen(r); });
+  return {routes, marks, code, f, rho:sel.rho, initKm:routes.reduce((s,r)=>s+r.len,0)};
+}
+/* ---- local search moves */
+function twoOpt(r){ const s=r.seq, n=s.length; if(n<3) return false; let imp=false;
+  const pt=i=> (i<0||i>=n) ? r.depot : s[i];
+  for(let i=0;i<n-1;i++) for(let j=i+1;j<n;j++){ const a=pt(i-1), b=s[i], c=s[j], d=pt(j+1);
+    if(dist(a,c)+dist(b,d) < dist(a,b)+dist(c,d)-1e-9){ let x=i,y=j; while(x<y){ const tmp=s[x]; s[x]=s[y]; s[y]=tmp; x++; y--; } imp=true; } }
+  return imp; }
+function orOpt(r){ const s=r.seq, n=s.length; if(n<3) return false;
+  for(let L=1; L<=3 && L<n; L++) for(let i=0;i+L<=n;i++){
+    const prev=i===0?r.depot:s[i-1], first=s[i], last=s[i+L-1], next=i+L>=n?r.depot:s[i+L];
+    const gain=dist(prev,first)+dist(last,next)-dist(prev,next);
+    const rest=s.slice(0,i).concat(s.slice(i+L)), seg=s.slice(i,i+L);
+    for(let k=0;k<=rest.length;k++){ if(k===i) continue; const u=k===0?r.depot:rest[k-1], v=k===rest.length?r.depot:rest[k];
+      const add1=dist(u,first)+dist(last,v)-dist(u,v), add2=dist(u,last)+dist(first,v)-dist(u,v);
+      if(Math.min(add1,add2) < gain-1e-9){ const sg = add2<add1 ? seg.slice().reverse() : seg; r.seq=rest.slice(0,k).concat(sg,rest.slice(k)); return true; } } }
+  return false; }
+function rtime(r,p){ const v = r.mode==="veh" ? p.v_c : p.v_w; const stops = r.fixedStops ? 0 : r.seq.length; return r.len/v + stops*p.s0 + (r.extra||0); }
+function relocate(routes,p){ let moved=false;
+  const groups={}; routes.forEach((r,i)=>{ if(r.star||r.fixedStops) return; (groups[r.group]=groups[r.group]||[]).push(r); });
+  for(const g in groups){ const rs=groups[g]; if(rs.length<2) continue;
+    for(const a of rs) for(let i=0;i<a.seq.length;i++){ const prev=i===0?a.depot:a.seq[i-1], x=a.seq[i], next=i===a.seq.length-1?a.depot:a.seq[i+1];
+      const gain=dist(prev,x)+dist(x,next)-dist(prev,next);
+      let best=null;
+      for(const b of rs){ if(b===a) continue; for(let k=0;k<=b.seq.length;k++){ const u=k===0?b.depot:b.seq[k-1], v=k===b.seq.length?b.depot:b.seq[k];
+          const add=dist(u,x)+dist(x,v)-dist(u,v); if(add<gain-1e-9 && (!best||add<best.add)) best={b,k,add}; } }
+      if(best){ const tb=rtime(best.b,p) + best.add/(best.b.mode==="veh"?p.v_c:p.v_w) + p.s0; const ta=rtime(a,p);
+        if(tb<=Math.max(best.b.budget, ta)){ a.seq.splice(i,1); best.b.seq.splice(best.k,0,x); a.len=rlen(a); best.b.len=rlen(best.b); moved=true; i--; } } } }
+  return moved; }
+function localOpt(r){ let any=false; for(let guard=0; guard<50; guard++){ const a=twoOpt(r); const b=orOpt(r); if(!(a||b)) break; any=true; } r.len=rlen(r); return any; }
+function kick(r,rnd){ const s=r.seq, n=s.length; if(n<8) return false; const p1=1+Math.floor(rnd()*(n/4)), p2=p1+1+Math.floor(rnd()*(n/4)), p3=p2+1+Math.floor(rnd()*(n/4));
+  if(p3>=n) return false; r.seq=s.slice(0,p1).concat(s.slice(p2,p3), s.slice(p1,p2), s.slice(p3)); return true; }
+
+let OPT=null, rafId=0;
+function startOpt(inst){ cancelAnimationFrame(rafId); OPT={inst, phase:"local", iter:0, stale:0, done:false, rnd:mulberry(S.seed*31+7), lastDraw:0, bestKm:inst.initKm, t0:performance.now()}; drawMap(); rafId=requestAnimationFrame(loop); }
+function totalKm(){ return OPT.inst.routes.reduce((s,r)=>s+r.len,0); }
+function loop(ts){ if(!OPT || OPT.done) return; const p=P(); const end=performance.now()+11; const R=OPT.inst.routes;
+  while(performance.now()<end && !OPT.done){
+    if(OPT.phase==="local"){ let any=false; for(const r of R){ if(r.star||r.fixedStops&&r.seq.length<3) continue; if(localOpt(r)) any=true; } if(relocate(R,p)) any=true; for(const r of R) r.len=rlen(r); OPT.iter++; if(!any) OPT.phase="kick"; }
+    else { const cand=R.filter(r=>!r.star && r.seq.length>=8); if(!cand.length){ OPT.done=true; break; }
+      const r=cand[Math.floor(OPT.rnd()*cand.length)]; const saved=r.seq.slice(), oldLen=r.len;
+      if(kick(r,OPT.rnd)){ localOpt(r); if(r.len < oldLen-1e-9){ OPT.stale=0; relocate(R,p); R.forEach(x=>x.len=rlen(x)); } else { r.seq=saved; r.len=oldLen; OPT.stale++; } } else OPT.stale++;
+      OPT.iter++; if(OPT.stale>=350) OPT.done=true; }
+  }
+  OPT.bestKm=totalKm(); if(ts-OPT.lastDraw>120 || OPT.done){ OPT.lastDraw=ts; drawMap(); }
+  if(!OPT.done) rafId=requestAnimationFrame(loop); }
+
+function mapSelection(){ if(S.mapMethod && S.mapMethod!=="AUTO") return {code:S.mapMethod, f:null, rho:null, auto:false};
+  const b=AI.best; return {code:b.code, f:b.f, rho:b.rho, auto:true}; }
+const COLV=i=>`var(--c${(i%8)+1})`;
+function drawMap(){ if(!OPT) return; const inst=OPT.inst, t=S.territory, p=P(); const L=+t.L, W=+t.W; const pad=Math.max(L,W)*0.04;
+  const X=x=>x, Y=y=>W-y; const svg=$("mapSvg"); svg.setAttribute("viewBox",`${-pad} ${-pad} ${L+2*pad} ${W+2*pad}`);
+  const rr=Math.max(L,W)*0.009; let h=`<rect x="0" y="0" width="${L}" height="${W}" fill="var(--map)" stroke="var(--line)" vector-effect="non-scaling-stroke" stroke-width="1"/>`;
+  S.areas.forEach((a,i)=>{ const n=+a.nL||0, m=+a.nW||0; const x0=a.x-a.L/2, y0=a.y-a.W/2;
+    for(let k=1;k<=n;k++){ const yy=y0+a.W*k/(n+1); h+=`<line x1="${X(x0)}" y1="${Y(yy)}" x2="${X(x0+a.L)}" y2="${Y(yy)}" stroke="var(--street)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }
+    for(let k=1;k<=m;k++){ const xx=x0+a.L*k/(m+1); h+=`<line x1="${X(xx)}" y1="${Y(y0)}" x2="${X(xx)}" y2="${Y(y0+a.W)}" stroke="var(--street)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }
+    h+=`<rect x="${X(x0)}" y="${Y(y0+a.W)}" width="${a.L}" height="${a.W}" fill="none" stroke="${COLV(i)}" stroke-opacity=".55" stroke-dasharray="4 3" vector-effect="non-scaling-stroke" stroke-width="1.2"/>`;
+    h+=`<text x="${X(x0)+rr}" y="${Y(y0+a.W)+rr*3.2}" font-size="${rr*2.6}" fill="var(--ink2)" font-family="IBM Plex Sans, system-ui, sans-serif">${esc(a.name)}</text>`; });
+  for(const mk of inst.marks){ if(mk.type==="ring" && mk.r<1e8){ const rad=mk.r/p.phi; h+=`<circle cx="${X(+t.cx)}" cy="${Y(+t.cy)}" r="${rad}" fill="none" stroke="var(--muted)" stroke-dasharray="6 4" vector-effect="non-scaling-stroke" stroke-width="1"/>`; } }
+  inst.routes.forEach(r=>{ if(!r.seq.length) return; const col = r.mode==="veh" ? "var(--ink2)" : COLV(r.col);
+    const pts=[r.depot,...r.seq,r.depot]; let d=""; for(let i=0;i<pts.length;i++){ const [x,y]=pts[i]; if(i===0){ d+=`M${X(x)} ${Y(y)}`; } else { const [px,py]=pts[i-1]; d+=`L${X(x)} ${Y(py)}L${X(x)} ${Y(y)}`; } }
+    h+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="${r.star?1:1.8}" stroke-opacity="${r.star?.45:.9}" ${r.mode==="veh"?'stroke-dasharray="7 4"':""} vector-effect="non-scaling-stroke" stroke-linejoin="round"/>`;
+    if(!r.fixedStops) r.seq.forEach(q=>{ h+=`<circle cx="${X(q[0])}" cy="${Y(q[1])}" r="${rr}" fill="${col}" stroke="var(--map)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }); });
+  for(const mk of inst.marks){ if(mk.type==="sat"){ const [x,y]=mk.pt; h+=`<path d="M${X(x)} ${Y(y)-rr*2.6}L${X(x)+rr*2.2} ${Y(y)+rr*1.6}L${X(x)-rr*2.2} ${Y(y)+rr*1.6}Z" fill="var(--c4)" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }
+    if(mk.type==="pickup"){ const [x,y]=mk.pt; h+=`<rect x="${X(x)-rr*2}" y="${Y(y)-rr*2}" width="${rr*4}" height="${rr*4}" transform="rotate(45 ${X(x)} ${Y(y)})" fill="var(--c5)" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>`; } }
+  h+=`<rect x="${X(+t.cx)-rr*2.4}" y="${Y(+t.cy)-rr*2.4}" width="${rr*4.8}" height="${rr*4.8}" fill="var(--accent)" stroke="var(--map)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`;
+  h+=`<text x="${X(+t.cx)+rr*3.4}" y="${Y(+t.cy)+rr*1.2}" font-size="${rr*3}" font-weight="600" fill="var(--ink)" font-family="IBM Plex Sans, system-ui, sans-serif">Емхана</text>`;
+  svg.innerHTML=h;
+  const walk=inst.routes.filter(r=>r.mode==="walk").reduce((s,r)=>s+r.len,0), veh=inst.routes.filter(r=>r.mode==="veh").reduce((s,r)=>s+r.len,0);
+  const worst=Math.max(0,...inst.routes.filter(r=>r.mode==="walk").map(r=>rtime(r,p)));
+  const over=inst.routes.filter(r=>r.mode==="walk" && rtime(r,p)>r.budget).length;
+  const imp = OPT.bestKm>0 ? (1-OPT.bestKm/inst.initKm)*100 : 0;
+  const stF=states(inst.f); const fr = inst.code==="M3" ? m3(stF,p,inst.rho!=null?inst.rho:null) : MFUN[inst.code](stF,p);
+  $("mapStat").innerHTML = `<div class="kpi"><div class="v">${F1(walk)}</div><div class="l">жаяу км / күн</div></div>
+    <div class="kpi"><div class="v">${F1(veh)}</div><div class="l">көлік км / күн</div></div>
+    <div class="kpi"><div class="v">${F0(worst)}</div><div class="l">ең ұзақ жаяу маршрут, мин${over?` · <b style="color:var(--bad)">${over} маршрут шектен асады</b>`:""}</div></div>
+    <div class="kpi"><div class="v">${F1(fr.walk_km+fr.veh_km)}</div><div class="l">формула бағасы, км / күн</div></div>`;
+  $("optBar").style.width = (OPT.done?100:Math.min(98, OPT.stale/350*100))+"%";
+  $("optStatus").textContent = OPT.done ? `ЖИ маршрутты тұрақтандырды: ${F0(OPT.iter)} қадам, жалпы жол ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%). Айнымалыны өзгертсеңіз, іздеу қайта басталады.`
+      : `ЖИ маршрутты жақсартып жатыр: ${F0(OPT.iter)} қадам, қазір ${F1(OPT.bestKm)} км (бастапқы ${F1(inst.initKm)} км, −${F1(imp)}%)…`;
+  const sel=mapSelection(); $("mapTitle").textContent = `${inst.code} · ${NAMES[inst.code]}${sel.auto?" (ЖИ таңдауы)":""}, ${inst.f||"кесте бойынша"}${inst.f?" күн/апта":""}`;
+  const used=[...new Set(inst.routes.filter(r=>r.mode==="walk").map(r=>r.col))].slice(0,8);
+  $("mapLegend").innerHTML = `<span><i class="sw" style="background:var(--accent)"></i>Емхана</span>`+
+    (inst.code==="M2" ? `<span>Түс = жапырақ (топ)</span>` : used.map(c=>`<span><i class="sw" style="background:${COLV(c)}"></i>${esc((S.areas[c]||{}).name||"")}</span>`).join(""))+
+    (inst.routes.some(r=>r.mode==="veh")?`<span><i class="sw" style="background:var(--ink2)"></i>Көлік (үзік сызық)</span>`:"")+
+    (inst.marks.some(m=>m.type==="sat")?`<span>▲ спутник нүкте</span>`:"")+(inst.marks.some(m=>m.type==="pickup")?`<span>◆ беру пункті</span>`:"")+(inst.marks.some(m=>m.type==="ring")?`<span>- - сақина шекарасы</span>`:"");
+}
+function fillMapSelect(){ const s=$("mapMethod"); s.innerHTML=`<option value="AUTO">ЖИ таңдауы (авто)</option>`+Object.keys(NAMES).map(c=>`<option value="${c}">${c} · ${NAMES[c]}</option>`).join(""); s.value=S.mapMethod||"AUTO"; }
+$("mapMethod").addEventListener("change", e=>{ S.mapMethod=e.target.value; save(); lastMapKey=""; refreshMap(); renderMethods(); });
+$("btnReseed").addEventListener("click", ()=>{ S.seed=(S.seed*1103515245+12345)%2147483647; save(); lastMapKey=""; refreshMap(); });
+
+let lastMapKey="";
+function refreshMap(){ const sel=mapSelection(); const key=JSON.stringify([sel, S.territory, S.areas, S.groups, S.params, S.seed]); if(key===lastMapKey) return; lastMapKey=key; startOpt(buildInstance(sel)); }
+
+/* ================================================================ orchestration */
+let timer=0;
+function schedule(){ clearTimeout(timer); timer=setTimeout(()=>{ recompute(); save(); }, 160); }
+function recompute(){ try{ renderAI(); renderMethods(); renderAreas(); renderDrugs(); refreshMap(); updateBadge(); }catch(err){ $("ai").innerHTML=`<div class="warns"><div>Есептеу кезінде қате: ${esc(err.message)}. Енгізілген мәндерді тексеріңіз.</div></div>`; } }
+function updateBadge(){ const b=$("dataBadge"); b.textContent = S.isExample ? "Мысал деректер" : "Өз деректеріңіз"; b.classList.toggle("own", !S.isExample); }
+function save(){ lsSet(STORE_KEY, JSON.stringify(S)); }
+
+/* ================================================================ data panel */
+function scenList(){ try{ return JSON.parse(lsGet(SCEN_KEY))||{}; }catch(e){ return {}; } }
+function renderScen(){ const L=scenList(); const names=Object.keys(L).sort();
+  $("scList").innerHTML = names.length ? names.map(n=>`<li><span>${esc(n)} <span class="small muted">${esc(new Date(L[n].t).toLocaleString("ru-RU"))}</span></span><span class="row"><button type="button" data-load="${esc(n)}">Ашу</button><button type="button" class="x" data-rm="${esc(n)}">Өшіру</button></span></li>`).join("") : `<li class="muted small">Әзірге сақталған сценарий жоқ.</li>`; }
+$("btnData").addEventListener("click", ()=>{ $("expText").value=JSON.stringify(S); renderScen(); $("dataPanel").hidden=false; $("dpClose").focus(); });
+$("dpClose").addEventListener("click", ()=>{ $("dataPanel").hidden=true; });
+$("dataPanel").addEventListener("click", e=>{ if(e.target.id==="dataPanel") $("dataPanel").hidden=true;
+  const ld=e.target.closest("[data-load]"), rm=e.target.closest("[data-rm]");
+  if(ld){ const L=scenList(); const it=L[ld.dataset.load]; if(it && validState(it.s)){ S=Object.assign(clone(DEFAULT), it.s); renderInputs(); fillMapSelect(); lastMapKey=""; recompute(); save(); $("scMsg").textContent=`«${ld.dataset.load}» ашылды.`; } }
+  if(rm){ const L=scenList(); delete L[rm.dataset.rm]; lsSet(SCEN_KEY, JSON.stringify(L)); renderScen(); } });
+$("scSave").addEventListener("click", ()=>{ const n=$("scName").value.trim(); const m=$("scMsg"); if(!n){ m.textContent="Сценарийге атау беріңіз."; m.classList.add("err"); return; }
+  const L=scenList(); L[n]={t:Date.now(), s:clone(S)}; const ok=lsSet(SCEN_KEY, JSON.stringify(L)); m.classList.toggle("err",!ok); m.textContent= ok?`«${n}» осы құрылғыда сақталды.`:"Бұл браузер деректерді сақтауға рұқсат бермейді. Экспорт мәтінін көшіріп алыңыз."; renderScen(); });
+$("expCopy").addEventListener("click", ()=>{ const ta=$("expText"); const m=$("expMsg");
+  (navigator.clipboard ? navigator.clipboard.writeText(ta.value) : Promise.reject()).then(()=>{ m.textContent="Көшірілді."; }).catch(()=>{ ta.focus(); ta.select(); m.textContent="Мәтін белгіленді — көшіріңіз (Ctrl+C / ұзақ басу)."; }); });
+$("impBtn").addEventListener("click", ()=>{ const m=$("impMsg"); try{ const s=JSON.parse($("impText").value); if(!validState(s)) throw new Error("құрылымы сәйкес емес");
+    S=Object.assign(clone(DEFAULT), s); renderInputs(); fillMapSelect(); lastMapKey=""; recompute(); save(); m.classList.remove("err"); m.textContent="Деректер жүктелді."; }
+  catch(err){ m.classList.add("err"); m.textContent="Импорт сәтсіз: мәтін осы беттің экспорты болуы керек ("+err.message+")."; } });
+$("btnReset").addEventListener("click", ()=>{ const b=$("btnReset");
+  if(b.dataset.confirm!=="1"){ b.dataset.confirm="1"; b.textContent="Иә, мысалды жүктеу"; setTimeout(()=>{ b.dataset.confirm=""; b.textContent="Мысалды қайта жүктеу"; }, 4000); return; }
+  b.dataset.confirm=""; b.textContent="Мысалды қайта жүктеу"; S=clone(DEFAULT); renderInputs(); fillMapSelect(); lastMapKey=""; recompute(); save(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("dataPanel").hidden=true; });
+
+/* ================================================================ boot */
+renderInputs(); fillMapSelect(); recompute();
+window.__dariModel = {states, MFUN, aiSearch, ruleR1, get S(){ return S; }};
+})();
+</script>
+
+</body>
+</html>
